@@ -116,29 +116,39 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setAccountId(a?.account ?? addr);
   }, []);
 
-  const init = useCallback(async () => {
-    if (connector.current) return connector.current;
-    if (!WALLETCONNECT_PROJECT_ID)
-      throw new Error("Wallet connection isn't configured yet (missing WalletConnect project ID).");
-    const { wc, sdk } = await loadLibs();
-    const ledger = NETWORK === "mainnet" ? sdk.LedgerId.MAINNET : sdk.LedgerId.TESTNET;
-    const chain = NETWORK === "mainnet" ? wc.HederaChainId.Mainnet : wc.HederaChainId.Testnet;
-    const c = new wc.DAppConnector(
-      {
-        name: "HederaPump",
-        description: "Meme coin launchpad on Hedera",
-        url: window.location.origin,
-        icons: [`${window.location.origin}/favicon.ico`],
-      },
-      ledger,
-      WALLETCONNECT_PROJECT_ID,
-      Object.values(wc.HederaJsonRpcMethod),
-      [wc.HederaSessionEvent.ChainChanged, wc.HederaSessionEvent.AccountsChanged],
-      [chain],
-    );
-    await c.init({ logger: "error" });
-    connector.current = c;
-    return c;
+  const initPromise = useRef<Promise<Connector> | null>(null);
+  const init = useCallback(() => {
+    if (connector.current) return Promise.resolve(connector.current);
+    // Share one in-flight init so a click during page-load setup doesn't hit a half-ready connector.
+    if (initPromise.current) return initPromise.current;
+    initPromise.current = (async () => {
+      if (!WALLETCONNECT_PROJECT_ID)
+        throw new Error("Wallet connection isn't configured yet (missing WalletConnect project ID).");
+      const { wc, sdk } = await loadLibs();
+      const ledger = NETWORK === "mainnet" ? sdk.LedgerId.MAINNET : sdk.LedgerId.TESTNET;
+      const chain = NETWORK === "mainnet" ? wc.HederaChainId.Mainnet : wc.HederaChainId.Testnet;
+      const c = new wc.DAppConnector(
+        {
+          name: "HederaPump",
+          description: "Meme coin launchpad on Hedera",
+          url: window.location.origin,
+          icons: [`${window.location.origin}/favicon.ico`],
+        },
+        ledger,
+        WALLETCONNECT_PROJECT_ID,
+        Object.values(wc.HederaJsonRpcMethod),
+        [wc.HederaSessionEvent.ChainChanged, wc.HederaSessionEvent.AccountsChanged],
+        [chain],
+      );
+      await c.init({ logger: "error" });
+      connector.current = c;
+      return c;
+    })().catch((e) => {
+      initPromise.current = null; // allow a retry on the next click
+      console.error("WalletConnect init failed", e);
+      throw e;
+    });
+    return initPromise.current;
   }, []);
 
   const syncAccount = useCallback(() => {
