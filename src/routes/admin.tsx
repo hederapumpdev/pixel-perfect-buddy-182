@@ -72,7 +72,7 @@ function Admin() {
           <>
             <p className="text-sm text-muted-foreground">
               Deploys the bonding-curve contract to Hedera {NETWORK}. The connected wallet becomes
-              the owner and fee recipient. Your wallet will ask you to approve a few transactions
+              the owner; fees go to 0.0.10923241. Your wallet will ask you to approve a few transactions
               (upload + create). Expect a few HBAR in network fees.
             </p>
             <label className="block space-y-1.5">
