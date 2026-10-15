@@ -4,7 +4,7 @@ export type Token = {
   progress: number; change: number; graduated: boolean; description: string;
 };
 
-const names = [
+const names: [string, string, string][] = [
   ["Hashcat", "HCAT", "🐱"], ["Gossip Frog", "GFROG", "🐸"], ["Consensus Dog", "CDOG", "🐶"],
   ["HBAR Moon", "HMOON", "🌙"], ["Tinybar", "TINY", "🪙"], ["Node Goblin", "GOB", "👺"],
   ["Ledger Llama", "LLAMA", "🦙"], ["Shard Shark", "SHRK", "🦈"], ["Pepe Graph", "PGRAPH", "🕸️"],
@@ -12,15 +12,15 @@ const names = [
 ];
 
 export const DEMO_TOKENS: Token[] = names.map(([name, ticker, emoji], i) => {
-  const progress = [12, 87, 45, 100, 5, 63, 100, 28, 74, 91, 38, 19][i];
+  const progress = [12, 87, 45, 100, 5, 63, 100, 28, 74, 91, 38, 19][i]!;
   const mcap = 4000 + progress * 820 + i * 333;
   return {
     id: ticker.toLowerCase(), name, ticker, emoji,
     creator: `0.0.${4810000 + i * 1371}`,
     price: mcap / 1_000_000_000, mcap, volume: mcap * (0.3 + (i % 4) * 0.4),
-    ageMin: [3, 45, 120, 1440, 1, 300, 2880, 18, 90, 600, 7, 30][i],
+    ageMin: [3, 45, 120, 1440, 1, 300, 2880, 18, 90, 600, 7, 30][i]!,
     holders: 20 + progress * 7 + i * 3, progress,
-    change: [42.1, -12.4, 8.9, 155.2, 3.1, -4.7, 22.0, -31.5, 67.3, 11.8, 0.6, -2.2][i],
+    change: [42.1, -12.4, 8.9, 155.2, 3.1, -4.7, 22.0, -31.5, 67.3, 11.8, 0.6, -2.2][i]!,
     graduated: progress >= 100,
     description: `${name} is a community meme coin launched on HederaPump. Demo listing.`,
   };
