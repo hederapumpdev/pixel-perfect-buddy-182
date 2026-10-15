@@ -12,4 +12,22 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // Wallet libraries (WalletConnect / Hedera / Web3Auth) import Node's "events" and "buffer".
+    // In the browser bundle those become empty stubs ("EventEmitter is not a constructor"),
+    // so map them to the npm browser polyfills — client build only.
+    plugins: [
+      {
+        name: "browser-node-polyfills",
+        enforce: "pre",
+        async resolveId(id, importer, opts) {
+          const env = (this as unknown as { environment?: { name?: string } }).environment?.name;
+          if (env !== "client") return null;
+          const m = /^(?:node:)?(events|buffer)$/.exec(id);
+          if (!m) return null;
+          return this.resolve(m[1] + "/", importer, { ...opts, skipSelf: true });
+        },
+      },
+    ],
+  },
 });
