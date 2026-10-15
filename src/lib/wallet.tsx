@@ -48,7 +48,7 @@ type WalletCtx = {
 const Ctx = createContext<WalletCtx | null>(null);
 // 0.0.N contract ID -> its long-zero EVM address
 const idToEvm = (id: string) =>
-  "0x" + BigInt(id.split(".")[2]).toString(16).padStart(40, "0");
+  "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
 type EvmSigner = import("ethers").JsonRpcSigner;
 let web3auth: import("@web3auth/modal").Web3Auth | null = null;
