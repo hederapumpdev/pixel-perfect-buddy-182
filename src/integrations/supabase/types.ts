@@ -32,6 +32,27 @@ export type Database = {
         }
         Relationships: []
       }
+      token_images: {
+        Row: {
+          created_at: string
+          data: string
+          hash: string
+          mime: string
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          hash: string
+          mime: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          hash?: string
+          mime?: string
+        }
+        Relationships: []
+      }
       tokens: {
         Row: {
           address: string
