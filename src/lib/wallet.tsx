@@ -54,7 +54,10 @@ type EvmSigner = import("ethers").JsonRpcSigner;
 let web3auth: import("@web3auth/modal").Web3Auth | null = null;
 async function initWeb3Auth() {
   if (web3auth) return web3auth;
-  const m = await import("@web3auth/modal");
+  const raw = (await import("@web3auth/modal")) as Record<string, any>;
+  // Production bundles may nest the exports under `default`.
+  const m = (raw.Web3Auth ? raw : raw.default?.Web3Auth ? raw.default : raw.default?.default ?? raw) as typeof import("@web3auth/modal");
+  if (typeof m.Web3Auth !== "function") throw new Error("Sign-in service failed to load. Please refresh and try again.");
   const w = new m.Web3Auth({
     clientId: WEB3AUTH_CLIENT_ID,
     web3AuthNetwork: m.WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
