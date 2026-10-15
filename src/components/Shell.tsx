@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Home, Compass, PlusCircle, Wallet, BookOpen } from "lucide-react";
+import { Home, Compass, PlusCircle, Wallet, BookOpen, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { useWallet } from "@/lib/wallet";
+import { NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
 
 const nav = [
   { to: "/", label: "Home" },
@@ -20,16 +21,26 @@ export function Logo() {
   );
 }
 
-export function DemoBadge() {
-  return <span className="rounded border border-warn/50 bg-warn/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-warn">Demo data</span>;
+function WalletButton() {
+  const w = useWallet();
+  if (w.accountId)
+    return (
+      <div className="flex items-center gap-2">
+        <span className="hidden font-mono text-xs text-muted-foreground sm:inline">{w.balanceHbar != null ? `${w.balanceHbar.toFixed(2)} ℏ` : ""}</span>
+        <span className="rounded-md bg-secondary px-2 py-1 font-mono text-xs">{w.accountId}</span>
+        <Button size="icon" variant="ghost" aria-label="Disconnect wallet" onClick={w.disconnect}><LogOut className="h-4 w-4" /></Button>
+      </div>
+    );
+  return <Button size="sm" onClick={w.connect} disabled={w.connecting}><Wallet className="h-4 w-4" />{w.connecting ? "Connecting…" : "Connect"}</Button>;
 }
 
 export function Shell({ children }: { children: ReactNode }) {
-  const connect = () => toast("Wallet connection (HashPack / WalletConnect) arrives in the next phase.");
+  const live = NETWORK === "mainnet";
   return (
     <div className="min-h-screen pb-20 md:pb-0">
-      <div className="border-b border-warn/30 bg-warn/10 py-1 text-center font-mono text-[11px] text-warn">
-        HEDERA TESTNET · Interface preview — all figures are DEMO DATA
+      <div className={`border-b py-1 text-center font-mono text-[11px] ${live ? "border-up/30 bg-up/10 text-up" : "border-warn/30 bg-warn/10 text-warn"}`}>
+        HEDERA {NETWORK.toUpperCase()} · {live ? "real HBAR — trades are final" : "test network"}
+        {!PUMP_CONTRACT_ID && " · launchpad contract not deployed yet"}
       </div>
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4">
@@ -41,12 +52,7 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-2">
-            <span className="hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 font-mono text-xs text-muted-foreground sm:flex">
-              <span className="h-2 w-2 rounded-full bg-warn" /> Testnet
-            </span>
-            <Button size="sm" onClick={connect}><Wallet className="h-4 w-4" />Connect</Button>
-          </div>
+          <div className="ml-auto"><WalletButton /></div>
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
