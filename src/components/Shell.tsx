@@ -15,7 +15,9 @@ const nav = [
 export function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold">
-      <span className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground">ℏ</span>
+      <span className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground">
+        ℏ
+      </span>
       Hedera<span className="text-primary">Pump</span>
     </Link>
   );
@@ -26,19 +28,30 @@ function WalletButton() {
   if (w.accountId)
     return (
       <div className="flex items-center gap-2">
-        <span className="hidden font-mono text-xs text-muted-foreground sm:inline">{w.balanceHbar != null ? `${w.balanceHbar.toFixed(2)} ℏ` : ""}</span>
+        <span className="hidden font-mono text-xs text-muted-foreground sm:inline">
+          {w.balanceHbar != null ? `${w.balanceHbar.toFixed(2)} ℏ` : ""}
+        </span>
         <span className="rounded-md bg-secondary px-2 py-1 font-mono text-xs">{w.accountId}</span>
-        <Button size="icon" variant="ghost" aria-label="Disconnect wallet" onClick={w.disconnect}><LogOut className="h-4 w-4" /></Button>
+        <Button size="icon" variant="ghost" aria-label="Disconnect wallet" onClick={w.disconnect}>
+          <LogOut className="h-4 w-4" />
+        </Button>
       </div>
     );
-  return <Button size="sm" onClick={w.connect} disabled={w.connecting}><Wallet className="h-4 w-4" />{w.connecting ? "Connecting…" : "Connect"}</Button>;
+  return (
+    <Button size="sm" onClick={w.connect} disabled={w.connecting}>
+      <Wallet className="h-4 w-4" />
+      {w.connecting ? "Connecting…" : "Connect"}
+    </Button>
+  );
 }
 
 export function Shell({ children }: { children: ReactNode }) {
   const live = NETWORK === "mainnet";
   return (
     <div className="min-h-screen pb-20 md:pb-0">
-      <div className={`border-b py-1 text-center font-mono text-[11px] ${live ? "border-up/30 bg-up/10 text-up" : "border-warn/30 bg-warn/10 text-warn"}`}>
+      <div
+        className={`border-b py-1 text-center font-mono text-[11px] ${live ? "border-up/30 bg-up/10 text-up" : "border-warn/30 bg-warn/10 text-warn"}`}
+      >
         HEDERA {NETWORK.toUpperCase()} · {live ? "real HBAR — trades are final" : "test network"}
         {!PUMP_CONTRACT_ID && " · launchpad contract not deployed yet"}
       </div>
@@ -47,12 +60,20 @@ export function Shell({ children }: { children: ReactNode }) {
           <Logo />
           <nav className="hidden gap-1 md:flex">
             {nav.map((n) => (
-              <Link key={n.to} to={n.to} className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground" activeProps={{ className: "text-foreground bg-secondary" }} activeOptions={{ exact: true }}>
+              <Link
+                key={n.to}
+                to={n.to}
+                className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground"
+                activeProps={{ className: "text-foreground bg-secondary" }}
+                activeOptions={{ exact: true }}
+              >
                 {n.label}
               </Link>
             ))}
           </nav>
-          <div className="ml-auto"><WalletButton /></div>
+          <div className="ml-auto">
+            <WalletButton />
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
@@ -66,8 +87,15 @@ export function Shell({ children }: { children: ReactNode }) {
           { to: "/create", label: "Create", Icon: PlusCircle },
           { to: "/how-it-works", label: "Guide", Icon: BookOpen },
         ].map(({ to, label, Icon }) => (
-          <Link key={to} to={to} className="flex flex-col items-center gap-0.5 py-2.5 text-[11px] text-muted-foreground" activeProps={{ className: "text-primary" }} activeOptions={{ exact: true }}>
-            <Icon className="h-5 w-5" />{label}
+          <Link
+            key={to}
+            to={to}
+            className="flex flex-col items-center gap-0.5 py-2.5 text-[11px] text-muted-foreground"
+            activeProps={{ className: "text-primary" }}
+            activeOptions={{ exact: true }}
+          >
+            <Icon className="h-5 w-5" />
+            {label}
           </Link>
         ))}
       </nav>

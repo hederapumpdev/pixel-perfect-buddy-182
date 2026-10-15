@@ -9,10 +9,18 @@ export function useChainSync(intervalMs = 12_000) {
   const qc = useQueryClient();
   useEffect(() => {
     let alive = true;
-    const run = () => sync().then((r) => { if (alive && r.synced) qc.invalidateQueries(); }).catch(() => {});
+    const run = () =>
+      sync()
+        .then((r) => {
+          if (alive && r.synced) qc.invalidateQueries();
+        })
+        .catch(() => {});
     run();
     const id = setInterval(run, intervalMs);
-    return () => { alive = false; clearInterval(id); };
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
   }, [sync, qc, intervalMs]);
   return sync;
 }

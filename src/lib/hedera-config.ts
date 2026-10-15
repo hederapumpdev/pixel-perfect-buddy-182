@@ -8,7 +8,9 @@ export const PUMP_CONTRACT_ID: string | null = null;
 export const WALLETCONNECT_PROJECT_ID: string = "";
 
 export const MIRROR_URL =
-  NETWORK === "mainnet" ? "https://mainnet-public.mirrornode.hedera.com" : "https://testnet.mirrornode.hedera.com";
+  NETWORK === "mainnet"
+    ? "https://mainnet-public.mirrornode.hedera.com"
+    : "https://testnet.mirrornode.hedera.com";
 export const HASHSCAN_URL = `https://hashscan.io/${NETWORK}`;
 
 export const TINYBARS = 100_000_000n;
