@@ -42,7 +42,8 @@ const tok = (v: bigint) => Number(v / 10n ** 10n) / 1e8;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleLog(db: any, log: MirrorLog) {
-  let ev: { eventName: string; args: Record<string, unknown> };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let ev: { eventName: string; args: any };
   try {
     ev = decodeEventLog({ abi, data: log.data, topics: log.topics as [Hex, ...Hex[]] }) as never;
   } catch { return; }
