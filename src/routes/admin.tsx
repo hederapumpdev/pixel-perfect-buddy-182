@@ -6,7 +6,7 @@ import { Shell } from "@/components/Shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
-import { NETWORK, PUMP_CONTRACT_ID, HASHSCAN_URL } from "@/lib/hedera-config";
+import { NETWORK, PUMP_CONTRACT_ID, HASHSCAN_URL, FEE_WALLET_EVM } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
 import artifact from "@/lib/contract-artifact.json";
 
@@ -36,7 +36,7 @@ function Admin() {
     try {
       const params = encodeAbiParameters(
         [{ type: "address" }, { type: "uint256" }, { type: "uint256" }],
-        [w.evmAddress as `0x${string}`, toTinybars(virtualHbar), toTinybars(creationFee)],
+        [FEE_WALLET_EVM as `0x${string}`, toTinybars(virtualHbar), toTinybars(creationFee)],
       );
       const id = await w.deploy({
         bytecode: artifact.bytecode,
@@ -72,7 +72,7 @@ function Admin() {
           <>
             <p className="text-sm text-muted-foreground">
               Deploys the bonding-curve contract to Hedera {NETWORK}. The connected wallet becomes
-              the owner and fee recipient. Your wallet will ask you to approve a few transactions
+              the owner; fees go to 0.0.10923241. Your wallet will ask you to approve a few transactions
               (upload + create). Expect a few HBAR in network fees.
             </p>
             <label className="block space-y-1.5">

@@ -26,3 +26,7 @@ export const CURVE_SUPPLY = 800_000_000n * TOKEN_UNIT;
 export const FEE_BPS = 100n;
 
 export const GAS = { create: 1_500_000, buy: 300_000, sell: 300_000, claim: 100_000 };
+
+// Wallet that receives platform fees (set as fee recipient at deploy).
+export const FEE_WALLET_ID = "0.0.10923241";
+export const FEE_WALLET_EVM = "0x" + (10923241).toString(16).padStart(40, "0");
