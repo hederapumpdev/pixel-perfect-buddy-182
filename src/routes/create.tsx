@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { encodeFunctionData } from "viem";
 import { useServerFn } from "@tanstack/react-start";
 import { Shell } from "@/components/Shell";
 import { Button } from "@/components/ui/button";
@@ -10,9 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useWallet } from "@/lib/wallet";
 import { syncChain, uploadImage } from "@/lib/chain.functions";
 import { supabase } from "@/integrations/supabase/client";
-import artifact from "@/lib/contract-artifact.json";
 import { GAS, MIRROR_URL, NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
+import { encodePump, encodeToken } from "@/lib/curve";
 
 export const Route = createFileRoute("/create")({
   head: () => ({
@@ -27,7 +26,7 @@ export const Route = createFileRoute("/create")({
 });
 
 async function readCreationFee(): Promise<bigint> {
-  const data = encodeFunctionData({ abi: artifact.pumpAbi as never, functionName: "creationFee" });
+  const data = encodePump("creationFee");
   const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, {
     method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ data, to: await contractEvm(), estimate: false }),
@@ -75,7 +74,7 @@ function Create() {
       const fee = await readCreationFee();
       const firstBuy = f.firstBuy ? toTinybars(f.firstBuy) : 0n;
       setBusy("Confirm in your wallet…");
-      const calldata = encodeFunctionData({ abi: artifact.pumpAbi as never, functionName: "createToken", args: [f.name.trim(), f.ticker, meta] });
+      const calldata = encodePump("createToken", [f.name.trim(), f.ticker, meta]);
       const { transactionHash } = await w.execute({ calldata, gas: GAS.create, payableTinybars: fee + firstBuy });
       setBusy("Waiting for the network…");
       for (let i = 0; i < 15; i++) {

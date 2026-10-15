@@ -33,3 +33,10 @@ export const toUnits = (tokens: string) => {
 };
 export const fromTinybars = (v: bigint) => Number(v) / 1e8;
 export const fromUnits = (v: bigint) => Number(v / 10n ** 10n) / 1e8;
+
+import { encodeFunctionData, type Abi } from "viem";
+import artifact from "./contract-artifact.json";
+export const encodePump = (functionName: string, args: unknown[] = []) =>
+  encodeFunctionData({ abi: artifact.pumpAbi as Abi, functionName, args } as never);
+export const encodeToken = (functionName: string, args: unknown[] = []) =>
+  encodeFunctionData({ abi: artifact.tokenAbi as Abi, functionName, args } as never);

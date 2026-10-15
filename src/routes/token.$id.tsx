@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { encodeFunctionData } from "viem";
 import { Shell } from "@/components/Shell";
 import { Progress, TokenImage } from "@/components/TokenCard";
 import { Button } from "@/components/ui/button";
@@ -11,8 +10,8 @@ import { useWallet } from "@/lib/wallet";
 import { useChainSync } from "@/hooks/use-sync";
 import { tokenQuery, tradesQuery, fmtHbar, fmtAge, mcapOf, priceOf, progressPct, shortAddr } from "@/lib/queries";
 import { quoteBuy, quoteSell, toTinybars, toUnits, fromTinybars, fromUnits } from "@/lib/curve";
+import { encodePump, encodeToken } from "@/lib/curve";
 import { GAS, HASHSCAN_URL, MIRROR_URL, TOKEN_UNIT } from "@/lib/hedera-config";
-import artifact from "@/lib/contract-artifact.json";
 
 export const Route = createFileRoute("/token/$id")({
   head: () => ({
@@ -27,7 +26,7 @@ export const Route = createFileRoute("/token/$id")({
 });
 
 async function tokenBalance(token: string, holder: string): Promise<bigint> {
-  const data = encodeFunctionData({ abi: artifact.tokenAbi as never, functionName: "balanceOf", args: [holder] });
+  const data = encodeToken("balanceOf", [holder]);
   const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ data, to: token, estimate: false }) });
   const j = await r.json();
   return BigInt(j.result && j.result !== "0x" ? j.result : "0x0");
@@ -71,12 +70,12 @@ function TokenPage() {
       if (side === "buy") {
         const value = toTinybars(amt);
         const min = ready ? (quoteBuy(state, value).tokensOut * (10_000n - SLIPPAGE_BPS)) / 10_000n : 0n;
-        await w.execute({ calldata: encodeFunctionData({ abi: artifact.pumpAbi as never, functionName: "buy", args: [t.address, min] }), gas: GAS.buy, payableTinybars: value });
+        await w.execute({ calldata: encodePump("buy", [t.address, min]), gas: GAS.buy, payableTinybars: value });
       } else {
         const units = toUnits(amt);
         if (units > bal) throw new Error("You don't hold that many");
         const min = (quoteSell(state, units).hbarOut * (10_000n - SLIPPAGE_BPS)) / 10_000n;
-        await w.execute({ calldata: encodeFunctionData({ abi: artifact.pumpAbi as never, functionName: "sell", args: [t.address, units, min] }), gas: GAS.sell });
+        await w.execute({ calldata: encodePump("sell", [t.address, units, min]), gas: GAS.sell });
       }
       toast.success(`${side === "buy" ? "Bought" : "Sold"} — confirmed on Hedera`);
       setAmt("");
