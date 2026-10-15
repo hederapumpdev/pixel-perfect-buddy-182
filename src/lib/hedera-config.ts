@@ -5,7 +5,7 @@ export const NETWORK: "mainnet" | "testnet" = "mainnet";
 export const PUMP_CONTRACT_ID: string | null = null;
 
 // WalletConnect project ID (public value from cloud.reown.com).
-export const WALLETCONNECT_PROJECT_ID: string = "";
+export const WALLETCONNECT_PROJECT_ID: string = "897d91d359830625cc68ba73089b2cce";
 
 export const MIRROR_URL =
   NETWORK === "mainnet"
