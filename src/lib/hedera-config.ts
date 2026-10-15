@@ -7,6 +7,13 @@ export const PUMP_CONTRACT_ID: string | null = null;
 // WalletConnect project ID (public value from cloud.reown.com).
 export const WALLETCONNECT_PROJECT_ID: string = "897d91d359830625cc68ba73089b2cce";
 
+// Web3Auth client ID (public) — powers "sign in with email/Google" wallets.
+export const WEB3AUTH_CLIENT_ID: string =
+  "BMko14SpFQVLoBQZTOwmOuoO5q9xR7X9hq1H5SiU07I7_IeB7BCP-nJAJHiWxfMnVuDOMtncJKyojHxJvK6zcKA";
+export const EVM_CHAIN_ID = NETWORK === "mainnet" ? 295 : 296;
+export const EVM_RPC_URL =
+  NETWORK === "mainnet" ? "https://mainnet.hashio.io/api" : "https://testnet.hashio.io/api";
+
 export const MIRROR_URL =
   NETWORK === "mainnet"
     ? "https://mainnet-public.mirrornode.hedera.com"

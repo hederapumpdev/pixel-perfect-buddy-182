@@ -8,7 +8,16 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
-import { MIRROR_URL, NETWORK, PUMP_CONTRACT_ID, WALLETCONNECT_PROJECT_ID } from "./hedera-config";
+import {
+  MIRROR_URL,
+  NETWORK,
+  PUMP_CONTRACT_ID,
+  WALLETCONNECT_PROJECT_ID,
+  WEB3AUTH_CLIENT_ID,
+  EVM_CHAIN_ID,
+  EVM_RPC_URL,
+  HASHSCAN_URL,
+} from "./hedera-config";
 
 type Connector = import("@hashgraph/hedera-wallet-connect").DAppConnector;
 
@@ -18,6 +27,8 @@ type WalletCtx = {
   balanceHbar: number | null;
   connecting: boolean;
   connect: () => Promise<void>;
+  connectEmail: () => Promise<void>;
+  mode: "hashpack" | "email" | null;
   disconnect: () => Promise<void>;
   /** Calls the launchpad contract. calldata = full ABI-encoded call (selector + args). */
   execute: (opts: {
@@ -35,6 +46,38 @@ type WalletCtx = {
 };
 
 const Ctx = createContext<WalletCtx | null>(null);
+// 0.0.N contract ID -> its long-zero EVM address
+const idToEvm = (id: string) =>
+  "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
+
+type EvmSigner = import("ethers").JsonRpcSigner;
+let web3auth: import("@web3auth/modal").Web3Auth | null = null;
+async function initWeb3Auth() {
+  if (web3auth) return web3auth;
+  const m = await import("@web3auth/modal");
+  const w = new m.Web3Auth({
+    clientId: WEB3AUTH_CLIENT_ID,
+    web3AuthNetwork: m.WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+    chains: [
+      {
+        chainNamespace: m.CHAIN_NAMESPACES.EIP155,
+        chainId: "0x" + EVM_CHAIN_ID.toString(16),
+        rpcTarget: EVM_RPC_URL,
+        displayName: NETWORK === "mainnet" ? "Hedera Mainnet" : "Hedera Testnet",
+        blockExplorerUrl: HASHSCAN_URL,
+        ticker: "HBAR",
+        tickerName: "HBAR",
+        decimals: 18,
+        logo: "https://hashscan.io/favicon.ico",
+      } as never,
+    ],
+    defaultChainId: "0x" + EVM_CHAIN_ID.toString(16),
+  } as never);
+  await w.init();
+  web3auth = w;
+  return w;
+}
+
 const hexToBytes = (h: string) =>
   Uint8Array.from((h.replace(/^0x/, "").match(/.{2}/g) ?? []).map((b) => parseInt(b, 16)));
 
@@ -53,6 +96,21 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [balanceHbar, setBal] = useState<number | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [tick, setTick] = useState(0);
+  const [mode, setMode] = useState<"hashpack" | "email" | null>(null);
+  const evmSigner = useRef<EvmSigner | null>(null);
+
+  const attachEmail = useCallback(async (w: import("@web3auth/modal").Web3Auth) => {
+    if (!w.provider) return;
+    const { BrowserProvider } = await import("ethers");
+    const signer = await new BrowserProvider(w.provider as never).getSigner();
+    evmSigner.current = signer;
+    const addr = (await signer.getAddress()).toLowerCase();
+    setMode("email");
+    setEvm(addr);
+    // Hedera creates the account on first HBAR deposit; until then show the address.
+    const a = await fetch(`${MIRROR_URL}/api/v1/accounts/${addr}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    setAccountId(a?.account ?? addr);
+  }, []);
 
   const init = useCallback(async () => {
     if (connector.current) return connector.current;
@@ -81,8 +139,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const syncAccount = useCallback(() => {
     const s = connector.current?.signers[0];
+    if (s) setMode("hashpack");
     setAccountId(s ? s.getAccountId().toString() : null);
   }, []);
+
+  // Restore an email-wallet session on load.
+  useEffect(() => {
+    if (!WEB3AUTH_CLIENT_ID) return;
+    initWeb3Auth()
+      .then((w) => (w.connected ? attachEmail(w) : undefined))
+      .catch(() => {});
+  }, [attachEmail]);
 
   // Restore an existing session on load.
   useEffect(() => {
@@ -99,10 +166,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       return;
     }
     fetch(`${MIRROR_URL}/api/v1/accounts/${accountId}`)
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : null))
       .then((a) => {
-        setEvm((a.evm_address as string)?.toLowerCase() ?? null);
-        setBal(a.balance ? a.balance.balance / 1e8 : null);
+        if (!a) return setBal(0);
+        if (a.evm_address) setEvm((a.evm_address as string).toLowerCase());
+        setBal(a.balance ? a.balance.balance / 1e8 : 0);
       })
       .catch(() => {});
   }, [accountId, tick]);
@@ -120,8 +188,24 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [init, syncAccount]);
 
+  const connectEmail = useCallback(async () => {
+    setConnecting(true);
+    try {
+      const w = await initWeb3Auth();
+      if (!w.connected) await w.connect();
+      await attachEmail(w);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't sign in");
+    } finally {
+      setConnecting(false);
+    }
+  }, [attachEmail]);
+
   const disconnect = useCallback(async () => {
     await connector.current?.disconnectAll().catch(() => {});
+    if (web3auth?.connected) await web3auth.logout().catch(() => {});
+    evmSigner.current = null;
+    setMode(null);
     setAccountId(null);
   }, []);
 
@@ -135,6 +219,19 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     async ({ calldata, gas, payableTinybars, contractId }) => {
       const id = contractId ?? PUMP_CONTRACT_ID;
       if (!id) throw new Error("Launchpad contract isn't deployed yet");
+      if (evmSigner.current) {
+        const tx = await evmSigner.current.sendTransaction({
+          to: idToEvm(id),
+          data: calldata,
+          gasLimit: BigInt(gas),
+          // JSON-RPC uses 18 decimals: 1 tinybar = 1e10 weibar
+          value: (payableTinybars ?? 0n) * 10_000_000_000n,
+        });
+        const r = await tx.wait();
+        if (!r || r.status !== 1) throw new Error("Transaction failed");
+        setTick((t) => t + 1);
+        return { transactionId: tx.hash, transactionHash: tx.hash };
+      }
       const { sdk } = await loadLibs();
       const s = signer();
       let tx = new sdk.ContractExecuteTransaction()
@@ -157,6 +254,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   );
 
   const deploy: WalletCtx["deploy"] = useCallback(async ({ bytecode, constructorParams, gas }) => {
+    if (evmSigner.current) throw new Error("Deploy with HashPack, not an email wallet");
     const { sdk } = await loadLibs();
     const s = signer();
     const flow = new sdk.ContractCreateFlow()
@@ -177,6 +275,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         balanceHbar,
         connecting,
         connect,
+        connectEmail,
+        mode,
         disconnect,
         execute,
         deploy,
