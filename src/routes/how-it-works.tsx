@@ -5,7 +5,10 @@ export const Route = createFileRoute("/how-it-works")({
   head: () => ({
     meta: [
       { title: "How it works — HederaPump" },
-      { name: "description", content: "How bonding curves, fees and DEX graduation work on HederaPump." },
+      {
+        name: "description",
+        content: "How bonding curves, fees and DEX graduation work on HederaPump.",
+      },
       { property: "og:title", content: "How it works — HederaPump" },
       { property: "og:description", content: "Bonding curves, fees and graduation explained." },
     ],
@@ -15,8 +18,14 @@ export const Route = createFileRoute("/how-it-works")({
 
 const steps = [
   ["Launch", "Anyone creates a coin with a fixed supply. No presale and no team allocation."],
-  ["Trade on the curve", "Price rises as people buy and falls as they sell, following a public bonding-curve formula."],
-  ["Graduate", "When the curve fills, liquidity moves to a supported Hedera DEX and trading continues there."],
+  [
+    "Trade on the curve",
+    "Price rises as people buy and falls as they sell, following a public bonding-curve formula.",
+  ],
+  [
+    "Graduate",
+    "When the curve fills, liquidity moves to a supported Hedera DEX and trading continues there.",
+  ],
   ["Fees", "A disclosed 1% fee per curve trade funds the platform and rewards the coin's creator."],
 ];
 
@@ -33,7 +42,9 @@ function How() {
           </div>
         ))}
       </div>
-      <p className="mt-6 rounded-lg border border-warn/40 bg-warn/10 p-4 text-sm text-warn">Meme coins are extremely risky and most lose value. Only trade what you can afford to lose.</p>
+      <p className="mt-6 rounded-lg border border-warn/40 bg-warn/10 p-4 text-sm text-warn">
+        Meme coins are extremely risky and most lose value. Only trade what you can afford to lose.
+      </p>
     </Shell>
   );
 }

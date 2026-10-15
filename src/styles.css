@@ -116,14 +116,23 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
 }
 
 @utility glow-primary {
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent), 0 8px 30px -8px color-mix(in oklab, var(--primary) 45%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent),
+    0 8px 30px -8px color-mix(in oklab, var(--primary) 45%, transparent);
 }
 @utility grid-bg {
-  background-image: linear-gradient(color-mix(in oklab, var(--border) 60%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--border) 60%, transparent) 1px, transparent 1px);
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--border) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--border) 60%, transparent) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 @layer base {

@@ -1,9 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { type Token, fmtHbar, fmtAge } from "@/lib/demo";
-
-export function Change({ v }: { v: number }) {
-  return <span className={`font-mono ${v >= 0 ? "text-up" : "text-down"}`}>{v >= 0 ? "+" : ""}{v.toFixed(1)}%</span>;
-}
+import {
+  type TokenRow,
+  fmtHbar,
+  fmtAge,
+  imageUrl,
+  mcapOf,
+  progressPct,
+  shortAddr,
+} from "@/lib/queries";
 
 export function Progress({ v }: { v: number }) {
   return (
@@ -13,27 +17,53 @@ export function Progress({ v }: { v: number }) {
   );
 }
 
-export function TokenCard({ t }: { t: Token }) {
+export function TokenImage({ t, className = "h-14 w-14" }: { t: TokenRow; className?: string }) {
+  const src = imageUrl(t.image_url);
+  return src ? (
+    <img
+      src={src}
+      alt={t.name}
+      className={`${className} shrink-0 rounded-md bg-secondary object-cover`}
+      loading="lazy"
+    />
+  ) : (
+    <div
+      className={`${className} grid shrink-0 place-items-center rounded-md bg-secondary font-display text-lg font-bold text-primary`}
+    >
+      {t.symbol.slice(0, 2)}
+    </div>
+  );
+}
+
+export function TokenCard({ t }: { t: TokenRow }) {
+  const p = progressPct(t);
   return (
-    <Link to="/token/$id" params={{ id: t.id }} className="group block rounded-lg border border-border bg-card p-3 transition-colors hover:border-primary/60">
+    <Link
+      to="/token/$id"
+      params={{ id: t.address }}
+      className="block rounded-lg border border-border bg-card p-3 transition-colors hover:border-primary/60"
+    >
       <div className="flex gap-3">
-        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-md bg-secondary text-3xl">{t.emoji}</div>
+        <TokenImage t={t} />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <p className="truncate font-semibold">{t.name}</p>
-            <Change v={t.change} />
-          </div>
-          <p className="font-mono text-xs text-muted-foreground">${t.ticker} · {fmtAge(t.ageMin)} · by {t.creator}</p>
-          <div className="mt-1 flex gap-3 font-mono text-xs">
-            <span>MC <b className="text-primary">{fmtHbar(t.mcap)}</b></span>
-            <span className="text-muted-foreground">Vol {fmtHbar(t.volume)}</span>
-            <span className="text-muted-foreground">{t.holders} holders</span>
+          <p className="truncate font-semibold">{t.name}</p>
+          <p className="font-mono text-xs text-muted-foreground">
+            ${t.symbol} · {fmtAge(t.created_at)} · by {shortAddr(t.creator)}
+          </p>
+          <div className="mt-1 flex flex-wrap gap-x-3 font-mono text-xs">
+            <span>
+              MC <b className="text-primary">{fmtHbar(mcapOf(t))}</b>
+            </span>
+            <span className="text-muted-foreground">Vol {fmtHbar(Number(t.volume_hbar))}</span>
+            <span className="text-muted-foreground">{t.trade_count} trades</span>
           </div>
         </div>
       </div>
       <div className="mt-3 flex items-center gap-2">
-        <Progress v={t.progress} />
-        <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{t.graduated ? "Graduated" : `${t.progress}%`}</span>
+        <Progress v={p} />
+        <span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+          {t.graduated ? "Graduated" : `${p.toFixed(1)}%`}
+        </span>
       </div>
     </Link>
   );
