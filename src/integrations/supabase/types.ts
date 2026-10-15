@@ -14,7 +14,140 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      sync_state: {
+        Row: {
+          contract: string
+          last_timestamp: string
+          synced_at: string
+        }
+        Insert: {
+          contract: string
+          last_timestamp?: string
+          synced_at?: string
+        }
+        Update: {
+          contract?: string
+          last_timestamp?: string
+          synced_at?: string
+        }
+        Relationships: []
+      }
+      tokens: {
+        Row: {
+          address: string
+          created_at: string
+          created_tx: string | null
+          creator: string
+          description: string | null
+          graduated: boolean
+          image_url: string | null
+          last_trade_at: string | null
+          name: string
+          network: string
+          symbol: string
+          telegram: string | null
+          tokens_sold: number
+          trade_count: number
+          twitter: string | null
+          virtual_hbar: number
+          virtual_tokens: number
+          volume_hbar: number
+          website: string | null
+        }
+        Insert: {
+          address: string
+          created_at: string
+          created_tx?: string | null
+          creator: string
+          description?: string | null
+          graduated?: boolean
+          image_url?: string | null
+          last_trade_at?: string | null
+          name: string
+          network: string
+          symbol: string
+          telegram?: string | null
+          tokens_sold?: number
+          trade_count?: number
+          twitter?: string | null
+          virtual_hbar?: number
+          virtual_tokens?: number
+          volume_hbar?: number
+          website?: string | null
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          created_tx?: string | null
+          creator?: string
+          description?: string | null
+          graduated?: boolean
+          image_url?: string | null
+          last_trade_at?: string | null
+          name?: string
+          network?: string
+          symbol?: string
+          telegram?: string | null
+          tokens_sold?: number
+          trade_count?: number
+          twitter?: string | null
+          virtual_hbar?: number
+          virtual_tokens?: number
+          volume_hbar?: number
+          website?: string | null
+        }
+        Relationships: []
+      }
+      trades: {
+        Row: {
+          created_at: string
+          fee: number
+          hbar_amount: number
+          id: string
+          is_buy: boolean
+          network: string
+          price: number
+          token: string
+          token_amount: number
+          trader: string
+          tx_hash: string | null
+        }
+        Insert: {
+          created_at: string
+          fee: number
+          hbar_amount: number
+          id: string
+          is_buy: boolean
+          network: string
+          price: number
+          token: string
+          token_amount: number
+          trader: string
+          tx_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          fee?: number
+          hbar_amount?: number
+          id?: string
+          is_buy?: boolean
+          network?: string
+          price?: number
+          token?: string
+          token_amount?: number
+          trader?: string
+          tx_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trades_token_fkey"
+            columns: ["token"]
+            isOneToOne: false
+            referencedRelation: "tokens"
+            referencedColumns: ["address"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
