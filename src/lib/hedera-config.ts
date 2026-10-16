@@ -75,3 +75,7 @@ export const GAS_V2 = {
 // Wallet that receives platform fees (set as fee recipient at deploy).
 export const FEE_WALLET_ID = "0.0.10923241";
 export const FEE_WALLET_EVM = "0x" + (10923241).toString(16).padStart(40, "0");
+
+// Platform bot: buys this many US dollars of every coin created after BOT_START.
+export const BOT_BUY_USD = 2;
+export const BOT_START = "2026-10-16T19:00:00Z";

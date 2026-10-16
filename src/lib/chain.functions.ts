@@ -195,3 +195,9 @@ export const uploadImage = createServerFn({ method: "POST" })
       );
     return { hash };
   });
+
+/** Public bot wallet address + HBAR balance (no secrets returned). */
+export const getBotInfo = createServerFn({ method: "GET" }).handler(async () => {
+  const { botInfo } = await import("./bot.server");
+  return botInfo();
+});
