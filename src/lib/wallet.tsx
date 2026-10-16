@@ -282,7 +282,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   // Where the upload stands: Hedera's own record first, this browser's memory second.
   const resolveDeploy = useCallback(async (bc: string): Promise<{ resume: DeployState | null; contractId: string | null }> => {
-    const id = accountRef.current;
+    const id = accountId && /^\d+\.\d+\.\d+$/.test(accountId) ? accountId : null;
     const fp = fingerprint(bc.replace(/^0x/, ""));
     let local: DeployState | null = null;
     try {
@@ -299,7 +299,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     // First part of the 4096-byte upload already paid for on 16 Oct 2026 (before step memos existed).
     if (!resume && id === LEGACY_DEPLOY.account) resume = LEGACY_DEPLOY.state;
     return { resume, contractId: null };
-  }, []);
+  }, [accountId]);
 
   const checkDeploy: WalletCtx["checkDeploy"] = useCallback(async (bytecode) => {
     const { resume, contractId } = await resolveDeploy(bytecode);
