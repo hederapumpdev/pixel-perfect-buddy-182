@@ -20,6 +20,16 @@ export const MIRROR_URL =
     : "https://testnet.mirrornode.hedera.com";
 export const HASHSCAN_URL = `https://hashscan.io/${NETWORK}`;
 
+/**
+ * Nodes a wallet transaction is frozen for. Several long-standing mainnet
+ * nodes: the wallet skips any it doesn't know or finds busy, while a single
+ * node fails outright ("All nodes are unhealthy") the moment it's busy.
+ */
+export const WALLET_NODE_IDS = [
+  "0.0.3", "0.0.4", "0.0.5", "0.0.6", "0.0.7", "0.0.8", "0.0.9",
+  "0.0.10", "0.0.11", "0.0.12", "0.0.13", "0.0.14", "0.0.15", "0.0.16",
+];
+
 export const TINYBARS = 100_000_000n;
 export const TOKEN_UNIT = 10n ** 18n;
 export const CURVE_SUPPLY = 800_000_000n * TOKEN_UNIT;

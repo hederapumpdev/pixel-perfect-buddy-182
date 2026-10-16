@@ -122,7 +122,7 @@ export async function deployStep(
   // client rejects (e.g. 0.0.17). Freeze against the SDK's full mainnet node
   // list instead; signing still happens in the wallet.
   const client = sdk.Client.forMainnet();
-  const nodes = [sdk.AccountId.fromString("0.0.3")] as never[];
+  const nodes = WALLET_NODE_IDS.map((n) => sdk.AccountId.fromString(n)) as never[];
 
   /** Sends one transaction; trusts whichever answers first: the wallet's receipt or Hedera's public record. */
   async function submit(tx: Transaction, memo: string): Promise<string | null> {
