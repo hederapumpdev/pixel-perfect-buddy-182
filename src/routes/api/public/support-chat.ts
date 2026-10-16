@@ -24,7 +24,7 @@ export const Route = createFileRoute("/api/public/support-chat")({
           .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
           .slice(-20)
           .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
-        if (!messages.length || messages[messages.length - 1].role !== "user")
+        if (!messages.length || messages[messages.length - 1]?.role !== "user")
           return Response.json({ error: "Send a question" }, { status: 400 });
         const apiKey = process.env["LOVABLE_API_KEY"];
         if (!apiKey) return Response.json({ error: "Support AI isn't configured" }, { status: 500 });
@@ -50,7 +50,7 @@ export const Route = createFileRoute("/api/public/support-chat")({
               include: ["reasoning.encrypted_content"],
             },
           },
-          onError: ({ error }) => {
+          onError: ({ error }: { error: unknown }) => {
             failure = error instanceof Error ? error.message : String(error);
             console.error("support-chat", failure);
           },
