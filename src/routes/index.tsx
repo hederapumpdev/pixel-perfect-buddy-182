@@ -108,6 +108,8 @@ function Index() {
           <Empty />
         )}
       </section>
+
+      <About />
     </Shell>
   );
 }
