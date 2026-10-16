@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { db, json } from "@/lib/dexscreener";
-import { PUMP_CONTRACT_ID } from "@/lib/hedera-config";
 
 export const Route = createFileRoute("/api/public/dexscreener/latest-block")({
   server: {
@@ -9,7 +8,8 @@ export const Route = createFileRoute("/api/public/dexscreener/latest-block")({
         const { data } = await (await db())
           .from("sync_state")
           .select("last_timestamp")
-          .eq("contract", PUMP_CONTRACT_ID ?? "")
+          .order("last_timestamp", { ascending: false })
+          .limit(1)
           .maybeSingle();
         // Everything up to the last synced mirror-node timestamp is indexed.
         const sec = Math.floor(Number(data?.last_timestamp ?? "0"));
