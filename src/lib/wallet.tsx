@@ -271,7 +271,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         .setFunctionParameters(hexToBytes(calldata));
       if (payableTinybars && payableTinybars > 0n)
         tx = tx.setPayableAmount(sdk.Hbar.fromTinybars(payableTinybars.toString()));
-      tx.setNodeAccountIds(Object.values(client.network).slice(0, 1) as never);
+      tx.setNodeAccountIds([sdk.AccountId.fromString("0.0.3")] as never);
       tx.setTransactionId(sdk.TransactionId.generate(s.getAccountId()));
       await tx.freezeWith(client);
       await tx.signWithSigner(s as never);
