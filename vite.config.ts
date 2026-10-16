@@ -11,6 +11,7 @@ const require = createRequire(import.meta.url);
 const browserPolyfills = {
   events: require.resolve("events/"),
   buffer: require.resolve("buffer/"),
+  process: require.resolve("process/browser.js"),
 };
 const SERVER_STUBBED =
   /^(@hashgraph\/hedera-wallet-connect|@hiero-ledger\/sdk|@web3auth\/modal|@grpc\/grpc-js)(\/.*)?$/;
@@ -32,7 +33,7 @@ export default defineConfig({
         resolveId(id) {
           const env = (this as unknown as { environment?: { name?: string } }).environment?.name;
           if (env !== "client") return null;
-          const m = /^(?:node:)?(events|buffer)\/?$/.exec(id);
+          const m = /^(?:node:)?(events|buffer|process)\/?$/.exec(id);
           if (!m) return null;
           // Return the file directly: re-resolving a bare package can loop through
           // built-in aliases and produce invalid "node:events/" imports.
