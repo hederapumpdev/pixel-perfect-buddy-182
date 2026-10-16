@@ -1,3 +1,4 @@
+import { InstantWallet } from "@/components/InstantWallet";
 import { WalletHoldings } from "@/components/WalletHoldings";
 import { ProfileEditor } from "@/components/ProfileEditor";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -155,6 +156,7 @@ function Profile() {
         </a>
       </p>
       <ProfileEditor wallet={(w.evmAddress ?? longZero(w.accountId!)).toLowerCase()} />
+      <InstantWallet />
       <WalletHoldings accountId={w.accountId!} addrs={addrs} balanceHbar={w.balanceHbar} />
 
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
