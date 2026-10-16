@@ -5,6 +5,13 @@
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const browserPolyfills = {
+  events: require.resolve("events/"),
+  buffer: require.resolve("buffer/"),
+};
 
 export default defineConfig({
   tanstackStart: {
@@ -20,12 +27,14 @@ export default defineConfig({
       {
         name: "browser-node-polyfills",
         enforce: "pre",
-        async resolveId(id, importer, opts) {
+        resolveId(id) {
           const env = (this as unknown as { environment?: { name?: string } }).environment?.name;
           if (env !== "client") return null;
-          const m = /^(?:node:)?(events|buffer)$/.exec(id);
+          const m = /^(?:node:)?(events|buffer)\/?$/.exec(id);
           if (!m) return null;
-          return this.resolve(m[1] + "/", importer, { ...opts, skipSelf: true });
+          // Return the file directly: re-resolving a bare package can loop through
+          // built-in aliases and produce invalid "node:events/" imports.
+          return browserPolyfills[m[1] as keyof typeof browserPolyfills];
         },
       },
     ],
