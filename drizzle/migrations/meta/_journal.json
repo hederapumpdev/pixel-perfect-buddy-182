@@ -64,6 +64,13 @@
       "when": 1792184251858,
       "tag": "0008_wallet_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792185646762,
+      "tag": "0009_lock_internal_tables",
+      "breakpoints": true
     }
   ]
 }
