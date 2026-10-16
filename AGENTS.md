@@ -18,3 +18,4 @@
 - DexScreener adapter lives in `src/routes/api/public/dexscreener/*` (read-only, from synced tables); block numbers are Unix seconds because Hedera has no EVM blocks — DexScreener needs monotonic integers.
 - Next-gen launchpad (native HTS tokens, 8 decimals, auto SaucerSwap listing) is `contracts/HederaPumpHTS.sol`, compiled by `contracts/compile-hts.mjs` into `src/lib/contract-artifact-hts.json`; kept separate so the live contract artifact stays untouched until the switch.
 - Pin `protobufjs` >=8.6.6 at the root: `@hiero-ledger/proto` (via hedera-wallet-connect) needs `Reader.tag()`; older 8.0.0 breaks wallet transactions with "e.tag is not a function".
+- Wallet transactions are frozen for the multi-node list `WALLET_NODE_IDS` in `hedera-config.ts`, never a single node — HashPack rejects unknown nodes and fails outright when its only node is busy.

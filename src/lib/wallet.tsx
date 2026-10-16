@@ -18,6 +18,7 @@ import {
   EVM_CHAIN_ID,
   EVM_RPC_URL,
   HASHSCAN_URL,
+  WALLET_NODE_IDS,
 } from "./hedera-config";
 
 type Connector = import("@hashgraph/hedera-wallet-connect").DAppConnector;
@@ -273,12 +274,24 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         .setFunctionParameters(hexToBytes(calldata));
       if (payableTinybars && payableTinybars > 0n)
         tx = tx.setPayableAmount(sdk.Hbar.fromTinybars(payableTinybars.toString()));
-      tx.setNodeAccountIds([sdk.AccountId.fromString("0.0.3")] as never);
+      tx.setNodeAccountIds(WALLET_NODE_IDS.map((n) => sdk.AccountId.fromString(n)) as never);
       tx.setTransactionId(sdk.TransactionId.generate(s.getAccountId()));
       await tx.freezeWith(client);
       // One wallet request (sign + submit). The wallet's receipt query breaks
       // ("Query.fromBytes() not implemented"), so read the result from the mirror node.
-      const res = await tx.executeWithSigner(s as never);
+      let res: Awaited<ReturnType<typeof tx.executeWithSigner>>;
+      try {
+        res = await tx.executeWithSigner(s as never);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        // The signer retries a failed transaction as a query, which hides the
+        // wallet's real answer behind "Query.fromBytes() not implemented".
+        if (/getByKey|unhealthy|txError/i.test(msg))
+          throw new Error(
+            "HashPack couldn't send this to Hedera. Nothing was charged — please try again.",
+          );
+        throw e;
+      }
       const [acct, ts] = res.transactionId.toString().split("@");
       const mirrorId = `${acct}-${(ts ?? "").replace(".", "-")}`;
       let result: string | null = null;
