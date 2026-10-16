@@ -1,0 +1,23 @@
+// Compiles contracts/HederaPumpV3.sol (platform fee auto-paid, creator claims) into
+// src/lib/contract-artifact-v3.json. Run: bun contracts/compile-v3.mjs
+import solc from "solc";
+import { readFileSync, writeFileSync } from "node:fs";
+
+const input = {
+  language: "Solidity",
+  sources: { "HederaPumpV3.sol": { content: readFileSync("contracts/HederaPumpV3.sol", "utf8") } },
+  settings: {
+    optimizer: { enabled: true, runs: 200 },
+    viaIR: true,
+    evmVersion: "cancun",
+    outputSelection: { "*": { "*": ["abi", "evm.bytecode.object"] } },
+  },
+};
+const out = JSON.parse(solc.compile(JSON.stringify(input)));
+const errs = (out.errors ?? []).filter((e) => e.severity === "error");
+if (errs.length) { console.error(errs.map((e) => e.formattedMessage).join("\n")); process.exit(1); }
+const pump = out.contracts["HederaPumpV3.sol"].HederaPumpV3;
+writeFileSync("src/lib/contract-artifact-v3.json", JSON.stringify({
+  pumpAbi: pump.abi, bytecode: pump.evm.bytecode.object,
+}));
+console.log("bytecode bytes:", pump.evm.bytecode.object.length / 2);
