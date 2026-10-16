@@ -1,3 +1,4 @@
+import { ShareButton } from "@/components/ShareCard";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -246,7 +247,7 @@ function TokenPage() {
         <TokenImage t={t} className="h-16 w-16" />
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold">{t.name}</h1>
+            <div className="flex flex-wrap items-center gap-2"><h1 className="text-2xl font-bold">{t.name}</h1><ShareButton t={t} /></div>
             <span className="font-mono text-muted-foreground">${t.symbol}</span>
           </div>
           <p className="font-mono text-xs text-muted-foreground">{fmtAge(t.created_at)} old</p>

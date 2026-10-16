@@ -21,8 +21,6 @@ async function drawCard(t: TokenRow): Promise<Blob> {
   c.width = W;
   c.height = H;
   const g = c.getContext("2d")!;
-  const css = getComputedStyle(document.documentElement);
-  const color = (v: string, f: string) => (css.getPropertyValue(v).trim() ? `${css.getPropertyValue(v).trim()}` : f);
   const bg = g.createLinearGradient(0, 0, W, H);
   bg.addColorStop(0, "#07130f");
   bg.addColorStop(1, "#071226");
@@ -73,7 +71,7 @@ async function drawCard(t: TokenRow): Promise<Blob> {
   g.fillStyle = "#94a3b8";
   g.font = "24px monospace";
   g.fillText(`${location.host}/token/${t.address.slice(0, 10)}…`, 70, 570);
-  void color;
+
   return new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("No image"))), "image/png"));
 }
 

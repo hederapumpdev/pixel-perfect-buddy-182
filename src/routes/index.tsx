@@ -7,6 +7,7 @@ import { TokenCard } from "@/components/TokenCard";
 import { Button } from "@/components/ui/button";
 import { tokensQuery, fmtHbar, mcapOf } from "@/lib/queries";
 import { useChainSync } from "@/hooks/use-sync";
+import { KingOfTheHill } from "@/components/KingOfTheHill";
 import banner from "@/assets/banner.png";
 
 export const Route = createFileRoute("/")({
@@ -79,6 +80,8 @@ function Index() {
           </Button>
         </div>
       </section>
+
+      <KingOfTheHill tokens={tokens} />
 
       <section className="mt-6">
         <p className="mb-2 text-xs text-muted-foreground">All-time, from on-chain events</p>

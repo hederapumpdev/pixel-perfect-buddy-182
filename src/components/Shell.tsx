@@ -4,6 +4,7 @@ import { Home, Compass, PlusCircle, Wallet, BookOpen, LogOut, LifeBuoy } from "l
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/wallet";
 import { NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
+import { LiveTicker } from "@/components/LiveTicker";
 import logo from "@/assets/hederapump-logo.png";
 
 const nav = [
@@ -66,6 +67,7 @@ export function Shell({ children }: { children: ReactNode }) {
         HEDERA {NETWORK.toUpperCase()} · {live ? "real HBAR — trades are final" : "test network"}
         {!PUMP_CONTRACT_ID && " · launchpad contract not deployed yet"}
       </div>
+      <LiveTicker />
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4">
           <Logo />
