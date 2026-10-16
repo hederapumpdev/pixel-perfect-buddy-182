@@ -157,6 +157,9 @@ contract HederaPumpHTS {
         if (c.tokensSold >= CURVE_SUPPLY) {
             c.graduated = true;
             emit Graduated(token, c.realHbar);
+            // Automatic SaucerSwap listing in the same transaction. If it fails (e.g. too
+            // little gas), the buy still succeeds and migrate() remains as a fallback.
+            try this.autoMigrate(token) {} catch {}
         }
         if (refund > 0) _send(trader, refund);
     }
@@ -185,7 +188,15 @@ contract HederaPumpHTS {
     /// @notice Anyone can list a graduated coin on SaucerSwap. All raised HBAR (minus the
     /// SaucerSwap pool fee) and the remaining 200M tokens go into the pool. The LP token stays
     /// in this contract, which has no way to move it — the liquidity is locked forever.
-    function migrate(address token) external nonReentrant {
+    function migrate(address token) external nonReentrant { _migrate(token); }
+
+    /// @dev Only callable by this contract itself, from _buy at graduation.
+    function autoMigrate(address token) external {
+        require(msg.sender == address(this), "self");
+        _migrate(token);
+    }
+
+    function _migrate(address token) internal {
         Curve storage c = curves[token];
         require(c.graduated && !c.migrated, "state");
         c.migrated = true;
