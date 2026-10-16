@@ -74,8 +74,9 @@ function Admin() {
           <>
             <p className="text-sm text-muted-foreground">
               Deploys the bonding-curve contract to Hedera {NETWORK}. The connected wallet becomes
-              the owner; fees go to 0.0.10923241. Your wallet will ask you to approve a few transactions
-              (upload + create). Expect a few HBAR in network fees.
+              the owner; fees go to 0.0.10923241. Your wallet will ask for <b>6 approvals</b>: the
+              contract is uploaded in 5 parts, then created. Expect roughly 10–15 HBAR in network
+              fees. If an earlier attempt was interrupted, this one continues where it stopped.
             </p>
             <label className="block space-y-1.5">
               <span className="text-sm font-medium">Starting virtual liquidity (HBAR)</span>
@@ -94,8 +95,20 @@ function Admin() {
               />
             </label>
             <Button className="w-full" size="lg" disabled={busy} onClick={deploy}>
-              {busy ? "Approve in wallet…" : w.accountId ? "Deploy contract" : "Connect wallet"}
+              {busy
+                ? w.deployProgress?.phase === "create"
+                  ? "Last approval: creating the contract…"
+                  : w.deployProgress
+                    ? `Approval ${w.deployProgress.part} of ${w.deployProgress.parts} — check your wallet…`
+                    : "Approve in wallet…"
+                : w.accountId ? "Deploy contract" : "Connect wallet"}
             </Button>
+            {busy && w.deployProgress && (
+              <p className="text-center text-xs text-muted-foreground">
+                Keep this page open and HashPack in front of you — the upload resumes automatically
+                if the connection drops.
+              </p>
+            )}
             {deployed && (
               <p className="rounded-md border border-up/40 bg-up/10 p-4 text-sm">
                 Deployed: <b className="font-mono">{deployed}</b> — send this ID in the chat to

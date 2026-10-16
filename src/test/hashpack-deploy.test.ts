@@ -1,40 +1,105 @@
 import * as sdk from "@hiero-ledger/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { deployWithHashPack } from "@/lib/hashpack-deploy";
+import { deployWithHashPack, DEPLOY_CHUNK } from "@/lib/hashpack-deploy";
 
 afterEach(() => vi.unstubAllGlobals());
 
+const ED25519 = "016206cce27f19c21933357cdaa83790cf06f85ef850572055ad5e5d0fadfc6b";
+// 9060 hex chars: one create + two appends at the 4096-byte network limit.
+const BYTECODE = "ab".repeat(4530);
+
+function stubAccountKey() {
+  vi.stubGlobal("fetch", vi.fn(async () => ({
+    ok: true,
+    json: async () => ({ key: { _type: "ED25519", key: ED25519 } }),
+  })));
+}
+
+function mockSigner(transactions: sdk.Transaction[]) {
+  const getAccountKey = vi.fn(() => { throw new Error("Method not implemented."); });
+  const signer = {
+    getAccountKey,
+    getAccountId: () => sdk.AccountId.fromString("0.0.1234"),
+    getNetwork: () => ({ "node:50211": sdk.AccountId.fromString("0.0.3") }),
+    populateTransaction: async (tx: sdk.Transaction) => tx.setTransactionId(sdk.TransactionId.generate("0.0.1234")),
+    call: async (tx: sdk.Transaction) => {
+      transactions.push(tx);
+      expect(tx.toBytes().length).toBeGreaterThan(0);
+      return { getReceiptWithSigner: async () => ({
+        status: sdk.Status.Success,
+        fileId: sdk.FileId.fromString("0.0.5678"),
+        contractId: tx instanceof sdk.ContractCreateTransaction ? sdk.ContractId.fromString("0.0.9999") : null,
+      }) };
+    },
+  } as unknown as sdk.Signer;
+  return { signer, getAccountKey };
+}
+
+const uploadedBytes = (txs: sdk.Transaction[]) => txs.flatMap(
+  (tx) => tx instanceof sdk.FileCreateTransaction || tx instanceof sdk.FileAppendTransaction
+    ? [...(tx.contents ?? [])] : [],
+);
+
 describe("HashPack contract deployment", () => {
   it("uploads chunks and creates a contract without calling getAccountKey", async () => {
+    stubAccountKey();
     const transactions: sdk.Transaction[] = [];
-    const getAccountKey = vi.fn(() => { throw new Error("Method not implemented."); });
-    const signer = {
-      getAccountKey,
-      getAccountId: () => sdk.AccountId.fromString("0.0.1234"),
-      getNetwork: () => ({ "node:50211": sdk.AccountId.fromString("0.0.3") }),
-      populateTransaction: async (tx: sdk.Transaction) => tx.setTransactionId(sdk.TransactionId.generate("0.0.1234")),
-      call: async (tx: sdk.Transaction) => {
-        transactions.push(tx);
-        expect(tx.toBytes().length).toBeGreaterThan(0);
-        return { getReceiptWithSigner: async () => ({
-          status: sdk.Status.Success,
-          fileId: sdk.FileId.fromString("0.0.5678"),
-          contractId: tx instanceof sdk.ContractCreateTransaction ? sdk.ContractId.fromString("0.0.9999") : null,
-        }) };
-      },
-    } as unknown as sdk.Signer;
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({
-      key: { _type: "ED25519", key: "016206cce27f19c21933357cdaa83790cf06f85ef850572055ad5e5d0fadfc6b" },
-    }) })));
-    const bytecode = "ab".repeat(4530);
-    const id = await deployWithHashPack(sdk, signer, "https://mirror.example", { bytecode: `0x${bytecode}`, constructorParams: "0x1234", gas: 4000000 });
+    const { signer, getAccountKey } = mockSigner(transactions);
+    const progress: string[] = [];
+    const id = await deployWithHashPack(
+      sdk, signer, "https://mirror.example",
+      { bytecode: `0x${BYTECODE}`, constructorParams: "0x1234", gas: 4000000 },
+      (p) => progress.push(`${p.phase} ${p.part}/${p.parts}`),
+    );
     expect(id).toBe("0.0.9999");
     expect(getAccountKey).not.toHaveBeenCalled();
     expect(transactions[0]).toBeInstanceOf(sdk.FileCreateTransaction);
-    expect(transactions.filter((tx) => tx instanceof sdk.FileAppendTransaction)).toHaveLength(4);
-    const uploaded = transactions.flatMap((tx) => tx instanceof sdk.FileCreateTransaction || tx instanceof sdk.FileAppendTransaction ? [...(tx.contents ?? [])] : []);
-    expect(new TextDecoder().decode(Uint8Array.from(uploaded))).toBe(bytecode);
+    expect(transactions.filter((tx) => tx instanceof sdk.FileAppendTransaction)).toHaveLength(2);
+    expect(new TextDecoder().decode(Uint8Array.from(uploadedBytes(transactions)))).toBe(BYTECODE);
     expect(transactions.at(-1)).toBeInstanceOf(sdk.ContractCreateTransaction);
+    expect(progress).toEqual(["upload 1/3", "upload 2/3", "upload 3/3", "create 3/3"]);
+    const chunkSizes = transactions
+      .filter((tx) => tx instanceof sdk.FileCreateTransaction || tx instanceof sdk.FileAppendTransaction)
+      .map((tx) => (tx.contents ?? []).length);
+    expect(chunkSizes).toEqual([DEPLOY_CHUNK, DEPLOY_CHUNK, BYTECODE.length - 2 * DEPLOY_CHUNK]);
+  });
+
+  it("continues an interrupted upload instead of paying for the same bytes twice", async () => {
+    stubAccountKey();
+    const transactions: sdk.Transaction[] = [];
+    const { signer } = mockSigner(transactions);
+    const id = await deployWithHashPack(
+      sdk, signer, "https://mirror.example",
+      { bytecode: `0x${BYTECODE}`, constructorParams: "0x1234", gas: 4000000, resume: { fileId: "0.0.5678", uploaded: DEPLOY_CHUNK } },
+    );
+    expect(id).toBe("0.0.9999");
+    expect(transactions.some((tx) => tx instanceof sdk.FileCreateTransaction)).toBe(false);
+    expect(transactions[0]).toBeInstanceOf(sdk.FileAppendTransaction);
+    expect(new TextDecoder().decode(Uint8Array.from(uploadedBytes(transactions)))).toBe(BYTECODE.slice(DEPLOY_CHUNK));
+  });
+
+  it("starts a fresh upload when a resumed file has already expired", async () => {
+    stubAccountKey();
+    const transactions: sdk.Transaction[] = [];
+    let failedOnce = false;
+    const { signer } = mockSigner(transactions);
+    const base = (signer as unknown as { call: (tx: sdk.Transaction) => Promise<unknown> }).call;
+    (signer as unknown as { call: (tx: sdk.Transaction) => Promise<unknown> }).call = async (tx: sdk.Transaction) => {
+      const out = await base(tx);
+      if (!failedOnce && tx instanceof sdk.FileAppendTransaction) {
+        failedOnce = true;
+        return { getReceiptWithSigner: async () => ({ status: sdk.Status.InvalidFileId }) };
+      }
+      return out;
+    };
+    const id = await deployWithHashPack(
+      sdk, signer, "https://mirror.example",
+      { bytecode: `0x${BYTECODE}`, constructorParams: "0x1234", gas: 4000000, resume: { fileId: "0.0.5678", uploaded: DEPLOY_CHUNK } },
+    );
+    expect(id).toBe("0.0.9999");
+    expect(transactions.filter((tx) => tx instanceof sdk.FileCreateTransaction)).toHaveLength(1);
+    // The failed attempt is dropped; the fresh upload re-sends the whole contract.
+    expect(new TextDecoder().decode(Uint8Array.from(uploadedBytes(transactions).slice(DEPLOY_CHUNK)))).toBe(BYTECODE);
   });
 
   it("rejects unsupported account keys before requesting a wallet signature", async () => {
