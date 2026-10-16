@@ -6,7 +6,7 @@ export const PUMP_CONTRACT_ID: string | null = "0.0.10923845";
 
 // Next-gen contract (native HTS tokens, 8 decimals, auto SaucerSwap listing).
 // Null until deployed on mainnet; coins stay on the contract that made them.
-export const PUMP_CONTRACT_V2_ID: string | null = null;
+export const PUMP_CONTRACT_V2_ID: string | null = "0.0.10924256";
 
 /** Every launchpad contract the app reads and trades on, oldest first. */
 export const PUMP_CONTRACTS: string[] = [PUMP_CONTRACT_ID, PUMP_CONTRACT_V2_ID].filter(
