@@ -18,6 +18,15 @@ type MirrorLog = {
  * Only writes data derived from on-chain events, so it is safe to expose publicly.
  */
 export const syncChain = createServerFn({ method: "POST" }).handler(async () => {
+  try {
+    return await runSync();
+  } catch (e) {
+    console.error("syncChain failed", e);
+    return { synced: 0, configured: true, error: e instanceof Error ? e.message : String(e) };
+  }
+});
+
+async function runSync(): Promise<{ synced: number; configured: boolean; error?: string }> {
   if (!PUMP_CONTRACT_ID) return { synced: 0, configured: false };
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: st } = await supabaseAdmin
@@ -59,7 +68,7 @@ export const syncChain = createServerFn({ method: "POST" }).handler(async () => 
     if (logs.length < 100) break;
   }
   return { synced: count, configured: true };
-});
+}
 
 const tsToIso = (ts: string) =>
   new Date(
