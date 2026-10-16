@@ -300,8 +300,8 @@ function TokenPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">On SaucerSwap</span>
-                <span className={t.graduated ? "text-up" : "text-muted-foreground"}>
-                  {t.graduated ? "Yes" : "Not yet"}
+                <span className={"text-muted-foreground"}>
+                  {t.graduated ? "Listing pending" : "Not yet"}
                 </span>
               </div>
             </div>
