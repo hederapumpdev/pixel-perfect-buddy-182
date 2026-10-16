@@ -429,6 +429,28 @@ function TokenPage() {
           </div>
 
           <div className="rounded-lg border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <p className="text-sm font-semibold">DexScreener chart</p>
+              <a
+                href={`https://dexscreener.com/hedera/${t.address}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-accent"
+              >
+                Open on DexScreener
+              </a>
+            </div>
+            <iframe
+              title={`${t.symbol} on DexScreener`}
+              src={`https://dexscreener.com/hedera/${t.address}?embed=1&theme=dark&trades=0&info=0`}
+              className="h-96 w-full rounded-b-lg"
+            />
+            <p className="px-4 pb-3 pt-2 text-xs text-muted-foreground">
+              The chart appears here as soon as this coin is listed on DexScreener.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-border bg-card">
             <p className="border-b border-border px-4 py-3 text-sm font-semibold">Trades</p>
             <div className="divide-y divide-border font-mono text-xs">
               {trades.slice(0, 50).map((r) => (
