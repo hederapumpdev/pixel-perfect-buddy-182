@@ -22,4 +22,9 @@ describe("daily app posting", () => {
       expect([...weighted].length).toBeLessThanOrEqual(280);
     }
   });
+  it("has exactly one branded image for every tweet topic", () => {
+    expect(topicImages.length).toBe(topics.length);
+    expect(new Set(topicImages).size).toBe(topicImages.length);
+    expect(topicImages.every((src) => typeof src === "string" && src.length > 0)).toBe(true);
+  });
 });
