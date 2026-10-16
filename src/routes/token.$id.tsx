@@ -161,17 +161,15 @@ function TokenPage() {
             <h1 className="text-2xl font-bold">{t.name}</h1>
             <span className="font-mono text-muted-foreground">${t.symbol}</span>
           </div>
-          <p className="font-mono text-xs text-muted-foreground">
-            Creator {shortAddr(t.creator)} · {fmtAge(t.created_at)} old ·{" "}
-            <a
-              className="text-accent"
-              href={`${HASHSCAN_URL}/contract/${t.address}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {shortAddr(t.address)}
-            </a>
-          </p>
+          <p className="font-mono text-xs text-muted-foreground">{fmtAge(t.created_at)} old</p>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        <AddrRow label="CA" addr={t.address} href={`${HASHSCAN_URL}/contract/${t.address}`} />
+        <AddrRow label="Creator" addr={t.creator} href={`${HASHSCAN_URL}/account/${t.creator}`} />
+      </div>
+      <div className="hidden">
+        <div>
         </div>
       </div>
 
