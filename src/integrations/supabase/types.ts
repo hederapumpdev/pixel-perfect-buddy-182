@@ -316,12 +316,63 @@ export type Database = {
         }
         Relationships: []
       }
+      x_daily_posts: {
+        Row: {
+          created_at: string
+          error: string | null
+          slot: string
+          status: string
+          text: string
+          tweet_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          slot: string
+          status?: string
+          text: string
+          tweet_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          slot?: string
+          status?: string
+          text?: string
+          tweet_id?: string | null
+        }
+        Relationships: []
+      }
+      x_posting_state: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: number
+          lease_until: string | null
+          pause_reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id: number
+          lease_until?: string | null
+          pause_reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          lease_until?: string | null
+          pause_reason?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      acquire_x_posting_lease: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
