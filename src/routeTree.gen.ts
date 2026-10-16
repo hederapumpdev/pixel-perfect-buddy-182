@@ -16,6 +16,10 @@ import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as TokenIdRouteImport } from './routes/token.$id'
+import { Route as ApiPublicDexscreenerAssetRouteImport } from './routes/api/public/dexscreener/asset'
+import { Route as ApiPublicDexscreenerEventsRouteImport } from './routes/api/public/dexscreener/events'
+import { Route as ApiPublicDexscreenerLatestBlockRouteImport } from './routes/api/public/dexscreener/latest-block'
+import { Route as ApiPublicDexscreenerPairRouteImport } from './routes/api/public/dexscreener/pair'
 import { Route as ApiPublicImgHashRouteImport } from './routes/api/public/img.$hash'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +57,30 @@ const TokenIdRoute = TokenIdRouteImport.update({
   path: '/token/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDexscreenerAssetRoute =
+  ApiPublicDexscreenerAssetRouteImport.update({
+    id: '/api/public/dexscreener/asset',
+    path: '/api/public/dexscreener/asset',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicDexscreenerEventsRoute =
+  ApiPublicDexscreenerEventsRouteImport.update({
+    id: '/api/public/dexscreener/events',
+    path: '/api/public/dexscreener/events',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicDexscreenerLatestBlockRoute =
+  ApiPublicDexscreenerLatestBlockRouteImport.update({
+    id: '/api/public/dexscreener/latest-block',
+    path: '/api/public/dexscreener/latest-block',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicDexscreenerPairRoute =
+  ApiPublicDexscreenerPairRouteImport.update({
+    id: '/api/public/dexscreener/pair',
+    path: '/api/public/dexscreener/pair',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicImgHashRoute = ApiPublicImgHashRouteImport.update({
   id: '/api/public/img/$hash',
   path: '/api/public/img/$hash',
@@ -67,6 +95,10 @@ export interface FileRoutesByFullPath {
   '/how-it-works': typeof HowItWorksRoute
   '/profile': typeof ProfileRoute
   '/token/$id': typeof TokenIdRoute
+  '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
+  '/api/public/dexscreener/events': typeof ApiPublicDexscreenerEventsRoute
+  '/api/public/dexscreener/latest-block': typeof ApiPublicDexscreenerLatestBlockRoute
+  '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +109,10 @@ export interface FileRoutesByTo {
   '/how-it-works': typeof HowItWorksRoute
   '/profile': typeof ProfileRoute
   '/token/$id': typeof TokenIdRoute
+  '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
+  '/api/public/dexscreener/events': typeof ApiPublicDexscreenerEventsRoute
+  '/api/public/dexscreener/latest-block': typeof ApiPublicDexscreenerLatestBlockRoute
+  '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
 }
 export interface FileRoutesById {
@@ -88,6 +124,10 @@ export interface FileRoutesById {
   '/how-it-works': typeof HowItWorksRoute
   '/profile': typeof ProfileRoute
   '/token/$id': typeof TokenIdRoute
+  '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
+  '/api/public/dexscreener/events': typeof ApiPublicDexscreenerEventsRoute
+  '/api/public/dexscreener/latest-block': typeof ApiPublicDexscreenerLatestBlockRoute
+  '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +140,10 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/profile'
     | '/token/$id'
+    | '/api/public/dexscreener/asset'
+    | '/api/public/dexscreener/events'
+    | '/api/public/dexscreener/latest-block'
+    | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +154,10 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/profile'
     | '/token/$id'
+    | '/api/public/dexscreener/asset'
+    | '/api/public/dexscreener/events'
+    | '/api/public/dexscreener/latest-block'
+    | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
   id:
     | '__root__'
@@ -120,6 +168,10 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/profile'
     | '/token/$id'
+    | '/api/public/dexscreener/asset'
+    | '/api/public/dexscreener/events'
+    | '/api/public/dexscreener/latest-block'
+    | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +183,10 @@ export interface RootRouteChildren {
   HowItWorksRoute: typeof HowItWorksRoute
   ProfileRoute: typeof ProfileRoute
   TokenIdRoute: typeof TokenIdRoute
+  ApiPublicDexscreenerAssetRoute: typeof ApiPublicDexscreenerAssetRoute
+  ApiPublicDexscreenerEventsRoute: typeof ApiPublicDexscreenerEventsRoute
+  ApiPublicDexscreenerLatestBlockRoute: typeof ApiPublicDexscreenerLatestBlockRoute
+  ApiPublicDexscreenerPairRoute: typeof ApiPublicDexscreenerPairRoute
   ApiPublicImgHashRoute: typeof ApiPublicImgHashRoute
 }
 
@@ -185,6 +241,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TokenIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/dexscreener/asset': {
+      id: '/api/public/dexscreener/asset'
+      path: '/api/public/dexscreener/asset'
+      fullPath: '/api/public/dexscreener/asset'
+      preLoaderRoute: typeof ApiPublicDexscreenerAssetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/dexscreener/events': {
+      id: '/api/public/dexscreener/events'
+      path: '/api/public/dexscreener/events'
+      fullPath: '/api/public/dexscreener/events'
+      preLoaderRoute: typeof ApiPublicDexscreenerEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/dexscreener/latest-block': {
+      id: '/api/public/dexscreener/latest-block'
+      path: '/api/public/dexscreener/latest-block'
+      fullPath: '/api/public/dexscreener/latest-block'
+      preLoaderRoute: typeof ApiPublicDexscreenerLatestBlockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/dexscreener/pair': {
+      id: '/api/public/dexscreener/pair'
+      path: '/api/public/dexscreener/pair'
+      fullPath: '/api/public/dexscreener/pair'
+      preLoaderRoute: typeof ApiPublicDexscreenerPairRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/img/$hash': {
       id: '/api/public/img/$hash'
       path: '/api/public/img/$hash'
@@ -203,6 +287,10 @@ const rootRouteChildren: RootRouteChildren = {
   HowItWorksRoute: HowItWorksRoute,
   ProfileRoute: ProfileRoute,
   TokenIdRoute: TokenIdRoute,
+  ApiPublicDexscreenerAssetRoute: ApiPublicDexscreenerAssetRoute,
+  ApiPublicDexscreenerEventsRoute: ApiPublicDexscreenerEventsRoute,
+  ApiPublicDexscreenerLatestBlockRoute: ApiPublicDexscreenerLatestBlockRoute,
+  ApiPublicDexscreenerPairRoute: ApiPublicDexscreenerPairRoute,
   ApiPublicImgHashRoute: ApiPublicImgHashRoute,
 }
 export const routeTree = rootRouteImport
