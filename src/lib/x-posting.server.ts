@@ -1,8 +1,6 @@
 import { appTweet, dailyXSlot, localXTime } from "./x-content";
 import { sendXTweet, xAuthorization } from "./x-oauth.server";
-import introductionImage from "@/assets/x-introduction.jpg";
-import communityImage from "@/assets/x-community.jpg";
-import graduationImage from "@/assets/x-graduation.jpg";
+import { topicImages } from "./x-images";
 
 export async function runDailyX(origin: string, now = new Date()) {
   const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
