@@ -111,9 +111,10 @@ contract HederaPumpHTS {
         t.tokenKeys = new IHTS.TokenKey[](0);
         t.expiry = IHTS.Expiry(0, address(this), 7_776_000);
 
-        uint256 before = address(this).balance - msg.value;
+        uint256 b0 = address(this).balance;
         (int64 rc, address tok) = HTS.createFungibleToken{value: htsBudget}(t, int64(int256(TOTAL_SUPPLY)), 8);
         require(rc == OK, "hts create");
+        uint256 unspent = htsBudget - (b0 - address(this).balance);
         token = tok;
         curves[token] = Curve(msg.sender, virtualHbarStart, VIRTUAL_TOKENS, 0, 0, false, false);
         allTokens.push(token);
@@ -121,21 +122,11 @@ contract HederaPumpHTS {
         emit TokenCreated(token, msg.sender, name_, symbol_, metadata);
 
         if (buyHbar > 0) _buy(token, msg.sender, buyHbar, 0);
-        // refund what Hedera did not charge for token creation
-        uint256 expected = before + creationFee;
-        if (address(this).balance > expected + _tracked()) {
-            uint256 refund = address(this).balance - expected - _tracked();
-            if (refund > 0) _send(msg.sender, refund);
-        }
+        if (unspent > 0) _send(msg.sender, unspent);
     }
-
-    // HBAR that belongs to curves and fees accumulated during this call (set by _buy).
-    uint256 private callTracked;
-    function _tracked() internal view returns (uint256) { return callTracked; }
 
     function buy(address token, uint256 minTokensOut) external payable live nonReentrant {
         _buy(token, msg.sender, msg.value, minTokensOut);
-        callTracked = 0;
     }
 
     function _buy(address token, address trader, uint256 value, uint256 minOut) internal {
@@ -161,7 +152,6 @@ contract HederaPumpHTS {
         c.realHbar += inAmt;
         c.tokensSold += out;
         _takeFee(c.creator, fee);
-        callTracked += inAmt + fee;
         require(HTS.transferToken(token, address(this), trader, int64(int256(out))) == OK, "transfer (associate token first)");
         emit Trade(token, trader, true, inAmt, out, fee, c.virtualHbar, c.virtualTokens);
         if (c.tokensSold >= CURVE_SUPPLY) {
