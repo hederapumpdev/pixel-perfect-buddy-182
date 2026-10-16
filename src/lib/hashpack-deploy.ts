@@ -127,6 +127,7 @@ export async function deployStep(
   /** Sends one transaction; trusts whichever answers first: the wallet's receipt or Hedera's public record. */
   async function submit(tx: Transaction, memo: string): Promise<string | null> {
     tx.setNodeAccountIds(nodes).setTransactionMemo(memo);
+    tx.setTransactionId(sdk.TransactionId.generate(signer.getAccountId()));
     await tx.freezeWith(client);
     await tx.signWithSigner(signer);
     const txId = tx.transactionId?.toString() ?? "";

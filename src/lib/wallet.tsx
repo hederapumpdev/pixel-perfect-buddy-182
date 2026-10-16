@@ -272,6 +272,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       if (payableTinybars && payableTinybars > 0n)
         tx = tx.setPayableAmount(sdk.Hbar.fromTinybars(payableTinybars.toString()));
       tx.setNodeAccountIds(Object.values(client.network).slice(0, 1) as never);
+      tx.setTransactionId(sdk.TransactionId.generate(s.getAccountId()));
       await tx.freezeWith(client);
       await tx.signWithSigner(s as never);
       const res = await tx.executeWithSigner(s as never);
