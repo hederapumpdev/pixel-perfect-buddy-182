@@ -37,6 +37,7 @@ export async function runDailyX(origin: string, now = new Date()) {
     if (!image.ok) throw new Error("Tweet image is unavailable");
     const mediaUrl = "https://api.x.com/2/media/upload";
     const form = new FormData();
+    form.set("media_category", "tweet_image");
     form.set("media", await image.blob(), "hederapump.jpg");
     const upload = await fetch(mediaUrl, { method: "POST", headers: { Authorization: xAuthorization("POST", mediaUrl) }, body: form, signal: AbortSignal.timeout(4_000) });
     if (!upload.ok) {

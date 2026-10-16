@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Daily X app tweets — implemented and scheduled; paused because X rejects saved credentials (HTTP 401); needs valid X credentials from user
+- [ ] Daily X app tweets — image upload verified; X rejects tweet creation (HTTP 403), requiring X posting permission/billing resolution
 - [x] Include branded images with daily X tweets
 - [x] Coin page: CA + creator with copy/links
 - [x] v2 HTS contract live (0.0.10924256)
