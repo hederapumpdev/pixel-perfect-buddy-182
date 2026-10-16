@@ -41,6 +41,27 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_settings: {
+        Row: {
+          enabled: boolean
+          id: number
+          updated_at: string
+          usd_amount: number
+        }
+        Insert: {
+          enabled?: boolean
+          id?: number
+          updated_at?: string
+          usd_amount?: number
+        }
+        Update: {
+          enabled?: boolean
+          id?: number
+          updated_at?: string
+          usd_amount?: number
+        }
+        Relationships: []
+      }
       sync_state: {
         Row: {
           contract: string
