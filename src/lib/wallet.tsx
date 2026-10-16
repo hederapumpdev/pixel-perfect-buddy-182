@@ -292,6 +292,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         const msg = e instanceof Error ? e.message : String(e);
         // The signer retries a failed transaction as a query, which hides the
         // wallet's real answer behind "Query.fromBytes() not implemented".
+        if (/INSUFFICIENT_PAYER_BALANCE|INSUFFICIENT_ACCOUNT_BALANCE/i.test(msg))
+          throw new Error("Not enough HBAR in your wallet for this. Nothing was charged — top up or use a smaller amount.");
         if (/getByKey|unhealthy|txError/i.test(msg))
           throw new Error(
             "HashPack couldn't send this to Hedera. Nothing was charged — please try again.",
@@ -338,6 +340,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         res = await tx.executeWithSigner(s as never);
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
+        if (/INSUFFICIENT_PAYER_BALANCE|INSUFFICIENT_ACCOUNT_BALANCE/i.test(msg))
+          throw new Error("Not enough HBAR in your wallet for this. Nothing was charged — top up or use a smaller amount.");
         if (/getByKey|unhealthy|txError/i.test(msg))
           throw new Error(
             "HashPack couldn't send this to Hedera. Nothing was charged — please try again.",
