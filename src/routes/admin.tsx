@@ -49,6 +49,7 @@ function Admin() {
   const [ok, setOk] = useState(false);
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   useEffect(() => {
     const saved = sessionStorage.getItem(PIN_KEY);
     if (saved) check({ data: { pin: saved } }).then((r) => setOk(r.ok)).catch(() => {});
@@ -56,14 +57,17 @@ function Admin() {
   async function unlock(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+    setErr(null);
     try {
       const r = await check({ data: { pin: pin.trim() } });
       if (!r.ok) {
-        toast.error("Wrong PIN");
+        setErr("Wrong PIN — check it and try again.");
         return;
       }
       sessionStorage.setItem(PIN_KEY, pin.trim());
       setOk(true);
+    } catch {
+      setErr("Couldn't check the PIN. Check your connection and try again.");
     } finally {
       setBusy(false);
     }
@@ -78,6 +82,7 @@ function Admin() {
           <Button className="w-full" disabled={busy || !pin}>
             {busy ? "Checking…" : "Open"}
           </Button>
+          {err && <p className="text-sm text-destructive">{err}</p>}
         </form>
       </Shell>
     );
