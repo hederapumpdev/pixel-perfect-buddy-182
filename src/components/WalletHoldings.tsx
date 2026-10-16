@@ -43,7 +43,7 @@ export function WalletHoldings({
         for (const t of j.tokens ?? []) if (t.balance > 0) hts.set(idToEvm(t.token_id), t.balance / 1e8);
         next = j.links?.next ?? null;
       }
-      const { data: traded } = await supabase.from("trades").select("token").in("trader", addrs).limit(1000);
+      const { data: traded } = await supabase.from("trades").select("token, is_buy, hbar_amount, token_amount").in("trader", addrs).limit(1000);
       const cand = [...new Set([...hts.keys(), ...(traded ?? []).map((r) => r.token.toLowerCase())])];
       if (!cand.length) return { hbar, rows: [] };
       const { data: coins } = await supabase.from("tokens").select("*").eq("network", NETWORK).in("address", cand);
@@ -56,7 +56,16 @@ export function WalletHoldings({
             for (const a of addrs) b += await erc20Balance(c.address, a).catch(() => 0n);
             amt = Number(b) / 1e18;
           }
-          return { c, amt, value: amt * priceOf(c) };
+          let paid = 0,
+            got = 0;
+          for (const t of traded ?? [])
+            if (t.is_buy && t.token.toLowerCase() === c.address.toLowerCase()) {
+              paid += Number(t.hbar_amount);
+              got += Number(t.token_amount);
+            }
+          const value = amt * priceOf(c);
+          const cost = got > 0 ? (amt * paid) / got : null;
+          return { c, amt, value, pnl: cost === null ? null : value - cost, pct: cost ? ((value - cost) / cost) * 100 : null };
         }),
       );
       return { hbar, rows: rows.filter((r) => r.amt > 0).sort((a, b) => b.value - a.value) };
@@ -65,6 +74,7 @@ export function WalletHoldings({
 
   const hbar = q.data?.hbar ?? balanceHbar ?? 0;
   const total = (q.data?.rows ?? []).reduce((a, r) => a + r.value, 0);
+  const pnlAll = (q.data?.rows ?? []).reduce((a, r) => a + (r.pnl ?? 0), 0);
   return (
     <div className="mt-6 rounded-lg border border-border bg-card">
       <div className="grid grid-cols-2 gap-3 border-b border-border p-4">
@@ -75,11 +85,17 @@ export function WalletHoldings({
         <div>
           <p className="text-xs text-muted-foreground">Your coins are worth</p>
           <p className="mt-1 font-mono text-2xl font-semibold">{q.isLoading ? "…" : fmtHbar(total)}</p>
+          {!q.isLoading && pnlAll !== 0 && (
+            <p className={`font-mono text-xs ${pnlAll >= 0 ? "text-up" : "text-down"}`}>
+              {pnlAll >= 0 ? "+" : "−"}
+              {fmtHbar(Math.abs(pnlAll))}
+            </p>
+          )}
         </div>
       </div>
       <p className="px-4 pt-3 text-sm font-semibold">Coins in your wallet</p>
       <div className="divide-y divide-border">
-        {(q.data?.rows ?? []).map(({ c, amt, value }) => (
+        {(q.data?.rows ?? []).map(({ c, amt, value, pnl, pct }) => (
           <Link
             key={c.address}
             to="/token/$id"
@@ -93,7 +109,18 @@ export function WalletHoldings({
                 {amt.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${c.symbol}
               </p>
             </div>
-            <span className="font-mono text-sm">{fmtHbar(value)}</span>
+            <div className="text-right font-mono">
+              <p className="text-sm">{fmtHbar(value)}</p>
+              {pnl !== null && pct !== null && (
+                <p className={`text-xs ${pnl >= 0 ? "text-up" : "text-down"}`}>
+                  {pnl >= 0 ? "+" : "−"}
+                  {fmtHbar(Math.abs(pnl))}{" "}
+                  <span className={`ml-1 rounded px-1 ${pnl >= 0 ? "bg-up/15" : "bg-down/15"}`}>
+                    {pnl >= 0 ? "↑" : "↓"} {Math.abs(pct).toFixed(1)}%
+                  </span>
+                </p>
+              )}
+            </div>
           </Link>
         ))}
         {!q.isLoading && !q.data?.rows.length && (
