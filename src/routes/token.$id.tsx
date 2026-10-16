@@ -286,7 +286,7 @@ function TokenPage() {
                     <span className="font-mono">
                       {side === "buy"
                         ? `${w.balanceHbar?.toFixed(2) ?? "—"} ℏ`
-                        : `${fromUnits(bal).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${t.symbol}`}
+                        : `${fromUnits(bal, t.contract).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${t.symbol}`}
                     </span>
                   )}
                 </div>
@@ -311,7 +311,7 @@ function TokenPage() {
                     : [25n, 50n, 100n].map((pc) => (
                         <button
                           key={String(pc)}
-                          onClick={() => setAmt(String(fromUnits((bal * pc) / 100n)))}
+                          onClick={() => setAmt(String(fromUnits((bal * pc) / 100n, t.contract)))}
                           className="flex-1 rounded bg-secondary py-1 font-mono text-xs"
                         >
                           {String(pc)}%
@@ -368,8 +368,8 @@ function TokenPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">On SaucerSwap</span>
-                <span className={"text-muted-foreground"}>
-                  {t.graduated ? "Listing pending" : "Not yet"}
+                <span className={t.graduated && v2 ? "text-up" : "text-muted-foreground"}>
+                  {t.graduated ? (v2 ? "Yes" : "Listing pending") : "Not yet"}
                 </span>
               </div>
             </div>
