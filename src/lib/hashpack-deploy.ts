@@ -118,14 +118,18 @@ export async function deployStep(
   else if (key?._type === "ECDSA_SECP256K1" && key.key) publicKey = sdk.PublicKey.fromStringECDSA(key.key);
   else throw new Error("Deployment requires a single-key HashPack account. This account's key type isn't supported.");
 
-  const nodes = Object.values(signer.getNetwork()).slice(0, 1)
-    .map((node) => typeof node === "string" ? sdk.AccountId.fromString(node) : node);
-  if (!nodes.length) throw new Error("No Hedera network node is available. Reconnect HashPack.");
+  // The WalletConnect signer's node list can contain nodes the wallet's own
+  // client rejects (e.g. 0.0.17). Freeze against the SDK's full mainnet node
+  // list instead; signing still happens in the wallet.
+  const client = sdk.Client.forMainnet();
+  const nodes = Object.values(client.network).slice(0, 1) as never[];
 
   /** Sends one transaction; trusts whichever answers first: the wallet's receipt or Hedera's public record. */
   async function submit(tx: Transaction, memo: string): Promise<string | null> {
     tx.setNodeAccountIds(nodes).setTransactionMemo(memo);
-    await tx.freezeWithSigner(signer);
+    tx.setTransactionId(sdk.TransactionId.generate(signer.getAccountId()));
+    await tx.freezeWith(client);
+    await tx.signWithSigner(signer);
     const txId = tx.transactionId?.toString() ?? "";
     const mirrorId = txId.replace("@", "-").replace(/\.(\d+)$/, "-$1");
     const stop = { done: false };
