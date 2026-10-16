@@ -254,3 +254,20 @@ export const checkAdminPin = createServerFn({ method: "POST" })
     const pin = process.env["ADMIN_PIN"];
     return { ok: !!pin && data.pin.trim() === pin.trim() };
   });
+
+/** Bot settings + recent bot buys for the admin page (PIN-protected). */
+export const getBotAdmin = createServerFn({ method: "POST" })
+  .inputValidator((d: { pin: string }) => {
+    if (typeof d.pin !== "string" || d.pin.length > 200) throw new Error("Invalid PIN");
+    return d;
+  })
+  .handler(async ({ data }) => {
+    const pin = process.env["ADMIN_PIN"];
+    if (!pin || data.pin.trim() !== pin.trim()) throw new Error("Wrong PIN");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [s, b] = await Promise.all([
+      supabaseAdmin.from("bot_settings").select("*").eq("id", 1).maybeSingle(),
+      supabaseAdmin.from("bot_buys").select("*").order("created_at", { ascending: false }).limit(50),
+    ]);
+    return { settings: s.data, buys: b.data ?? [] };
+  });
