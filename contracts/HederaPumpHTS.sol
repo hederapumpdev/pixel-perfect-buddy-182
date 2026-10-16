@@ -213,10 +213,14 @@ contract HederaPumpHTS {
         emit Migrated(token, router, usedHbar, usedTok);
     }
 
+    /// Creator share is paid out directly on every trade (no claim needed). If the payout
+    /// fails, it is kept for claimCreatorFees so the trade never breaks.
     function _takeFee(address creator, uint256 fee) internal {
         uint256 cf = (fee * CREATOR_SHARE_BPS) / 10_000;
-        creatorFees[creator] += cf;
         platformFees += fee - cf;
+        if (cf == 0) return;
+        (bool ok, ) = payable(creator).call{value: cf, gas: 10_000}("");
+        if (!ok) creatorFees[creator] += cf;
     }
 
     function claimCreatorFees() external nonReentrant {
