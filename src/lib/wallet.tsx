@@ -103,8 +103,7 @@ const hexToBytes = (h: string) =>
 
 // Remembers an interrupted contract upload so the next attempt continues where it
 // stopped instead of paying for the same bytes again.
-const DEPLOY_STATE_KEY = "hederaPump.deploy.v1";
-const LEGACY_DEPLOY = { account: "0.0.10923241", state: { fileId: "0.0.10923830", uploaded: 4096 } };
+const DEPLOY_STATE_KEY = "hederaPump.deploy.v2";
 const fingerprint = (bc: string) => `${bc.length}:${bc.slice(0, 16)}:${bc.slice(-16)}`;
 
 async function loadLibs() {
@@ -436,8 +435,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     let resume = chain?.state ?? local;
     if (chain?.state && local && local.fileId === chain.state.fileId)
       resume = { fileId: local.fileId, uploaded: Math.max(local.uploaded, chain.state.uploaded) };
-    // First part of the 4096-byte upload already paid for on 16 Oct 2026 (before step memos existed).
-    if (!resume && id === LEGACY_DEPLOY.account) resume = LEGACY_DEPLOY.state;
     return { resume, contractId: null };
   }, [accountId]);
 
