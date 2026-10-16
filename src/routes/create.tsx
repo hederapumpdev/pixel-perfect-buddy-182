@@ -171,8 +171,8 @@ function Create() {
             <Textarea
               value={f.description}
               onChange={set("description")}
-              maxLength={500}
-              rows={3}
+              maxLength={5000}
+              rows={8}
             />
           </Field>
           <Field label="Image (max 400 KB)">
