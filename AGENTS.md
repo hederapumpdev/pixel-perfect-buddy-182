@@ -16,3 +16,4 @@
 - HashPack deployment uses explicit file-create, file-append, and contract-create transactions with a public mirror-node account key; ContractCreateFlow calls an unimplemented WalletConnect signer method.
 - Deploy sends one wallet request per user tap, tags each tx memo `hpump:<fp>:<offset>:<len>`, and rebuilds progress from mirror-node history — mobile wallets miss requests sent while the browser is backgrounded, and nothing may be paid twice.
 - DexScreener adapter lives in `src/routes/api/public/dexscreener/*` (read-only, from synced tables); block numbers are Unix seconds because Hedera has no EVM blocks — DexScreener needs monotonic integers.
+- Next-gen launchpad (native HTS tokens, 8 decimals, auto SaucerSwap listing) is `contracts/HederaPumpHTS.sol`, compiled by `contracts/compile-hts.mjs` into `src/lib/contract-artifact-hts.json`; kept separate so the live contract artifact stays untouched until the switch.

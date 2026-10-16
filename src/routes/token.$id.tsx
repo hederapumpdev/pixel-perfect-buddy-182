@@ -52,6 +52,26 @@ async function tokenBalance(token: string, holder: string): Promise<bigint> {
 
 const SLIPPAGE_BPS = 300n;
 
+function AddrRow({ label, addr, href }: { label: string; addr: string; href: string }) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+      <span className="shrink-0 text-xs font-semibold text-muted-foreground">{label}</span>
+      <span className="min-w-0 flex-1 truncate font-mono text-xs">{addr}</span>
+      <button
+        onClick={() =>
+          navigator.clipboard.writeText(addr).then(() => toast.success(`${label} copied`))
+        }
+        className="shrink-0 rounded bg-secondary px-2 py-1 text-xs"
+      >
+        Copy
+      </button>
+      <a href={href} target="_blank" rel="noreferrer" className="shrink-0 text-xs text-accent">
+        HashScan
+      </a>
+    </div>
+  );
+}
+
 function TokenPage() {
   const { id } = Route.useParams();
   const sync = useChainSync(8000);
@@ -161,18 +181,12 @@ function TokenPage() {
             <h1 className="text-2xl font-bold">{t.name}</h1>
             <span className="font-mono text-muted-foreground">${t.symbol}</span>
           </div>
-          <p className="font-mono text-xs text-muted-foreground">
-            Creator {shortAddr(t.creator)} · {fmtAge(t.created_at)} old ·{" "}
-            <a
-              className="text-accent"
-              href={`${HASHSCAN_URL}/contract/${t.address}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {shortAddr(t.address)}
-            </a>
-          </p>
+          <p className="font-mono text-xs text-muted-foreground">{fmtAge(t.created_at)} old</p>
         </div>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        <AddrRow label="CA" addr={t.address} href={`${HASHSCAN_URL}/contract/${t.address}`} />
+        <AddrRow label="Creator" addr={t.creator} href={`${HASHSCAN_URL}/account/${t.creator}`} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
