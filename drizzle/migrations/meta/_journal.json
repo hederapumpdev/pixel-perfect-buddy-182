@@ -36,6 +36,13 @@
       "when": 1792175947024,
       "tag": "0004_bot_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792179444931,
+      "tag": "0005_token_texts",
+      "breakpoints": true
     }
   ]
 }

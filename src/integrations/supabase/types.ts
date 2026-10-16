@@ -101,6 +101,24 @@ export type Database = {
         }
         Relationships: []
       }
+      token_texts: {
+        Row: {
+          body: string
+          created_at: string
+          hash: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          hash: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          hash?: string
+        }
+        Relationships: []
+      }
       tokens: {
         Row: {
           address: string
