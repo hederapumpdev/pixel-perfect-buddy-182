@@ -130,7 +130,7 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
   } else if (ev.eventName === "Trade") {
     const token = String(a.token).toLowerCase();
     const vH = hbar(a.virtualHbar as bigint),
-      vT = tok(a.virtualTokens as bigint);
+      vT = toTok(a.virtualTokens as bigint);
     const id = `${log.transaction_hash}-${log.index}`;
     const { error } = await db.from("trades").insert({
       id,
@@ -139,7 +139,7 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
       trader: String(a.trader).toLowerCase(),
       is_buy: Boolean(a.isBuy),
       hbar_amount: hbar(a.hbarAmount as bigint),
-      token_amount: tok(a.tokenAmount as bigint),
+      token_amount: toTok(a.tokenAmount as bigint),
       fee: hbar(a.fee as bigint),
       price: vT ? vH / vT : 0,
       tx_hash: log.transaction_hash,
