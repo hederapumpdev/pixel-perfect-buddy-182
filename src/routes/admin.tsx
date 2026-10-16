@@ -245,26 +245,25 @@ function TopCoins() {
 function BotPanel() {
   const info = useServerFn(getBotInfo);
   const bot = useQuery({ queryKey: ["bot-info"], queryFn: () => info(), refetchInterval: 30_000 });
-  const buys = useQuery({
-    queryKey: ["bot-buys"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("bot_buys").select("*").order("created_at", { ascending: false }).limit(50);
-      if (error) throw error;
-      return data;
+  const botAdmin = useServerFn(getBotAdmin);
+  const adminData = useQuery({
+    queryKey: ["bot-admin"],
+    queryFn: () => {
+      let p = "";
+      try {
+        p = sessionStorage.getItem(PIN_KEY) ?? "";
+      } catch {
+        /* blocked */
+      }
+      return botAdmin({ data: { pin: p } });
     },
     refetchInterval: 30_000,
   });
+  const buys = { data: adminData.data?.buys };
   const names = new Map((useAll().data?.tokens ?? []).map((t) => [t.address, t.symbol]));
   const b = bot.data;
   const save = useServerFn(saveBotSettings);
-  const cfg = useQuery({
-    queryKey: ["bot-settings"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("bot_settings").select("*").eq("id", 1).maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-  });
+  const cfg = { data: adminData.data?.settings };
   const [enabled, setEnabled] = useState(true);
   const [usd, setUsd] = useState(String(BOT_BUY_USD));
   const [pin, setPin] = useState(() => {
