@@ -14,6 +14,8 @@ export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Launchpad setup — HederaPump" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "description", content: "Deploy and configure the HederaPump launchpad contract." },
       { property: "og:title", content: "Launchpad setup — HederaPump" },
       { property: "og:description", content: "Deploy the HederaPump contract." },

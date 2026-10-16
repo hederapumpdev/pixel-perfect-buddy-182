@@ -19,7 +19,8 @@ export async function deployWithHashPack(
   else if (key?._type === "ECDSA_SECP256K1" && key.key) publicKey = sdk.PublicKey.fromStringECDSA(key.key);
   else throw new Error("Deployment requires a single-key HashPack account. This account's key type isn't supported.");
 
-  const nodes = Object.values(signer.getNetwork()).slice(0, 1);
+  const nodes = Object.values(signer.getNetwork()).slice(0, 1)
+    .map((node) => typeof node === "string" ? sdk.AccountId.fromString(node) : node);
   if (!nodes.length) throw new Error("No Hedera network node is available. Reconnect HashPack.");
   async function submit(tx: Transaction): Promise<TransactionReceipt> {
     tx.setNodeAccountIds(nodes);

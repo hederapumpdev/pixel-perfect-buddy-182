@@ -17,6 +17,8 @@ export const Route = createFileRoute("/create")({
   head: () => ({
     meta: [
       { title: "Create a coin — HederaPump" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "description",
         content: "Launch your own meme coin on Hedera with a fair bonding curve.",

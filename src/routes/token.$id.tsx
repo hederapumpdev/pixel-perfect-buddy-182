@@ -26,6 +26,8 @@ export const Route = createFileRoute("/token/$id")({
   head: () => ({
     meta: [
       { title: "Coin — HederaPump" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "description",
         content: "Chart, trades and bonding-curve progress for a HederaPump coin.",
