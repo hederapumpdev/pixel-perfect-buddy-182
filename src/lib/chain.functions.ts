@@ -114,7 +114,7 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
         creator: String(a.creator).toLowerCase(),
         name: String(a.name).slice(0, 32),
         symbol: String(a.symbol).slice(0, 10),
-        description: s("description", 500),
+        description: await resolveDesc(meta, s("description", 5000)),
         image_url: img && /^[a-f0-9]{64}$/.test(img) ? img : null,
         website: s("website"),
         twitter: s("twitter"),
@@ -170,6 +170,27 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
       .eq("address", String(a.token).toLowerCase());
   }
 }
+
+async function resolveDesc(meta: Record<string, string>, inline: string | null) {
+  const h = meta["desc"];
+  if (typeof h !== "string" || !/^[a-f0-9]{64}$/.test(h)) return inline;
+  const { data } = await db.from("token_texts").select("body").eq("hash", h).maybeSingle();
+  return data?.body ?? inline;
+}
+
+/** Stores a long coin description (≤5000 chars); its SHA-256 goes on-chain so it can't be altered. */
+export const uploadText = createServerFn({ method: "POST" })
+  .inputValidator((d: { body: string }) => {
+    if (typeof d.body !== "string" || d.body.length > 5000) throw new Error("Description too long (max 5000)");
+    return d;
+  })
+  .handler(async ({ data }) => {
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(data.body));
+    const hash = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("token_texts").upsert({ hash, body: data.body }, { onConflict: "hash", ignoreDuplicates: true });
+    return { hash };
+  });
 
 const MAX_IMG = 400_000;
 

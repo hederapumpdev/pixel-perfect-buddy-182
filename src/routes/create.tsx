@@ -96,9 +96,16 @@ function Create() {
         setBusy("Uploading image…");
         image = (await upload({ data: { mime: file.type, base64: await fileToB64(file) } })).hash;
       }
+      const descText = f.description.trim();
+      let desc: string | undefined;
+      if (descText.length > 300) {
+        setBusy("Saving description…");
+        desc = (await uploadText({ data: { body: descText } })).hash;
+      }
       const meta = JSON.stringify({
         image,
-        description: f.description.trim() || undefined,
+        desc,
+        description: desc ? descText.slice(0, 300) : descText || undefined,
         website: f.website.trim() || undefined,
         twitter: f.twitter.trim() || undefined,
         telegram: f.telegram.trim() || undefined,
