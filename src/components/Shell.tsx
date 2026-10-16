@@ -92,7 +92,25 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
-      <footer className="mx-auto hidden max-w-7xl px-4 py-10 text-xs text-muted-foreground md:block">
+      <footer className="mx-auto max-w-7xl px-4 pb-24 pt-10 text-xs text-muted-foreground md:pb-10">
+        <div className="mb-4 flex gap-3">
+          <a
+            href="https://x.com/hederapumpdev"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:border-primary"
+          >
+            <span className="text-base leading-none">𝕏</span> @hederapumpdev
+          </a>
+          <a
+            href="https://t.me/hederapump"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:border-primary"
+          >
+            <Send className="h-4 w-4 text-primary" /> Telegram
+          </a>
+        </div>
         Meme coins are highly speculative. Nothing here is financial advice. © 2026 HederaPump
       </footer>
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-background/95 backdrop-blur md:hidden">
