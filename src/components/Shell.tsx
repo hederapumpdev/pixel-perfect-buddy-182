@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Home, Compass, PlusCircle, Wallet, BookOpen, LogOut, LifeBuoy } from "lucide-react";
+import { Home, Compass, PlusCircle, Wallet, BookOpen, LogOut, LifeBuoy, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/wallet";
 import { NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
