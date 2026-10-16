@@ -521,6 +521,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         connecting,
         connect,
         connectEmail,
+        connectMetaMask,
         mode,
         disconnect,
         execute,
