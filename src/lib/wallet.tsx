@@ -18,6 +18,7 @@ import {
   EVM_CHAIN_ID,
   EVM_RPC_URL,
   HASHSCAN_URL,
+  WALLET_NODE_IDS,
 } from "./hedera-config";
 
 type Connector = import("@hashgraph/hedera-wallet-connect").DAppConnector;
