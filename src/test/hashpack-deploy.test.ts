@@ -98,7 +98,8 @@ describe("HashPack contract deployment", () => {
     );
     expect(id).toBe("0.0.9999");
     expect(transactions.filter((tx) => tx instanceof sdk.FileCreateTransaction)).toHaveLength(1);
-    expect(new TextDecoder().decode(Uint8Array.from(uploadedBytes(transactions).slice(DEPLOY_CHUNK)))).toBe(BYTECODE.slice(DEPLOY_CHUNK));
+    // The failed attempt is dropped; the fresh upload re-sends the whole contract.
+    expect(new TextDecoder().decode(Uint8Array.from(uploadedBytes(transactions).slice(DEPLOY_CHUNK)))).toBe(BYTECODE);
   });
 
   it("rejects unsupported account keys before requesting a wallet signature", async () => {
