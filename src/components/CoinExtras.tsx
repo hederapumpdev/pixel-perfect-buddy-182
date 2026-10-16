@@ -24,7 +24,10 @@ export function Comments({ token, author }: { token: string; author: string | nu
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
-    if (!author) return toast.error("Connect your wallet to comment");
+    if (!author) {
+      toast.error("Connect your wallet to comment");
+      return;
+    }
     setBusy(true);
     try {
       await post({ data: { token, author, body } });
