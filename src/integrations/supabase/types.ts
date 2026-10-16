@@ -62,6 +62,33 @@ export type Database = {
         }
         Relationships: []
       }
+      support_requests: {
+        Row: {
+          contact: string
+          created_at: string
+          id: string
+          message: string
+          status: string
+          wallet: string | null
+        }
+        Insert: {
+          contact: string
+          created_at?: string
+          id?: string
+          message: string
+          status?: string
+          wallet?: string | null
+        }
+        Update: {
+          contact?: string
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          wallet?: string | null
+        }
+        Relationships: []
+      }
       sync_state: {
         Row: {
           contract: string

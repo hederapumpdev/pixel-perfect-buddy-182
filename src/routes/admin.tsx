@@ -21,6 +21,7 @@ import {
 import { toTinybars } from "@/lib/curve";
 import { fmtAge, fmtHbar } from "@/lib/queries";
 import artifact from "@/lib/contract-artifact-v3.json";
+import { listSupport, setSupportStatus } from "@/lib/support.functions";
 
 // SaucerSwap V1 mainnet (docs.saucerswap.finance/developers/contracts)
 const SAUCER_ROUTER_EVM = "0x00000000000000000000000000000000002e7a5d"; // 0.0.3045981
@@ -106,6 +107,7 @@ function Admin() {
     <Shell>
       <div className="mx-auto max-w-4xl space-y-10">
         <h1 className="text-3xl font-bold">Admin</h1>
+        <SupportInbox />
         <FeeOverview />
         <TopCoins />
         <BotPanel />
@@ -462,6 +464,50 @@ function Deploy() {
           )}
         </>
       )}
+    </section>
+  );
+}
+
+function SupportInbox() {
+  const list = useServerFn(listSupport);
+  const setStatus = useServerFn(setSupportStatus);
+  const pin = (() => {
+    try {
+      return sessionStorage.getItem(PIN_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  })();
+  const q = useQuery({ queryKey: ["support"], queryFn: () => list({ data: { pin } }), refetchInterval: 60_000 });
+  const open = (q.data ?? []).filter((r) => r.status === "open").length;
+  async function toggle(id: string, status: "open" | "done") {
+    try {
+      await setStatus({ data: { pin, id, status } });
+      q.refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Saving failed");
+    }
+  }
+  return (
+    <section>
+      <h2 className="text-xl font-semibold">Support requests {open > 0 && <span className="text-primary">({open} open)</span>}</h2>
+      {q.error && <p className="mt-2 text-sm text-destructive">Couldn't load requests — reopen the admin page with your PIN.</p>}
+      {q.data?.length === 0 && <p className="mt-2 text-sm text-muted-foreground">No requests yet.</p>}
+      <div className="mt-3 space-y-3">
+        {(q.data ?? []).map((r) => (
+          <div key={r.id} className={`rounded-lg border border-border p-3 text-sm ${r.status === "done" ? "opacity-60" : ""}`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="font-medium">{r.contact}</span>
+              <span className="text-xs text-muted-foreground">{fmtAge(r.created_at)}</span>
+            </div>
+            {r.wallet && <div className="mt-1 font-mono text-xs text-muted-foreground">{r.wallet}</div>}
+            <p className="mt-2 whitespace-pre-wrap">{r.message}</p>
+            <Button size="sm" variant="secondary" className="mt-2" onClick={() => toggle(r.id, r.status === "done" ? "open" : "done")}>
+              {r.status === "done" ? "Reopen" : "Mark as done"}
+            </Button>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

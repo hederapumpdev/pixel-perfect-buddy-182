@@ -15,7 +15,9 @@ import { Route as CreateRouteImport } from './routes/create'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as TokenIdRouteImport } from './routes/token.$id'
+import { Route as ApiPublicSupportChatRouteImport } from './routes/api/public/support-chat'
 import { Route as ApiPublicDexscreenerAssetRouteImport } from './routes/api/public/dexscreener/asset'
 import { Route as ApiPublicDexscreenerEventsRouteImport } from './routes/api/public/dexscreener/events'
 import { Route as ApiPublicDexscreenerLatestBlockRouteImport } from './routes/api/public/dexscreener/latest-block'
@@ -53,9 +55,19 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TokenIdRoute = TokenIdRouteImport.update({
   id: '/token/$id',
   path: '/token/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSupportChatRoute = ApiPublicSupportChatRouteImport.update({
+  id: '/api/public/support-chat',
+  path: '/api/public/support-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicDexscreenerAssetRoute =
@@ -100,7 +112,9 @@ export interface FileRoutesByFullPath {
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
   '/profile': typeof ProfileRoute
+  '/support': typeof SupportRoute
   '/token/$id': typeof TokenIdRoute
+  '/api/public/support-chat': typeof ApiPublicSupportChatRoute
   '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
   '/api/public/dexscreener/events': typeof ApiPublicDexscreenerEventsRoute
   '/api/public/dexscreener/latest-block': typeof ApiPublicDexscreenerLatestBlockRoute
@@ -115,7 +129,9 @@ export interface FileRoutesByTo {
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
   '/profile': typeof ProfileRoute
+  '/support': typeof SupportRoute
   '/token/$id': typeof TokenIdRoute
+  '/api/public/support-chat': typeof ApiPublicSupportChatRoute
   '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
   '/api/public/dexscreener/events': typeof ApiPublicDexscreenerEventsRoute
   '/api/public/dexscreener/latest-block': typeof ApiPublicDexscreenerLatestBlockRoute
@@ -131,7 +147,9 @@ export interface FileRoutesById {
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
   '/profile': typeof ProfileRoute
+  '/support': typeof SupportRoute
   '/token/$id': typeof TokenIdRoute
+  '/api/public/support-chat': typeof ApiPublicSupportChatRoute
   '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
   '/api/public/dexscreener/events': typeof ApiPublicDexscreenerEventsRoute
   '/api/public/dexscreener/latest-block': typeof ApiPublicDexscreenerLatestBlockRoute
@@ -148,7 +166,9 @@ export interface FileRouteTypes {
     | '/explore'
     | '/how-it-works'
     | '/profile'
+    | '/support'
     | '/token/$id'
+    | '/api/public/support-chat'
     | '/api/public/dexscreener/asset'
     | '/api/public/dexscreener/events'
     | '/api/public/dexscreener/latest-block'
@@ -163,7 +183,9 @@ export interface FileRouteTypes {
     | '/explore'
     | '/how-it-works'
     | '/profile'
+    | '/support'
     | '/token/$id'
+    | '/api/public/support-chat'
     | '/api/public/dexscreener/asset'
     | '/api/public/dexscreener/events'
     | '/api/public/dexscreener/latest-block'
@@ -178,7 +200,9 @@ export interface FileRouteTypes {
     | '/explore'
     | '/how-it-works'
     | '/profile'
+    | '/support'
     | '/token/$id'
+    | '/api/public/support-chat'
     | '/api/public/dexscreener/asset'
     | '/api/public/dexscreener/events'
     | '/api/public/dexscreener/latest-block'
@@ -194,7 +218,9 @@ export interface RootRouteChildren {
   ExploreRoute: typeof ExploreRoute
   HowItWorksRoute: typeof HowItWorksRoute
   ProfileRoute: typeof ProfileRoute
+  SupportRoute: typeof SupportRoute
   TokenIdRoute: typeof TokenIdRoute
+  ApiPublicSupportChatRoute: typeof ApiPublicSupportChatRoute
   ApiPublicDexscreenerAssetRoute: typeof ApiPublicDexscreenerAssetRoute
   ApiPublicDexscreenerEventsRoute: typeof ApiPublicDexscreenerEventsRoute
   ApiPublicDexscreenerLatestBlockRoute: typeof ApiPublicDexscreenerLatestBlockRoute
@@ -247,11 +273,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/token/$id': {
       id: '/token/$id'
       path: '/token/$id'
       fullPath: '/token/$id'
       preLoaderRoute: typeof TokenIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/support-chat': {
+      id: '/api/public/support-chat'
+      path: '/api/public/support-chat'
+      fullPath: '/api/public/support-chat'
+      preLoaderRoute: typeof ApiPublicSupportChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/dexscreener/asset': {
@@ -306,7 +346,9 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreRoute: ExploreRoute,
   HowItWorksRoute: HowItWorksRoute,
   ProfileRoute: ProfileRoute,
+  SupportRoute: SupportRoute,
   TokenIdRoute: TokenIdRoute,
+  ApiPublicSupportChatRoute: ApiPublicSupportChatRoute,
   ApiPublicDexscreenerAssetRoute: ApiPublicDexscreenerAssetRoute,
   ApiPublicDexscreenerEventsRoute: ApiPublicDexscreenerEventsRoute,
   ApiPublicDexscreenerLatestBlockRoute: ApiPublicDexscreenerLatestBlockRoute,
