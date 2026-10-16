@@ -1,7 +1,7 @@
 export const DAILY_X_HOURS = [10, 15, 20] as const;
-export const APP_URL = "https://pixel-perfect-buddy-182.lovable.app";
+export const APP_URL = "https://hederapump.dev";
 
-const topics = [
+export const topics = [
   "Meet HederaPump: a meme coin launchpad on Hedera. Create native Hedera tokens, trade on a bonding curve and build your community. At graduation, new coins automatically list on SaucerSwap.",
   "What do we do? HederaPump brings meme coin creation and bonding-curve trading to Hedera. Discover new launches, follow creators and track each coin's journey to graduation.",
   "Your idea. Your coin. Your community. Create a native Hedera token on HederaPump, add an image and description, and share your coin page. Crypto trading carries risk.",

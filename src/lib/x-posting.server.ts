@@ -1,8 +1,6 @@
 import { appTweet, dailyXSlot, localXTime } from "./x-content";
 import { sendXTweet, xAuthorization } from "./x-oauth.server";
-import introductionImage from "@/assets/x-introduction.jpg";
-import communityImage from "@/assets/x-community.jpg";
-import graduationImage from "@/assets/x-graduation.jpg";
+import { topicImages } from "./x-images";
 
 export async function runDailyX(origin: string, now = new Date()) {
   const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
@@ -32,7 +30,7 @@ export async function runDailyX(origin: string, now = new Date()) {
     let mediaId = savedMedia && new Date(savedMedia.expires_at) > now ? savedMedia.media_id : null;
     // One external transaction per scheduled invocation to keep callbacks short.
     if (!mediaId) {
-    const selectedImage = slot === "introduction" ? introductionImage : (count ?? 0) % 2 === 0 ? communityImage : graduationImage;
+    const selectedImage = topicImages[(count ?? 0) % topicImages.length] ?? topicImages[0];
     const image = await fetch(new URL(selectedImage, origin), { signal: AbortSignal.timeout(4_000) });
     if (!image.ok) throw new Error("Tweet image is unavailable");
     const mediaUrl = "https://api.x.com/2/media/upload";
