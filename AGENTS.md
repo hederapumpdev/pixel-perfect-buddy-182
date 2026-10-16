@@ -20,3 +20,5 @@
 - Pin `protobufjs` >=8.6.6 at the root: `@hiero-ledger/proto` (via hedera-wallet-connect) needs `Reader.tag()`; older 8.0.0 breaks wallet transactions with "e.tag is not a function".
 - Wallet transactions are frozen for the multi-node list `WALLET_NODE_IDS` in `hedera-config.ts`, never a single node — HashPack rejects unknown nodes and fails outright when its only node is busy.
 - Coins carry a `contract` column; every trade/quote/claim path must branch on it via `isV2`/`tokenUnit` in `src/lib/curve.ts` (v1: 18-dec ERC20 in-contract, v2: 8-dec HTS with associate/allowance steps) — never assume one contract or one decimal count.
+- v3 contract `contracts/HederaPumpV3.sol` (compile-v3.mjs → contract-artifact-v3.json) shares the HTS ABI, so v2+v3 are both encoded with `encodePumpV2` and grouped in `HTS_CONTRACTS`; new coins go to `LATEST_CONTRACT_ID` — avoids per-version branches everywhere.
+- Auto-buy bot (`src/lib/bot.server.ts`, key derived from BOT_SEED) runs one transaction step per scheduled call to `/api/public/jobs/autobuy`, tracked in `bot_buys` (token unique) — scheduled requests are short and a coin must never be bought twice.

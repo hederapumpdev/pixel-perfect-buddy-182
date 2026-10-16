@@ -18,7 +18,7 @@ const RESERVE_TINYBARS = 5n * 100_000_000n; // always keep 5 HBAR for gas
 const WEI = 10_000_000_000n; // 1 tinybar = 1e10 weibar on JSON-RPC
 
 export function botWallet() {
-  const seed = process.env.BOT_SEED;
+  const seed = process.env["BOT_SEED"];
   if (!seed) throw new Error("BOT_SEED missing");
   const provider = new ethers.JsonRpcProvider(EVM_RPC_URL, EVM_CHAIN_ID, { staticNetwork: true });
   return new ethers.Wallet(ethers.keccak256(ethers.toUtf8Bytes(seed)), provider);
