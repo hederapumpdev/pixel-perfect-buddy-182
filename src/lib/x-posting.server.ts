@@ -1,6 +1,8 @@
 import { appTweet, dailyXSlot, localXTime } from "./x-content";
 import { sendXTweet, xAuthorization } from "./x-oauth.server";
 import introductionImage from "@/assets/x-introduction.jpg";
+import communityImage from "@/assets/x-community.jpg";
+import graduationImage from "@/assets/x-graduation.jpg";
 
 export async function runDailyX(origin: string, now = new Date()) {
   const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
@@ -25,25 +27,33 @@ export async function runDailyX(origin: string, now = new Date()) {
     const { count, error: countError } = await db.from("x_daily_posts").select("slot", { count: "exact", head: true }).eq("status", "sent");
     if (countError) throw new Error("Could not read X sequence");
     const text = appTweet(count ?? 0, localXTime(now).day);
-    // Upload before claiming a post: uploading an image cannot create a public duplicate.
-    const image = await fetch(new URL(introductionImage, origin), { signal: AbortSignal.timeout(10_000) });
+    const { data: savedMedia, error: mediaError } = await db.from("x_daily_media").select("media_id,expires_at").eq("slot", slot).maybeSingle();
+    if (mediaError) throw new Error("Could not read image progress");
+    let mediaId = savedMedia && new Date(savedMedia.expires_at) > now ? savedMedia.media_id : null;
+    // One external transaction per scheduled invocation to keep callbacks short.
+    if (!mediaId) {
+    const selectedImage = slot === "introduction" ? introductionImage : (count ?? 0) % 2 === 0 ? communityImage : graduationImage;
+    const image = await fetch(new URL(selectedImage, origin), { signal: AbortSignal.timeout(4_000) });
     if (!image.ok) throw new Error("Tweet image is unavailable");
     const mediaUrl = "https://api.x.com/2/media/upload";
     const form = new FormData();
     form.set("media", await image.blob(), "hederapump.jpg");
-    form.set("media_category", "tweet_image");
-    const upload = await fetch(mediaUrl, { method: "POST", headers: { Authorization: xAuthorization("POST", mediaUrl) }, body: form, signal: AbortSignal.timeout(15_000) });
+    const upload = await fetch(mediaUrl, { method: "POST", headers: { Authorization: xAuthorization("POST", mediaUrl) }, body: form, signal: AbortSignal.timeout(4_000) });
     if (!upload.ok) {
       const reason = `X image upload failed (HTTP ${upload.status}). Check media upload permission and X API billing.`;
       await db.from("x_posting_state").update({ pause_reason: reason }).eq("id", 1);
       return { step: "paused", error: reason };
     }
-    const media = await upload.json() as { data?: { id?: string } };
+    const media = await upload.json() as { data?: { id?: string; expires_after_secs?: number } };
     if (!media.data?.id) throw new Error("X did not confirm the image upload");
+    const { error: savedError } = await db.from("x_daily_media").upsert({ slot, media_id: media.data.id, expires_at: new Date(now.getTime() + (media.data.expires_after_secs ?? 3600) * 1000).toISOString() });
+    if (savedError) throw new Error("Could not save image progress");
+    return { step: "image uploaded" };
+    }
     const { error: claimError } = await db.from("x_daily_posts").insert({ slot, text });
     if (claimError) throw new Error("Could not reserve X post");
     try {
-      const sent = await sendXTweet(text, media.data.id);
+      const sent = await sendXTweet(text, mediaId);
       if (!sent.ok) {
         await db.from("x_daily_posts").update({ status: "failed", error: sent.error }).eq("slot", slot);
         await db.from("x_posting_state").update({ pause_reason: sent.error }).eq("id", 1);
