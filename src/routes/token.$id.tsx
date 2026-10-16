@@ -166,19 +166,51 @@ function TokenPage() {
     try {
       if (side === "buy") {
         const value = toTinybars(amt);
-        const min = ready
-          ? (quoteBuy(state, value).tokensOut * (10_000n - SLIPPAGE_BPS)) / 10_000n
-          : 0n;
-        await w.execute({
-          calldata: encodePump("buy", [t.address, min]),
-          gas: GAS.buy,
-          payableTinybars: value,
-        });
+        const q = ready ? quoteBuy(state, value, t.contract) : null;
+        const min = q ? (q.tokensOut * (10_000n - SLIPPAGE_BPS)) / 10_000n : 0n;
+        if (v2) {
+          const tokenId = evmToId(t.address);
+          if (w.accountId.includes(".") && !(await isAssociated(tokenId, w.accountId))) {
+            toast("One-time step: adding the coin to your wallet…");
+            await w.associateToken(tokenId);
+          }
+          // The buy that sells the last curve tokens also lists on SaucerSwap,
+          // which needs much more gas.
+          const final = !!q && q.tokensOut >= CURVE_SUPPLY_V2 - state.tokensSold;
+          await w.execute({
+            calldata: encodePumpV2("buy", [t.address, min]),
+            gas: final ? GAS_V2.buyFinal : GAS_V2.buy,
+            payableTinybars: value,
+            contractId: PUMP_CONTRACT_V2_ID!,
+          });
+        } else {
+          await w.execute({
+            calldata: encodePump("buy", [t.address, min]),
+            gas: GAS.buy,
+            payableTinybars: value,
+          });
+        }
       } else {
-        const units = toUnits(amt);
+        const units = toUnits(amt, t.contract);
         if (units > bal) throw new Error("You don't hold that many");
         const min = (quoteSell(state, units).hbarOut * (10_000n - SLIPPAGE_BPS)) / 10_000n;
-        await w.execute({ calldata: encodePump("sell", [t.address, units, min]), gas: GAS.sell });
+        if (v2) {
+          const tokenId = evmToId(t.address);
+          if (
+            w.accountId.includes(".") &&
+            (await allowance(tokenId, w.accountId, PUMP_CONTRACT_V2_ID!)) < units
+          ) {
+            toast("One-time step: allowing the sale of this coin…");
+            await w.approveToken(tokenId, PUMP_CONTRACT_V2_ID!, CURVE_SUPPLY_V2);
+          }
+          await w.execute({
+            calldata: encodePumpV2("sell", [t.address, units, min]),
+            gas: GAS_V2.sell,
+            contractId: PUMP_CONTRACT_V2_ID!,
+          });
+        } else {
+          await w.execute({ calldata: encodePump("sell", [t.address, units, min]), gas: GAS.sell });
+        }
       }
       toast.success(`${side === "buy" ? "Bought" : "Sold"} — confirmed on Hedera`);
       setAmt("");
