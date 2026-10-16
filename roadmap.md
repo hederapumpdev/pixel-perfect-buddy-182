@@ -12,3 +12,4 @@
 - [ ] Daily X tweets link to hederapump.dev instead of the lovable.app URL
 - [ ] One branded image per tweet topic (9 images, text and image matched)
 - [ ] Delete the first X tweet and post a fresh one on hederapump.dev
+- [ ] 40 extra tweet images, each matched to its own tweet text (49 topics total)
