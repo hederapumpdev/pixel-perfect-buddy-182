@@ -276,11 +276,21 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       tx.setNodeAccountIds([sdk.AccountId.fromString("0.0.3")] as never);
       tx.setTransactionId(sdk.TransactionId.generate(s.getAccountId()));
       await tx.freezeWith(client);
-      await tx.signWithSigner(s as never);
+      // One wallet request (sign + submit). The wallet's receipt query breaks
+      // ("Query.fromBytes() not implemented"), so read the result from the mirror node.
       const res = await tx.executeWithSigner(s as never);
-      const receipt = await res.getReceiptWithSigner(s as never);
-      if (receipt.status.toString() !== "SUCCESS")
-        throw new Error(`Transaction failed: ${receipt.status}`);
+      const [acct, ts] = res.transactionId.toString().split("@");
+      const mirrorId = `${acct}-${(ts ?? "").replace(".", "-")}`;
+      let result: string | null = null;
+      for (let i = 0; i < 40 && !result; i++) {
+        await new Promise((r) => setTimeout(r, 1500));
+        const j = await fetch(`${MIRROR_URL}/api/v1/transactions/${mirrorId}`)
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null);
+        result = j?.transactions?.[0]?.result ?? null;
+      }
+      if (!result) throw new Error("Sent, but no confirmation yet. Check your wallet history.");
+      if (result !== "SUCCESS") throw new Error(`Transaction failed: ${result}`);
       setTick((t) => t + 1);
       const hash =
         "0x" + [...res.transactionHash].map((b) => b.toString(16).padStart(2, "0")).join("");
