@@ -11,3 +11,4 @@
 - [x] Admin page only behind PIN
 - [ ] Daily X tweets link to hederapump.dev instead of the lovable.app URL
 - [ ] One branded image per tweet topic (9 images, text and image matched)
+- [ ] Delete the first X tweet and post a fresh one on hederapump.dev
