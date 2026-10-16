@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { appTweet, dailyXSlot, DAILY_X_HOURS, localXTime } from "@/lib/x-content";
+import { appTweet, dailyXSlot, DAILY_X_HOURS, localXTime, topics } from "@/lib/x-content";
+import { topicImages } from "@/lib/x-images";
 
 describe("daily app posting", () => {
   it("begins with an introduction outside normal posting hours", () => {
