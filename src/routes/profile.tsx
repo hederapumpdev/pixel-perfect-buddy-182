@@ -152,6 +152,7 @@ function Profile() {
           {w.accountId}
         </a>
       </p>
+      <ProfileEditor wallet={(w.evmAddress ?? longZero(w.accountId!)).toLowerCase()} />
 
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         <Stat label="Coins created" value={String(coins.data?.length ?? 0)} />

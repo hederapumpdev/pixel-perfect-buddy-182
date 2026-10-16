@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { listComments, postComment } from "@/lib/comments.functions";
 import { MIRROR_URL } from "@/lib/hedera-config";
 import { fmtAge, shortAddr } from "@/lib/queries";
+import { Avatar, useProfiles } from "@/components/ProfileEditor";
 
 type Trade = { trader: string; is_buy: boolean; token_amount: number | string };
 
@@ -19,6 +20,7 @@ export function Comments({ token, author }: { token: string; author: string | nu
     queryFn: () => list({ data: { token } }),
     refetchInterval: 15_000,
   });
+  const profs = useProfiles(data.map((c) => c.author));
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -60,11 +62,17 @@ export function Comments({ token, author }: { token: string; author: string | nu
       </form>
       <div className="divide-y divide-border">
         {data.map((c) => (
-          <div key={c.id} className="px-4 py-3 text-sm">
-            <p className="font-mono text-xs text-muted-foreground">
-              {shortAddr(c.author)} · {fmtAge(c.created_at)} ago
-            </p>
-            <p className="mt-1 whitespace-pre-wrap break-words">{c.body}</p>
+          <div key={c.id} className="flex gap-3 px-4 py-3 text-sm">
+            <Avatar hash={profs[c.author.toLowerCase()]?.avatar} size={32} />
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">
+                <span className="font-semibold text-foreground">
+                  {profs[c.author.toLowerCase()]?.name ?? shortAddr(c.author)}
+                </span>{" "}
+                · {fmtAge(c.created_at)} ago
+              </p>
+              <p className="mt-1 whitespace-pre-wrap break-words">{c.body}</p>
+            </div>
           </div>
         ))}
         {!data.length && (
