@@ -123,21 +123,34 @@ export async function deployStep(
   // client rejects (e.g. 0.0.17). Freeze against the SDK's full mainnet node
   // list instead; signing still happens in the wallet.
   const client = sdk.Client.forMainnet();
-  const nodes = WALLET_NODE_IDS.slice(0, 5).map((n) => sdk.AccountId.fromString(n)) as never[];
+  // Same full node list as buy/sell: if one node is busy or unknown to HashPack, it tries the next.
+  const nodes = WALLET_NODE_IDS.map((n) => sdk.AccountId.fromString(n)) as never[];
 
   /** Sends one transaction; trusts whichever answers first: the wallet's receipt or Hedera's public record. */
   async function submit(tx: Transaction, memo: string): Promise<string | null> {
     tx.setNodeAccountIds(nodes).setTransactionMemo(memo);
     tx.setTransactionId(sdk.TransactionId.generate(signer.getAccountId()));
     await tx.freezeWith(client);
-    await tx.signWithSigner(signer);
+    // No separate signWithSigner(): that was a SECOND wallet request per step, which
+    // mobile HashPack misses after the first approval. executeWithSigner signs + sends in one.
     const txId = tx.transactionId?.toString() ?? "";
     const mirrorId = txId.replace("@", "-").replace(/\.(\d+)$/, "-$1");
     const stop = { done: false };
     const timeout = opts.confirmTimeoutMs ?? 180_000;
 
     const viaWallet = (async () => {
-      const res = await tx.executeWithSigner(signer); // a rejection here is the user's answer
+      let res;
+      try {
+        res = await tx.executeWithSigner(signer);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        // HashPack often sends the transaction but then fails reading the reply
+        // (getByKey bug): let Hedera's public record decide.
+        if (/getByKey|fromBytes/i.test(msg)) return new Promise<never>(() => {});
+        if (/unhealthy|txError/i.test(msg))
+          throw new Error("HashPack couldn't send this to Hedera. Nothing was charged — tap the button again.");
+        throw e; // e.g. the user rejected it
+      }
       try {
         const r = await res.getReceiptWithSigner(signer);
         return { status: r.status.toString(), entity: (r.contractId ?? r.fileId)?.toString() ?? null };
