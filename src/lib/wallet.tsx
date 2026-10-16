@@ -103,7 +103,7 @@ const hexToBytes = (h: string) =>
 
 // Remembers an interrupted contract upload so the next attempt continues where it
 // stopped instead of paying for the same bytes again.
-const DEPLOY_STATE_KEY = "hederaPump.deploy.v1";
+const DEPLOY_STATE_KEY = "hederaPump.deploy.v2";
 const fingerprint = (bc: string) => `${bc.length}:${bc.slice(0, 16)}:${bc.slice(-16)}`;
 
 async function loadLibs() {
