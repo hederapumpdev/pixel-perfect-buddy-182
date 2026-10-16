@@ -2,14 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { decodeFunctionResult, type Hex } from "viem";
+import type { Hex } from "viem";
 import { Shell } from "@/components/Shell";
 import { TokenCard } from "@/components/TokenCard";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
 import { encodePump } from "@/lib/curve";
-import artifact from "@/lib/contract-artifact.json";
 import { GAS, HASHSCAN_URL, MIRROR_URL, NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
 import { fmtAge, fmtHbar } from "@/lib/queries";
 
@@ -30,7 +29,7 @@ export const Route = createFileRoute("/profile")({
 const longZero = (id: string) =>
   "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
-const contractEvm = "0x" + BigInt((PUMP_CONTRACT_ID ?? "0.0.0").split(".")[2]).toString(16).padStart(40, "0");
+const contractEvm = "0x" + BigInt((PUMP_CONTRACT_ID ?? "0.0.0").split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
 async function readFees(addr: string): Promise<bigint> {
   const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, {
@@ -40,11 +39,7 @@ async function readFees(addr: string): Promise<bigint> {
   });
   const j = await r.json();
   if (!j.result || j.result === "0x") return 0n;
-  return decodeFunctionResult({
-    abi: artifact.pumpAbi as never,
-    functionName: "creatorFees",
-    data: j.result as Hex,
-  }) as unknown as bigint;
+  return BigInt(j.result as Hex);
 }
 
 function Profile() {
