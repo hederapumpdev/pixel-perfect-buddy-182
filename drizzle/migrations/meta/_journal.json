@@ -50,6 +50,13 @@
       "when": 1792182784469,
       "tag": "0006_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792183702059,
+      "tag": "0007_coin_comments",
+      "breakpoints": true
     }
   ]
 }

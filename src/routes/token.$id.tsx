@@ -1,4 +1,6 @@
 import { ShareButton } from "@/components/ShareCard";
+import { Comments, Holders } from "@/components/CoinExtras";
+import { FollowButton } from "@/components/PriceAlerts";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -451,7 +453,17 @@ function TokenPage() {
               {!trades.length && (
                 <p className="px-4 py-6 text-center text-muted-foreground">No trades yet.</p>
               )}
-            </div>
+          </div>
+          <FollowButton token={t.address} symbol={t.symbol} />
+          <Holders
+            tokenId={v2 ? `0.0.${BigInt(t.address)}` : null}
+            decimals={v2 ? 8 : 18}
+            creator={t.creator}
+            contract={t.contract}
+            trades={trades}
+            supply={1_000_000_000}
+          />
+          <Comments token={t.address} author={w.evmAddress ?? w.accountId ?? null} />
           </div>
         </div>
       </div>
