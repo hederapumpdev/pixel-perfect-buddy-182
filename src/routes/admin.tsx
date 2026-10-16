@@ -57,12 +57,12 @@ function Admin() {
     e.preventDefault();
     setBusy(true);
     try {
-      const r = await check({ data: { pin } });
+      const r = await check({ data: { pin: pin.trim() } });
       if (!r.ok) {
         toast.error("Wrong PIN");
         return;
       }
-      sessionStorage.setItem(PIN_KEY, pin);
+      sessionStorage.setItem(PIN_KEY, pin.trim());
       setOk(true);
     } finally {
       setBusy(false);
@@ -74,7 +74,7 @@ function Admin() {
         <form onSubmit={unlock} className="mx-auto max-w-sm space-y-3 py-16 text-center">
           <h1 className="text-3xl font-bold">Admin</h1>
           <p className="text-sm text-muted-foreground">Enter the admin PIN.</p>
-          <Input type="password" value={pin} onChange={(e) => setPin(e.target.value)} autoFocus />
+          <Input type="password" value={pin} onChange={(e) => setPin(e.target.value)} autoFocus autoCapitalize="off" autoCorrect="off" spellCheck={false} />
           <Button className="w-full" disabled={busy || !pin}>
             {busy ? "Checking…" : "Open"}
           </Button>
@@ -255,7 +255,7 @@ function BotPanel() {
   async function onSave() {
     setSaving(true);
     try {
-      await save({ data: { pin, enabled, usd: Number(usd) } });
+      await save({ data: { pin: pin.trim(), enabled, usd: Number(usd) } });
       toast.success("Bot settings saved");
       cfg.refetch();
     } catch (e) {
@@ -284,7 +284,7 @@ function BotPanel() {
         </label>
         <label className="block space-y-1.5">
           <span className="text-xs text-muted-foreground">Admin PIN</span>
-          <Input type="password" value={pin} onChange={(e) => setPin(e.target.value)} />
+          <Input type="password" value={pin} onChange={(e) => setPin(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} />
         </label>
         <Button className="w-full" disabled={saving || !pin} onClick={onSave}>
           {saving ? "Saving…" : "Save bot settings"}

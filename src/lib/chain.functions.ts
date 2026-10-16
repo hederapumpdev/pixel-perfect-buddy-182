@@ -212,7 +212,7 @@ export const saveBotSettings = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const pin = process.env["ADMIN_PIN"];
-    if (!pin || data.pin !== pin) throw new Error("Wrong PIN");
+    if (!pin || data.pin.trim() !== pin.trim()) throw new Error("Wrong PIN");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("bot_settings")
@@ -230,5 +230,5 @@ export const checkAdminPin = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const pin = process.env["ADMIN_PIN"];
-    return { ok: !!pin && data.pin === pin };
+    return { ok: !!pin && data.pin.trim() === pin.trim() };
   });
