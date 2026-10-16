@@ -4,6 +4,15 @@ export const NETWORK: "mainnet" | "testnet" = "mainnet";
 // Filled in after the launchpad contract is deployed from /admin.
 export const PUMP_CONTRACT_ID: string | null = "0.0.10923845";
 
+// Next-gen contract (native HTS tokens, 8 decimals, auto SaucerSwap listing).
+// Null until deployed on mainnet; coins stay on the contract that made them.
+export const PUMP_CONTRACT_V2_ID: string | null = null;
+
+/** Every launchpad contract the app reads and trades on, oldest first. */
+export const PUMP_CONTRACTS: string[] = [PUMP_CONTRACT_ID, PUMP_CONTRACT_V2_ID].filter(
+  (c): c is string => !!c,
+);
+
 // WalletConnect project ID (public value from cloud.reown.com).
 export const WALLETCONNECT_PROJECT_ID: string = "897d91d359830625cc68ba73089b2cce";
 
@@ -35,7 +44,20 @@ export const TOKEN_UNIT = 10n ** 18n;
 export const CURVE_SUPPLY = 800_000_000n * TOKEN_UNIT;
 export const FEE_BPS = 100n;
 
+// V2 coins are native HTS tokens with 8 decimals.
+export const TOKEN_UNIT_V2 = 10n ** 8n;
+export const CURVE_SUPPLY_V2 = 800_000_000n * TOKEN_UNIT_V2;
+
 export const GAS = { create: 1_500_000, buy: 300_000, sell: 300_000, claim: 100_000 };
+// V2: creating a coin also creates the HTS token; the buy that reaches 800M
+// sold also lists on SaucerSwap (~7.6M gas measured on testnet).
+export const GAS_V2 = {
+  create: 2_500_000,
+  buy: 1_500_000,
+  sell: 1_500_000,
+  buyFinal: 9_000_000,
+  claim: 200_000,
+};
 
 // Wallet that receives platform fees (set as fee recipient at deploy).
 export const FEE_WALLET_ID = "0.0.10923241";

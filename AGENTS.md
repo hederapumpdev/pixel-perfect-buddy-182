@@ -19,3 +19,4 @@
 - Next-gen launchpad (native HTS tokens, 8 decimals, auto SaucerSwap listing) is `contracts/HederaPumpHTS.sol`, compiled by `contracts/compile-hts.mjs` into `src/lib/contract-artifact-hts.json`; kept separate so the live contract artifact stays untouched until the switch.
 - Pin `protobufjs` >=8.6.6 at the root: `@hiero-ledger/proto` (via hedera-wallet-connect) needs `Reader.tag()`; older 8.0.0 breaks wallet transactions with "e.tag is not a function".
 - Wallet transactions are frozen for the multi-node list `WALLET_NODE_IDS` in `hedera-config.ts`, never a single node — HashPack rejects unknown nodes and fails outright when its only node is busy.
+- Coins carry a `contract` column; every trade/quote/claim path must branch on it via `isV2`/`tokenUnit` in `src/lib/curve.ts` (v1: 18-dec ERC20 in-contract, v2: 8-dec HTS with associate/allowance steps) — never assume one contract or one decimal count.

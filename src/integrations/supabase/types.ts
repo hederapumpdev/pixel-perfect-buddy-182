@@ -56,6 +56,7 @@ export type Database = {
       tokens: {
         Row: {
           address: string
+          contract: string
           created_at: string
           created_tx: string | null
           creator: string
@@ -77,6 +78,7 @@ export type Database = {
         }
         Insert: {
           address: string
+          contract?: string
           created_at: string
           created_tx?: string | null
           creator: string
@@ -98,6 +100,7 @@ export type Database = {
         }
         Update: {
           address?: string
+          contract?: string
           created_at?: string
           created_tx?: string | null
           creator?: string

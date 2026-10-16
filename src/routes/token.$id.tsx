@@ -18,9 +18,28 @@ import {
   progressPct,
   shortAddr,
 } from "@/lib/queries";
-import { quoteBuy, quoteSell, toTinybars, toUnits, fromTinybars, fromUnits } from "@/lib/curve";
-import { encodePump, encodeToken } from "@/lib/curve";
-import { GAS, HASHSCAN_URL, MIRROR_URL, TOKEN_UNIT } from "@/lib/hedera-config";
+import {
+  quoteBuy,
+  quoteSell,
+  toTinybars,
+  toUnits,
+  fromTinybars,
+  fromUnits,
+  isV2,
+  tokenUnit,
+} from "@/lib/curve";
+import { encodePump, encodePumpV2, encodeToken } from "@/lib/curve";
+import {
+  CURVE_SUPPLY_V2,
+  GAS,
+  GAS_V2,
+  HASHSCAN_URL,
+  MIRROR_URL,
+  PUMP_CONTRACT_V2_ID,
+} from "@/lib/hedera-config";
+
+/** Long-zero EVM address of a 0.0.N token/contract -> its "0.0.N" ID. */
+const evmToId = (addr: string) => `0.0.${BigInt(addr).toString()}`;
 
 export const Route = createFileRoute("/token/$id")({
   head: () => ({
@@ -106,10 +125,12 @@ function TokenPage() {
       </Shell>
     );
 
+  const v2 = isV2(t.contract);
+  const unit = tokenUnit(t.contract);
   const state = {
     virtualHbar: BigInt(Math.round(Number(t.virtual_hbar) * 1e8)),
-    virtualTokens: BigInt(Math.round(Number(t.virtual_tokens))) * TOKEN_UNIT,
-    tokensSold: BigInt(Math.round(Number(t.tokens_sold))) * TOKEN_UNIT,
+    virtualTokens: BigInt(Math.round(Number(t.virtual_tokens))) * unit,
+    tokensSold: BigInt(Math.round(Number(t.tokens_sold))) * unit,
   };
   const ready = state.virtualHbar > 0n;
   let est = "—";
@@ -117,10 +138,25 @@ function TokenPage() {
     if (ready && Number(amt) > 0)
       est =
         side === "buy"
-          ? `${fromUnits(quoteBuy(state, toTinybars(amt)).tokensOut).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${t.symbol}`
-          : `${fromTinybars(quoteSell(state, toUnits(amt)).hbarOut).toFixed(4)} ℏ`;
+          ? `${fromUnits(quoteBuy(state, toTinybars(amt), t.contract).tokensOut, t.contract).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${t.symbol}`
+          : `${fromTinybars(quoteSell(state, toUnits(amt, t.contract)).hbarOut).toFixed(4)} ℏ`;
   } catch {
     /* bad input */
+  }
+
+  // V2 coins are HTS tokens: the wallet must hold the token (associate) before
+  // the first buy and let the contract spend it (allowance) before the first sell.
+  async function isAssociated(tokenId: string, accountId: string) {
+    const j = await fetch(
+      `${MIRROR_URL}/api/v1/accounts/${accountId}/tokens?token.id=${tokenId}&limit=1`,
+    ).then((r) => (r.ok ? r.json() : null));
+    return (j?.tokens?.length ?? 0) > 0;
+  }
+  async function allowance(tokenId: string, accountId: string, spenderId: string) {
+    const j = await fetch(
+      `${MIRROR_URL}/api/v1/accounts/${accountId}/allowances/tokens?token.id=${tokenId}&spender.id=${spenderId}&limit=1`,
+    ).then((r) => (r.ok ? r.json() : null));
+    return BigInt(j?.allowances?.[0]?.amount ?? 0);
   }
 
   async function trade() {
@@ -130,19 +166,51 @@ function TokenPage() {
     try {
       if (side === "buy") {
         const value = toTinybars(amt);
-        const min = ready
-          ? (quoteBuy(state, value).tokensOut * (10_000n - SLIPPAGE_BPS)) / 10_000n
-          : 0n;
-        await w.execute({
-          calldata: encodePump("buy", [t.address, min]),
-          gas: GAS.buy,
-          payableTinybars: value,
-        });
+        const q = ready ? quoteBuy(state, value, t.contract) : null;
+        const min = q ? (q.tokensOut * (10_000n - SLIPPAGE_BPS)) / 10_000n : 0n;
+        if (v2) {
+          const tokenId = evmToId(t.address);
+          if (w.accountId.includes(".") && !(await isAssociated(tokenId, w.accountId))) {
+            toast("One-time step: adding the coin to your wallet…");
+            await w.associateToken(tokenId);
+          }
+          // The buy that sells the last curve tokens also lists on SaucerSwap,
+          // which needs much more gas.
+          const final = !!q && q.tokensOut >= CURVE_SUPPLY_V2 - state.tokensSold;
+          await w.execute({
+            calldata: encodePumpV2("buy", [t.address, min]),
+            gas: final ? GAS_V2.buyFinal : GAS_V2.buy,
+            payableTinybars: value,
+            contractId: PUMP_CONTRACT_V2_ID!,
+          });
+        } else {
+          await w.execute({
+            calldata: encodePump("buy", [t.address, min]),
+            gas: GAS.buy,
+            payableTinybars: value,
+          });
+        }
       } else {
-        const units = toUnits(amt);
+        const units = toUnits(amt, t.contract);
         if (units > bal) throw new Error("You don't hold that many");
         const min = (quoteSell(state, units).hbarOut * (10_000n - SLIPPAGE_BPS)) / 10_000n;
-        await w.execute({ calldata: encodePump("sell", [t.address, units, min]), gas: GAS.sell });
+        if (v2) {
+          const tokenId = evmToId(t.address);
+          if (
+            w.accountId.includes(".") &&
+            (await allowance(tokenId, w.accountId, PUMP_CONTRACT_V2_ID!)) < units
+          ) {
+            toast("One-time step: allowing the sale of this coin…");
+            await w.approveToken(tokenId, PUMP_CONTRACT_V2_ID!, CURVE_SUPPLY_V2);
+          }
+          await w.execute({
+            calldata: encodePumpV2("sell", [t.address, units, min]),
+            gas: GAS_V2.sell,
+            contractId: PUMP_CONTRACT_V2_ID!,
+          });
+        } else {
+          await w.execute({ calldata: encodePump("sell", [t.address, units, min]), gas: GAS.sell });
+        }
       }
       toast.success(`${side === "buy" ? "Bought" : "Sold"} — confirmed on Hedera`);
       setAmt("");
@@ -218,7 +286,7 @@ function TokenPage() {
                     <span className="font-mono">
                       {side === "buy"
                         ? `${w.balanceHbar?.toFixed(2) ?? "—"} ℏ`
-                        : `${fromUnits(bal).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${t.symbol}`}
+                        : `${fromUnits(bal, t.contract).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${t.symbol}`}
                     </span>
                   )}
                 </div>
@@ -243,7 +311,7 @@ function TokenPage() {
                     : [25n, 50n, 100n].map((pc) => (
                         <button
                           key={String(pc)}
-                          onClick={() => setAmt(String(fromUnits((bal * pc) / 100n)))}
+                          onClick={() => setAmt(String(fromUnits((bal * pc) / 100n, t.contract)))}
                           className="flex-1 rounded bg-secondary py-1 font-mono text-xs"
                         >
                           {String(pc)}%
@@ -300,8 +368,8 @@ function TokenPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">On SaucerSwap</span>
-                <span className={"text-muted-foreground"}>
-                  {t.graduated ? "Listing pending" : "Not yet"}
+                <span className={t.graduated && v2 ? "text-up" : "text-muted-foreground"}>
+                  {t.graduated ? (v2 ? "Yes" : "Listing pending") : "Not yet"}
                 </span>
               </div>
             </div>

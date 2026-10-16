@@ -15,6 +15,13 @@
       "when": 1792101940165,
       "tag": "0001_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792171013081,
+      "tag": "0002_tokens_contract_column",
+      "breakpoints": true
     }
   ]
 }

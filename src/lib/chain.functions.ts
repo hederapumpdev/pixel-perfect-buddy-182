@@ -1,7 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { decodeEventLog, type Hex } from "viem";
 import artifact from "./contract-artifact.json";
-import { MIRROR_URL, NETWORK, PUMP_CONTRACT_ID } from "./hedera-config";
+import {
+  MIRROR_URL,
+  NETWORK,
+  PUMP_CONTRACTS,
+  PUMP_CONTRACT_ID,
+  PUMP_CONTRACT_V2_ID,
+} from "./hedera-config";
 
 const abi = artifact.pumpAbi as never;
 
@@ -27,45 +33,46 @@ export const syncChain = createServerFn({ method: "POST" }).handler(async () => 
 });
 
 async function runSync(): Promise<{ synced: number; configured: boolean; error?: string }> {
-  if (!PUMP_CONTRACT_ID) return { synced: 0, configured: false };
+  if (!PUMP_CONTRACTS.length) return { synced: 0, configured: false };
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: st } = await supabaseAdmin
-    .from("sync_state")
-    .select("*")
-    .eq("contract", PUMP_CONTRACT_ID)
-    .maybeSingle();
-  if (st && Date.now() - new Date(st.synced_at).getTime() < 4000)
-    return { synced: 0, configured: true };
-  let last = st?.last_timestamp ?? "0";
-  await supabaseAdmin
-    .from("sync_state")
-    .upsert({
-      contract: PUMP_CONTRACT_ID,
-      last_timestamp: last,
-      synced_at: new Date().toISOString(),
-    });
-
   let count = 0;
-  for (let page = 0; page < 5; page++) {
-    const res = await fetch(
-      `${MIRROR_URL}/api/v1/contracts/${PUMP_CONTRACT_ID}/results/logs?order=asc&limit=100&timestamp=gt:${last}`,
-    );
-    if (!res.ok) {
-      console.error("mirror error", res.status);
-      break;
-    }
-    const { logs } = (await res.json()) as { logs: MirrorLog[] };
-    if (!logs?.length) break;
-    for (const log of logs) {
-      await handleLog(supabaseAdmin, log);
-      last = log.timestamp;
-      count++;
-    }
+  for (const contract of PUMP_CONTRACTS) {
+    const { data: st } = await supabaseAdmin
+      .from("sync_state")
+      .select("*")
+      .eq("contract", contract)
+      .maybeSingle();
+    if (st && Date.now() - new Date(st.synced_at).getTime() < 4000) continue;
+    let last = st?.last_timestamp ?? "0";
     await supabaseAdmin
       .from("sync_state")
-      .update({ last_timestamp: last })
-      .eq("contract", PUMP_CONTRACT_ID);
-    if (logs.length < 100) break;
+      .upsert({
+        contract,
+        last_timestamp: last,
+        synced_at: new Date().toISOString(),
+      });
+
+    for (let page = 0; page < 5; page++) {
+      const res = await fetch(
+        `${MIRROR_URL}/api/v1/contracts/${contract}/results/logs?order=asc&limit=100&timestamp=gt:${last}`,
+      );
+      if (!res.ok) {
+        console.error("mirror error", res.status);
+        break;
+      }
+      const { logs } = (await res.json()) as { logs: MirrorLog[] };
+      if (!logs?.length) break;
+      for (const log of logs) {
+        await handleLog(supabaseAdmin, log, contract);
+        last = log.timestamp;
+        count++;
+      }
+      await supabaseAdmin
+        .from("sync_state")
+        .update({ last_timestamp: last })
+        .eq("contract", contract);
+      if (logs.length < 100) break;
+    }
   }
   return { synced: count, configured: true };
 }
@@ -76,9 +83,13 @@ const tsToIso = (ts: string) =>
   ).toISOString();
 const hbar = (v: bigint) => Number(v) / 1e8;
 const tok = (v: bigint) => Number(v / 10n ** 10n) / 1e8;
+// V2 coins are HTS tokens with 8 decimals.
+const tokV2 = (v: bigint) => Number(v) / 1e8;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleLog(db: any, log: MirrorLog) {
+async function handleLog(db: any, log: MirrorLog, contract: string) {
+  const v2 = !!PUMP_CONTRACT_V2_ID && contract === PUMP_CONTRACT_V2_ID;
+  const toTok = v2 ? tokV2 : tok;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ev: { eventName: string; args: any };
   try {
@@ -110,6 +121,7 @@ async function handleLog(db: any, log: MirrorLog) {
         telegram: s("telegram"),
         virtual_hbar: 0,
         virtual_tokens: 0,
+        contract,
         created_tx: log.transaction_hash,
         created_at: tsToIso(log.timestamp),
       },
@@ -118,7 +130,7 @@ async function handleLog(db: any, log: MirrorLog) {
   } else if (ev.eventName === "Trade") {
     const token = String(a.token).toLowerCase();
     const vH = hbar(a.virtualHbar as bigint),
-      vT = tok(a.virtualTokens as bigint);
+      vT = toTok(a.virtualTokens as bigint);
     const id = `${log.transaction_hash}-${log.index}`;
     const { error } = await db.from("trades").insert({
       id,
@@ -127,7 +139,7 @@ async function handleLog(db: any, log: MirrorLog) {
       trader: String(a.trader).toLowerCase(),
       is_buy: Boolean(a.isBuy),
       hbar_amount: hbar(a.hbarAmount as bigint),
-      token_amount: tok(a.tokenAmount as bigint),
+      token_amount: toTok(a.tokenAmount as bigint),
       fee: hbar(a.fee as bigint),
       price: vT ? vH / vT : 0,
       tx_hash: log.transaction_hash,
@@ -151,7 +163,7 @@ async function handleLog(db: any, log: MirrorLog) {
         last_trade_at: tsToIso(log.timestamp),
       })
       .eq("address", token);
-  } else if (ev.eventName === "Graduated") {
+  } else if (ev.eventName === "Graduated" || ev.eventName === "Migrated") {
     await db
       .from("tokens")
       .update({ graduated: true })
