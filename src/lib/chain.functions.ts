@@ -114,7 +114,7 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
         creator: String(a.creator).toLowerCase(),
         name: String(a.name).slice(0, 32),
         symbol: String(a.symbol).slice(0, 10),
-        description: await resolveDesc(meta, s("description", 5000)),
+        description: await resolveDesc(db, meta, s("description", 5000)),
         image_url: img && /^[a-f0-9]{64}$/.test(img) ? img : null,
         website: s("website"),
         twitter: s("twitter"),
@@ -171,7 +171,8 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
   }
 }
 
-async function resolveDesc(meta: Record<string, string>, inline: string | null) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function resolveDesc(db: any, meta: Record<string, string>, inline: string | null) {
   const h = meta["desc"];
   if (typeof h !== "string" || !/^[a-f0-9]{64}$/.test(h)) return inline;
   const { data } = await db.from("token_texts").select("body").eq("hash", h).maybeSingle();

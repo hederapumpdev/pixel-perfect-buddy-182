@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useWallet } from "@/lib/wallet";
-import { syncChain, uploadImage } from "@/lib/chain.functions";
+import { syncChain, uploadImage, uploadText as uploadTextFn } from "@/lib/chain.functions";
 import { supabase } from "@/integrations/supabase/client";
 import {
   GAS,
@@ -69,6 +69,7 @@ function Create() {
   const w = useWallet();
   const nav = useNavigate();
   const upload = useServerFn(uploadImage);
+  const uploadText = useServerFn(uploadTextFn);
   const sync = useServerFn(syncChain);
   const [f, setF] = useState({
     name: "",
