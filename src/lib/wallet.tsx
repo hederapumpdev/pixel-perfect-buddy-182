@@ -305,8 +305,19 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           // JSON-RPC uses 18 decimals: 1 tinybar = 1e10 weibar
           value: (payableTinybars ?? 0n) * 10_000_000_000n,
         });
-        const r = await tx.wait();
-        if (!r || r.status !== 1) throw new Error("Transaction failed");
+        // Don't rely on the wallet's own receipt polling (MetaMask mobile stalls on
+        // Hedera); ask the mirror node for the result instead.
+        let done = false;
+        for (let i = 0; i < 60 && !done; i++) {
+          await new Promise((res) => setTimeout(res, 2000));
+          const res = await fetch(`${MIRROR_URL}/api/v1/contracts/results/${tx.hash}`)
+            .then((x) => (x.ok ? x.json() : null))
+            .catch(() => null);
+          if (!res?.result) continue;
+          if (res.result !== "SUCCESS") throw new Error(`Transaction failed: ${res.result}`);
+          done = true;
+        }
+        if (!done) throw new Error("Hedera hasn't confirmed this yet — check your wallet history before trying again.");
         setTick((t) => t + 1);
         return { transactionId: tx.hash, transactionHash: tx.hash };
       }
