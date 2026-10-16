@@ -21,7 +21,7 @@ export function xAuthorization(method: string, url: string, query: Record<string
 
 export async function sendXTweet(text: string, mediaId: string) {
   const url = "https://api.x.com/2/tweets";
-  const response = await fetch(url, { method: "POST", headers: { Authorization: xAuthorization("POST", url), "Content-Type": "application/json" }, body: JSON.stringify({ text, media: { media_ids: [mediaId] } }), signal: AbortSignal.timeout(15_000) });
+  const response = await fetch(url, { method: "POST", headers: { Authorization: xAuthorization("POST", url), "Content-Type": "application/json" }, body: JSON.stringify({ text, media: { media_ids: [mediaId] } }), signal: AbortSignal.timeout(4_000) });
   if (!response.ok) {
     // Never store raw provider bodies: they may echo credential-bearing headers.
     return { ok: false as const, status: response.status, error: `X rejected the post (HTTP ${response.status}). Check X posting permissions and API billing.` };
