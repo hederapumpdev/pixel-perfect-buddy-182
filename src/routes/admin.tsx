@@ -6,9 +6,13 @@ import { Shell } from "@/components/Shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
-import { NETWORK, PUMP_CONTRACT_ID, HASHSCAN_URL, FEE_WALLET_EVM } from "@/lib/hedera-config";
+import { NETWORK, PUMP_CONTRACT_V2_ID, HASHSCAN_URL, FEE_WALLET_EVM } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
-import artifact from "@/lib/contract-artifact.json";
+import artifact from "@/lib/contract-artifact-hts.json";
+
+// SaucerSwap V1 mainnet (docs.saucerswap.finance/developers/contracts)
+const SAUCER_ROUTER_EVM = "0x00000000000000000000000000000000002e7a5d"; // 0.0.3045981
+const SAUCER_FACTORY_EVM = "0x0000000000000000000000000000000000103680"; // 0.0.1062784
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -36,7 +40,7 @@ function Admin() {
 
   // Show where the upload stands as soon as HashPack is connected.
   useEffect(() => {
-    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_ID) {
+    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_V2_ID) {
       w.checkDeploy(artifact.bytecode).then((s) => s.contractId && setDeployed(s.contractId)).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,13 +52,25 @@ function Admin() {
     setLastError(null);
     try {
       const params = encodeAbiParameters(
-        [{ type: "address" }, { type: "uint256" }, { type: "uint256" }],
-        [FEE_WALLET_EVM as `0x${string}`, toTinybars(virtualHbar), toTinybars(creationFee)],
+        [
+          { type: "address" },
+          { type: "uint256" },
+          { type: "uint256" },
+          { type: "address" },
+          { type: "address" },
+        ],
+        [
+          FEE_WALLET_EVM as `0x${string}`,
+          toTinybars(virtualHbar),
+          toTinybars(creationFee),
+          SAUCER_ROUTER_EVM as `0x${string}`,
+          SAUCER_FACTORY_EVM as `0x${string}`,
+        ],
       );
       const r = await w.deploy({
         bytecode: artifact.bytecode,
         constructorParams: params,
-        gas: 4_000_000,
+        gas: 6_000_000,
       });
       if (r.contractId) {
         setDeployed(r.contractId);
@@ -78,16 +94,16 @@ function Admin() {
     <Shell>
       <div className="mx-auto max-w-xl space-y-4">
         <h1 className="text-3xl font-bold">Launchpad setup</h1>
-        {PUMP_CONTRACT_ID ? (
+        {PUMP_CONTRACT_V2_ID ? (
           <p className="rounded-md border border-border bg-card p-4 text-sm">
             Live contract:{" "}
             <a
               className="font-mono text-accent"
-              href={`${HASHSCAN_URL}/contract/${PUMP_CONTRACT_ID}`}
+              href={`${HASHSCAN_URL}/contract/${PUMP_CONTRACT_V2_ID}`}
               target="_blank"
               rel="noreferrer"
             >
-              {PUMP_CONTRACT_ID}
+              {PUMP_CONTRACT_V2_ID}
             </a>
           </p>
         ) : (
