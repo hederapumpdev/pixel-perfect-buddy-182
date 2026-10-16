@@ -289,6 +289,33 @@ export type Database = {
           },
         ]
       }
+      wallet_profiles: {
+        Row: {
+          avatar: string | null
+          bio: string | null
+          edit_key_hash: string
+          name: string
+          updated_at: string
+          wallet: string
+        }
+        Insert: {
+          avatar?: string | null
+          bio?: string | null
+          edit_key_hash: string
+          name: string
+          updated_at?: string
+          wallet: string
+        }
+        Update: {
+          avatar?: string | null
+          bio?: string | null
+          edit_key_hash?: string
+          name?: string
+          updated_at?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
