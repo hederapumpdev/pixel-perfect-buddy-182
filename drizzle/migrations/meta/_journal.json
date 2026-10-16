@@ -57,6 +57,13 @@
       "when": 1792183702059,
       "tag": "0007_coin_comments",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792184251858,
+      "tag": "0008_wallet_profiles",
+      "breakpoints": true
     }
   ]
 }
