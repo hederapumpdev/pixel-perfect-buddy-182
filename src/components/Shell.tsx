@@ -10,6 +10,7 @@ const nav = [
   { to: "/explore", label: "Explore" },
   { to: "/create", label: "Create Coin" },
   { to: "/how-it-works", label: "How It Works" },
+  { to: "/profile", label: "Profile" },
 ] as const;
 
 export function Logo() {
