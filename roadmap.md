@@ -6,4 +6,4 @@
 - [x] v3 live on mainnet (0.0.10924285)
 - [ ] Fund bot wallet 0xD14aDF40256C7FDab669Ec2a5eEE25aFaa755392 — waits on user
 - [ ] DexScreener listing request (user submits)
-- [ ] Admin page only behind PIN (you + invited people)
+- [x] Admin page only behind PIN

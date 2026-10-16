@@ -58,7 +58,10 @@ function Admin() {
     setBusy(true);
     try {
       const r = await check({ data: { pin } });
-      if (!r.ok) return toast.error("Wrong PIN");
+      if (!r.ok) {
+        toast.error("Wrong PIN");
+        return;
+      }
       sessionStorage.setItem(PIN_KEY, pin);
       setOk(true);
     } finally {
