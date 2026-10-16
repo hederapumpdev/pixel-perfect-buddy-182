@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
-import { getBotInfo, saveBotSettings } from "@/lib/chain.functions";
+import { checkAdminPin, getBotInfo, saveBotSettings } from "@/lib/chain.functions";
 import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
@@ -42,7 +42,45 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
+const PIN_KEY = "hederaPump.adminPin";
+
 function Admin() {
+  const check = useServerFn(checkAdminPin);
+  const [ok, setOk] = useState(false);
+  const [pin, setPin] = useState("");
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const saved = sessionStorage.getItem(PIN_KEY);
+    if (saved) check({ data: { pin: saved } }).then((r) => setOk(r.ok)).catch(() => {});
+  }, [check]);
+  async function unlock(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const r = await check({ data: { pin } });
+      if (!r.ok) {
+        toast.error("Wrong PIN");
+        return;
+      }
+      sessionStorage.setItem(PIN_KEY, pin);
+      setOk(true);
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (!ok)
+    return (
+      <Shell>
+        <form onSubmit={unlock} className="mx-auto max-w-sm space-y-3 py-16 text-center">
+          <h1 className="text-3xl font-bold">Admin</h1>
+          <p className="text-sm text-muted-foreground">Enter the admin PIN.</p>
+          <Input type="password" value={pin} onChange={(e) => setPin(e.target.value)} autoFocus />
+          <Button className="w-full" disabled={busy || !pin}>
+            {busy ? "Checking…" : "Open"}
+          </Button>
+        </form>
+      </Shell>
+    );
   return (
     <Shell>
       <div className="mx-auto max-w-4xl space-y-10">
@@ -206,7 +244,7 @@ function BotPanel() {
   });
   const [enabled, setEnabled] = useState(true);
   const [usd, setUsd] = useState(String(BOT_BUY_USD));
-  const [pin, setPin] = useState("");
+  const [pin, setPin] = useState(() => (typeof window === "undefined" ? "" : sessionStorage.getItem(PIN_KEY) ?? ""));
   const [saving, setSaving] = useState(false);
   useEffect(() => {
     if (cfg.data) {

@@ -10,7 +10,7 @@ export const PUMP_CONTRACT_V2_ID: string | null = "0.0.10924256";
 
 // v3: same coin type as v2, but the platform fee goes straight to FEE_WALLET and
 // creators claim their share. Null until deployed from /admin.
-export const PUMP_CONTRACT_V3_ID: string | null = null;
+export const PUMP_CONTRACT_V3_ID: string | null = "0.0.10924285";
 
 /** Contracts whose coins are native HTS tokens (v2 + v3 share the same ABI). */
 export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID].filter(
