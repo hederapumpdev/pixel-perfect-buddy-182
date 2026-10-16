@@ -1,4 +1,4 @@
-import * as sdk from "@hashgraph/sdk";
+import * as sdk from "@hiero-ledger/sdk";
 import { encodeFunctionData, decodeEventLog, type Abi } from "viem";
 import art from "/dev-server/src/lib/contract-artifact-hts.json";
 const abi = art.pumpAbi as Abi;
