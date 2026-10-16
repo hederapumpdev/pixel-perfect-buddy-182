@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as TokenIdRouteImport } from './routes/token.$id'
 import { Route as ApiPublicImgHashRouteImport } from './routes/api/public/img.$hash'
 
@@ -42,6 +43,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
   path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TokenIdRoute = TokenIdRouteImport.update({
   id: '/token/$id',
   path: '/token/$id',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/profile': typeof ProfileRoute
   '/token/$id': typeof TokenIdRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/profile': typeof ProfileRoute
   '/token/$id': typeof TokenIdRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/profile': typeof ProfileRoute
   '/token/$id': typeof TokenIdRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/explore'
     | '/how-it-works'
+    | '/profile'
     | '/token/$id'
     | '/api/public/img/$hash'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/explore'
     | '/how-it-works'
+    | '/profile'
     | '/token/$id'
     | '/api/public/img/$hash'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/explore'
     | '/how-it-works'
+    | '/profile'
     | '/token/$id'
     | '/api/public/img/$hash'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   CreateRoute: typeof CreateRoute
   ExploreRoute: typeof ExploreRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  ProfileRoute: typeof ProfileRoute
   TokenIdRoute: typeof TokenIdRoute
   ApiPublicImgHashRoute: typeof ApiPublicImgHashRoute
 }
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/token/$id': {
       id: '/token/$id'
       path: '/token/$id'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreateRoute: CreateRoute,
   ExploreRoute: ExploreRoute,
   HowItWorksRoute: HowItWorksRoute,
+  ProfileRoute: ProfileRoute,
   TokenIdRoute: TokenIdRoute,
   ApiPublicImgHashRoute: ApiPublicImgHashRoute,
 }
