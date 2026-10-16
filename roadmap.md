@@ -1,6 +1,6 @@
 # Roadmap
-- [ ] Daily X app tweets, beginning with an introduction
-- [ ] Include branded images with daily X tweets
+- [ ] Daily X app tweets — implemented and scheduled; paused because X rejects saved credentials (HTTP 401); needs valid X credentials from user
+- [x] Include branded images with daily X tweets
 - [x] Coin page: CA + creator with copy/links
 - [x] v2 HTS contract live (0.0.10924256)
 - [x] v3 contract (platform fee straight to fee wallet, creator claims) — testnet-tested
