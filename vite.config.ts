@@ -12,6 +12,8 @@ const browserPolyfills = {
   events: require.resolve("events/"),
   buffer: require.resolve("buffer/"),
 };
+const SERVER_STUBBED =
+  /^(@hashgraph\/hedera-wallet-connect|@hiero-ledger\/sdk|@web3auth\/modal|@grpc\/grpc-js)(\/.*)?$/;
 
 export default defineConfig({
   tanstackStart: {
@@ -38,25 +40,21 @@ export default defineConfig({
         },
       },
       {
-        // The Hedera SDK pulls in @grpc/grpc-js, whose CJS init calls require("node:process"),
-        // which crashes on the Worker runtime and takes every server function sharing that
-        // bundle chunk down with it. Server code never talks gRPC, so stub it outside the browser.
-        name: "server-grpc-stub",
+        // Wallet SDKs are browser-only and only loaded via dynamic import inside the browser.
+        // Bundled for the Worker they crash at load (grpc-js require("node:process"),
+        // HTMLElement web components), and the server bundler merges viem/ethers into that
+        // same chunk — killing every server function. Stub them out of server builds.
+        name: "server-wallet-sdk-stub",
         enforce: "pre",
+        apply: "build",
         resolveId(id) {
           const env = (this as unknown as { environment?: { name?: string } }).environment?.name;
           if (env === "client") return null;
-          return id === "@grpc/grpc-js" ? "\0grpc-server-stub" : null;
+          return SERVER_STUBBED.test(id) ? "\0wallet-sdk-server-stub" : null;
         },
         load(id) {
-          if (id !== "\0grpc-server-stub") return null;
-          return [
-            "const fail = () => { throw new Error('gRPC is not available on the server'); };",
-            "export class Client { constructor() { fail(); } }",
-            "export class Metadata { set() {} }",
-            "export const credentials = { createSsl: fail, createInsecure: fail };",
-            "export default { Client, Metadata, credentials };",
-          ].join("\n");
+          if (id !== "\0wallet-sdk-server-stub") return null;
+          return "export default {};";
         },
       },
     ],
