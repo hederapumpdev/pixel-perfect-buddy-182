@@ -37,6 +37,28 @@ export default defineConfig({
           return browserPolyfills[m[1] as keyof typeof browserPolyfills];
         },
       },
+      {
+        // The Hedera SDK pulls in @grpc/grpc-js, whose CJS init calls require("node:process"),
+        // which crashes on the Worker runtime and takes every server function sharing that
+        // bundle chunk down with it. Server code never talks gRPC, so stub it outside the browser.
+        name: "server-grpc-stub",
+        enforce: "pre",
+        resolveId(id) {
+          const env = (this as unknown as { environment?: { name?: string } }).environment?.name;
+          if (env === "client") return null;
+          return id === "@grpc/grpc-js" ? "\0grpc-server-stub" : null;
+        },
+        load(id) {
+          if (id !== "\0grpc-server-stub") return null;
+          return [
+            "const fail = () => { throw new Error('gRPC is not available on the server'); };",
+            "export class Client { constructor() { fail(); } }",
+            "export class Metadata { set() {} }",
+            "export const credentials = { createSsl: fail, createInsecure: fail };",
+            "export default { Client, Metadata, credentials };",
+          ].join("\n");
+        },
+      },
     ],
   },
 });
