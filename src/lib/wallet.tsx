@@ -52,7 +52,10 @@ type WalletCtx = {
   refresh: () => void;
 };
 
-const Ctx = createContext<WalletCtx | null>(null);
+// Keep one context object across hot reloads; a fresh one would orphan the
+// already-mounted provider ("useWallet outside WalletProvider").
+const g = globalThis as { __hpWalletCtx?: React.Context<WalletCtx | null> };
+const Ctx = (g.__hpWalletCtx ??= createContext<WalletCtx | null>(null));
 // 0.0.N contract ID -> its long-zero EVM address
 const idToEvm = (id: string) =>
   "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
