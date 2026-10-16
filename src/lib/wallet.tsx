@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
+import { deployWithHashPack } from "./hashpack-deploy";
 import {
   MIRROR_URL,
   NETWORK,
@@ -271,14 +272,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (evmSigner.current) throw new Error("Deploy with HashPack, not an email wallet");
     const { sdk } = await loadLibs();
     const s = signer();
-    const flow = new sdk.ContractCreateFlow()
-      .setBytecode(bytecode)
-      .setGas(gas)
-      .setConstructorParameters(hexToBytes(constructorParams));
-    const res = await flow.executeWithSigner(s as never);
-    const receipt = await res.getReceiptWithSigner(s as never);
-    if (!receipt.contractId) throw new Error(`Deploy failed: ${receipt.status}`);
-    return receipt.contractId.toString();
+    return deployWithHashPack(sdk, s, MIRROR_URL, { bytecode, constructorParams, gas });
   }, []);
 
   return (

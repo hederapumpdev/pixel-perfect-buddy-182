@@ -11,6 +11,8 @@ export const Route = createFileRoute("/explore")({
   head: () => ({
     meta: [
       { title: "Explore tokens — HederaPump" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "description",
         content: "Search, sort and filter meme coins launched on HederaPump.",
