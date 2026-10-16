@@ -250,7 +250,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     try {
       const chainHex = `0x${EVM_CHAIN_ID.toString(16)}`;
       await eth.request({ method: "eth_requestAccounts" });
-      try {
+      const current = await eth.request({ method: "eth_chainId" }).catch(() => null);
+      if (current !== chainHex) try {
         await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: chainHex }] });
       } catch {
         await eth.request({
