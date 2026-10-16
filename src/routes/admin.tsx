@@ -51,20 +51,36 @@ function Admin() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   useEffect(() => {
-    const saved = sessionStorage.getItem(PIN_KEY);
+    let saved: string | null = null;
+    try {
+      saved = sessionStorage.getItem(PIN_KEY);
+    } catch {
+      /* storage blocked */
+    }
     if (saved) check({ data: { pin: saved } }).then((r) => setOk(r.ok)).catch(() => {});
   }, [check]);
   async function unlock(e: React.FormEvent) {
     e.preventDefault();
+    // Read the field itself: phone autofill can fill it without React noticing.
+    const value = (new FormData(e.currentTarget as HTMLFormElement).get("pin") ?? pin).toString().trim();
+    if (!value) {
+      setErr("Enter the PIN first.");
+      return;
+    }
     setBusy(true);
     setErr(null);
     try {
-      const r = await check({ data: { pin: pin.trim() } });
+      const r = await check({ data: { pin: value } });
       if (!r.ok) {
         setErr("Wrong PIN — check it and try again.");
         return;
       }
-      sessionStorage.setItem(PIN_KEY, pin.trim());
+      try {
+        sessionStorage.setItem(PIN_KEY, value);
+      } catch {
+        /* storage blocked */
+      }
+      setPin(value);
       setOk(true);
     } catch {
       setErr("Couldn't check the PIN. Check your connection and try again.");
@@ -78,8 +94,8 @@ function Admin() {
         <form onSubmit={unlock} className="mx-auto max-w-sm space-y-3 py-16 text-center">
           <h1 className="text-3xl font-bold">Admin</h1>
           <p className="text-sm text-muted-foreground">Enter the admin PIN.</p>
-          <Input type="password" value={pin} onChange={(e) => setPin(e.target.value)} autoFocus autoCapitalize="off" autoCorrect="off" spellCheck={false} />
-          <Button className="w-full" disabled={busy || !pin}>
+          <Input name="pin" type="password" autoComplete="off" defaultValue="" onChange={(e) => setPin(e.target.value)} autoFocus autoCapitalize="off" autoCorrect="off" spellCheck={false} />
+          <Button type="submit" className="w-full" disabled={busy}>
             {busy ? "Checking…" : "Open"}
           </Button>
           {err && <p className="text-sm text-destructive">{err}</p>}
@@ -249,7 +265,13 @@ function BotPanel() {
   });
   const [enabled, setEnabled] = useState(true);
   const [usd, setUsd] = useState(String(BOT_BUY_USD));
-  const [pin, setPin] = useState(() => (typeof window === "undefined" ? "" : sessionStorage.getItem(PIN_KEY) ?? ""));
+  const [pin, setPin] = useState(() => {
+    try {
+      return sessionStorage.getItem(PIN_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  });
   const [saving, setSaving] = useState(false);
   useEffect(() => {
     if (cfg.data) {
@@ -291,7 +313,7 @@ function BotPanel() {
           <span className="text-xs text-muted-foreground">Admin PIN</span>
           <Input type="password" value={pin} onChange={(e) => setPin(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} />
         </label>
-        <Button className="w-full" disabled={saving || !pin} onClick={onSave}>
+        <Button className="w-full" disabled={saving} onClick={onSave}>
           {saving ? "Saving…" : "Save bot settings"}
         </Button>
       </div>
