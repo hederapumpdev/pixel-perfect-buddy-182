@@ -10,8 +10,8 @@
 - [ ] DexScreener listing request (user submits)
 - [x] Admin page only behind PIN
 - [ ] Daily X tweets link to hederapump.dev instead of the lovable.app URL
-- [ ] One branded image per tweet topic (9 images, text and image matched)
+- [x] One branded image per tweet topic (49 images, text and image matched)
 - [ ] Delete the first X tweet and post a fresh one on hederapump.dev
-- [ ] 40 extra tweet images, each matched to its own tweet text (49 topics total)
-- [ ] Remove every Lovable logo and badge from the site
+- [x] 40 extra tweet images, each matched to its own tweet text (49 topics total)
+- [x] Remove every Lovable logo and badge from the site
 - [ ] Fix: signing in with a wallet does not work
