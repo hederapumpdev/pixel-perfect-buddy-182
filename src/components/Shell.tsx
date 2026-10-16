@@ -4,6 +4,7 @@ import { Home, Compass, PlusCircle, Wallet, BookOpen, LogOut } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/wallet";
 import { NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
+import logo from "@/assets/hederapump-logo.png";
 
 const nav = [
   { to: "/", label: "Home" },
@@ -16,9 +17,7 @@ const nav = [
 export function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold">
-      <span className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground">
-        ℏ
-      </span>
+      <img src={logo} alt="HederaPump logo" width={32} height={32} className="h-8 w-8 object-contain" />
       Hedera<span className="text-primary">Pump</span>
     </Link>
   );
