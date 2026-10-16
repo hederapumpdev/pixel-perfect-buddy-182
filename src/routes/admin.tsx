@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
-import { checkAdminPin, getBotInfo, saveBotSettings } from "@/lib/chain.functions";
+import { checkAdminPin, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/chain.functions";
 import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
@@ -285,7 +285,7 @@ function BotPanel() {
     try {
       await save({ data: { pin: pin.trim(), enabled, usd: Number(usd) } });
       toast.success("Bot settings saved");
-      cfg.refetch();
+      adminData.refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Saving failed");
     } finally {
