@@ -412,8 +412,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         sdk.TokenId.fromString(tokenId),
         signer().getAccountId(),
         sdk.AccountId.fromString(spenderId),
-        // SDK wants a whole-token Long here; v2 coins have 8 decimals.
-        Number(amount / 100_000_000n) as never,
+        // The amount is in the token's smallest unit (v2 coins: 8 decimals).
+        sdk.Long.fromString(amount.toString()) as never,
       );
       await submitTx(tx as never);
     },
