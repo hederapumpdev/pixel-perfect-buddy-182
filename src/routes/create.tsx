@@ -57,6 +57,20 @@ async function contractEvm() {
   return (await r.json()).evm_address as string;
 }
 
+/** Center-crops any picture to a 512×512 square and compresses it (JPEG keeps it well under 400 KB). */
+async function squareImage(f: File): Promise<File> {
+  const bmp = await createImageBitmap(f);
+  const side = Math.min(bmp.width, bmp.height);
+  const c = document.createElement("canvas");
+  c.width = c.height = 512;
+  c.getContext("2d")!.drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 512, 512);
+  for (const q of [0.9, 0.8, 0.7, 0.6]) {
+    const b = await new Promise<Blob | null>((r) => c.toBlob(r, "image/jpeg", q));
+    if (b && b.size < 400_000) return new File([b], "coin.jpg", { type: "image/jpeg" });
+  }
+  throw new Error("Couldn't shrink this image");
+}
+
 const fileToB64 = (f: File) =>
   new Promise<string>((res, rej) => {
     const r = new FileReader();
@@ -93,9 +107,9 @@ function Create() {
     try {
       let image: string | undefined;
       if (file) {
-        if (file.size > 400_000) throw new Error("Image must be under 400 KB");
+        const img = await squareImage(file);
         setBusy("Uploading image…");
-        image = (await upload({ data: { mime: file.type, base64: await fileToB64(file) } })).hash;
+        image = (await upload({ data: { mime: img.type, base64: await fileToB64(img) } })).hash;
       }
       const descText = f.description.trim();
       let desc: string | undefined;
@@ -183,7 +197,7 @@ function Create() {
               rows={8}
             />
           </Field>
-          <Field label="Image (max 400 KB)">
+          <Field label="Image (any size, auto-cropped to a square)">
             <Input
               type="file"
               accept="image/png,image/jpeg,image/webp,image/gif"
