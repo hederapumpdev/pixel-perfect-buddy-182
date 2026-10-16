@@ -39,6 +39,10 @@ type WalletCtx = {
     payableTinybars?: bigint;
     contractId?: string;
   }) => Promise<{ transactionId: string; transactionHash: string }>;
+  /** Adds an HTS token to the connected account (one-time, before the first buy). */
+  associateToken: (tokenId: string) => Promise<void>;
+  /** Lets the launchpad spend the account's HTS tokens (one-time, before the first sell). */
+  approveToken: (tokenId: string, spenderId: string, amount: bigint) => Promise<void>;
   /** Sends ONE deploy approval to HashPack; call again (from a tap) for the next one. */
   deploy: (opts: {
     bytecode: string;

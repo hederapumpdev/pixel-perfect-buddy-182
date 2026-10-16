@@ -163,7 +163,7 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
         last_trade_at: tsToIso(log.timestamp),
       })
       .eq("address", token);
-  } else if (ev.eventName === "Graduated") {
+  } else if (ev.eventName === "Graduated" || ev.eventName === "Migrated") {
     await db
       .from("tokens")
       .update({ graduated: true })
