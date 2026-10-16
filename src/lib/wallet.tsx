@@ -1,3 +1,4 @@
+import "./node-globals";
 import {
   createContext,
   useCallback,
