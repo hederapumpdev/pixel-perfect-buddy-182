@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { encodeAbiParameters } from "viem";
 import { Shell } from "@/components/Shell";
@@ -31,28 +31,48 @@ function Admin() {
   const [creationFee, setFee] = useState("10");
   const [busy, setBusy] = useState(false);
   const [deployed, setDeployed] = useState<string | null>(null);
+  const [lastError, setLastError] = useState<string | null>(null);
+  const p = w.deployProgress;
+
+  // Show where the upload stands as soon as HashPack is connected.
+  useEffect(() => {
+    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_ID) {
+      w.checkDeploy(artifact.bytecode).then((s) => s.contractId && setDeployed(s.contractId)).catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [w.accountId, w.mode]);
 
   async function deploy() {
     if (!w.accountId || !w.evmAddress) return w.connect();
     setBusy(true);
+    setLastError(null);
     try {
       const params = encodeAbiParameters(
         [{ type: "address" }, { type: "uint256" }, { type: "uint256" }],
         [FEE_WALLET_EVM as `0x${string}`, toTinybars(virtualHbar), toTinybars(creationFee)],
       );
-      const id = await w.deploy({
+      const r = await w.deploy({
         bytecode: artifact.bytecode,
         constructorParams: params,
         gas: 4_000_000,
       });
-      setDeployed(id);
-      toast.success(`Deployed ${id}`);
+      if (r.contractId) {
+        setDeployed(r.contractId);
+        toast.success(`Deployed ${r.contractId}`);
+      } else {
+        toast.success(`Approval ${r.done} of ${r.approvals} done — tap the button for the next one.`);
+      }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Deploy failed");
+      const msg = e instanceof Error ? e.message : "Deploy failed";
+      setLastError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
   }
+
+  const next = p ? Math.min(p.done + 1, p.approvals) : 1;
+  const total = p?.approvals ?? 6;
 
   return (
     <Shell>
@@ -74,9 +94,9 @@ function Admin() {
           <>
             <p className="text-sm text-muted-foreground">
               Deploys the bonding-curve contract to Hedera {NETWORK}. The connected wallet becomes
-              the owner; fees go to 0.0.10923241. Your wallet will ask for <b>6 approvals</b>: the
-              contract is uploaded in 5 parts, then created. Expect roughly 10–15 HBAR in network
-              fees. If an earlier attempt was interrupted, this one continues where it stopped.
+              the owner; fees go to 0.0.10923241. The contract is uploaded in 5 parts, then created:
+              <b> 6 approvals</b>, one per tap of the button below. Expect roughly 20–25 HBAR in
+              network fees. Progress is read from Hedera itself, so you can stop and continue later.
             </p>
             <label className="block space-y-1.5">
               <span className="text-sm font-medium">Starting virtual liquidity (HBAR)</span>
@@ -94,20 +114,34 @@ function Admin() {
                 className="font-mono"
               />
             </label>
-            <Button className="w-full" size="lg" disabled={busy} onClick={deploy}>
-              {busy
-                ? w.deployProgress?.phase === "create"
-                  ? "Last approval: creating the contract…"
-                  : w.deployProgress
-                    ? `Approval ${w.deployProgress.part} of ${w.deployProgress.parts} — check your wallet…`
-                    : "Approve in wallet…"
-                : w.accountId ? "Deploy contract" : "Connect wallet"}
-            </Button>
-            {busy && w.deployProgress && (
-              <p className="text-center text-xs text-muted-foreground">
-                Keep this page open and HashPack in front of you — the upload resumes automatically
-                if the connection drops.
+            {p && !deployed && (
+              <div className="space-y-1.5">
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${(p.done / p.approvals) * 100}%` }} />
+                </div>
+                <p className="text-xs text-muted-foreground">{p.done} of {p.approvals} approvals done</p>
+              </div>
+            )}
+            {!deployed && (
+              <Button className="w-full" size="lg" disabled={busy} onClick={deploy}>
+                {!w.accountId
+                  ? "Connect wallet"
+                  : busy
+                    ? `Approval ${next} of ${total} — open HashPack and approve…`
+                    : p && p.done > 0
+                      ? `Continue: approval ${next} of ${total}`
+                      : `Start deploy: approval 1 of ${total}`}
+              </Button>
+            )}
+            {busy && (
+              <p className="rounded-md border border-border bg-card p-3 text-center text-xs text-muted-foreground">
+                Switch to the <b>HashPack</b> app now — the request is waiting there. Approve it, then
+                come back to this page. If nothing shows up in HashPack after a minute, come back and
+                tap the button again; nothing is paid twice.
               </p>
+            )}
+            {!busy && lastError && (
+              <p className="text-center text-xs text-destructive">{lastError}</p>
             )}
             {deployed && (
               <p className="rounded-md border border-up/40 bg-up/10 p-4 text-sm">

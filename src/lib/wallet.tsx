@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
-import { deployWithHashPack, type DeployProgress, type DeployState } from "./hashpack-deploy";
+import { deployStep, deployProgressOf, findDeployOnMirror, type DeployProgress, type DeployState } from "./hashpack-deploy";
 import {
   MIRROR_URL,
   NETWORK,
@@ -38,12 +38,15 @@ type WalletCtx = {
     payableTinybars?: bigint;
     contractId?: string;
   }) => Promise<{ transactionId: string; transactionHash: string }>;
+  /** Sends ONE deploy approval to HashPack; call again (from a tap) for the next one. */
   deploy: (opts: {
     bytecode: string;
     constructorParams: `0x${string}`;
     gas: number;
-  }) => Promise<string>;
-  /** Live progress of a contract upload, so the UI can say which approval is next. */
+  }) => Promise<DeployProgress>;
+  /** Reads how far the deploy got (from Hedera), without asking the wallet anything. */
+  checkDeploy: (bytecode: string) => Promise<DeployProgress>;
+  /** Last known deploy progress, so the UI can say which approval is next. */
   deployProgress: DeployProgress | null;
   refresh: () => void;
 };
@@ -91,6 +94,7 @@ const hexToBytes = (h: string) =>
 // Remembers an interrupted contract upload so the next attempt continues where it
 // stopped instead of paying for the same bytes again.
 const DEPLOY_STATE_KEY = "hederaPump.deploy.v1";
+const LEGACY_DEPLOY = { account: "0.0.10923241", state: { fileId: "0.0.10923830", uploaded: 4096 } };
 const fingerprint = (bc: string) => `${bc.length}:${bc.slice(0, 16)}:${bc.slice(-16)}`;
 
 async function loadLibs() {
@@ -276,36 +280,54 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const deploy: WalletCtx["deploy"] = useCallback(async ({ bytecode, constructorParams, gas }) => {
-    if (evmSigner.current) throw new Error("Deploy with HashPack, not an email wallet");
-    const { sdk } = await loadLibs();
-    const s = signer();
-    const bc = bytecode.replace(/^0x/, "");
-    const fp = fingerprint(bc);
-    let resume: DeployState | null = null;
+  // Where the upload stands: Hedera's own record first, this browser's memory second.
+  const resolveDeploy = useCallback(async (bc: string): Promise<{ resume: DeployState | null; contractId: string | null }> => {
+    const id = accountId && /^\d+\.\d+\.\d+$/.test(accountId) ? accountId : null;
+    const fp = fingerprint(bc.replace(/^0x/, ""));
+    let local: DeployState | null = null;
     try {
       const stored = JSON.parse(localStorage.getItem(DEPLOY_STATE_KEY) ?? "null") as
         (DeployState & { fingerprint?: string }) | null;
       if (stored?.fileId && stored.fingerprint === fp && typeof stored.uploaded === "number")
-        resume = { fileId: stored.fileId, uploaded: stored.uploaded };
-    } catch { resume = null; }
-    try {
-      const id = await deployWithHashPack(
-        sdk, s, MIRROR_URL,
-        { bytecode, constructorParams, gas, resume },
-        (p) => {
-          setDeployProgress(p);
-          try {
-            if (p.fileId) localStorage.setItem(DEPLOY_STATE_KEY, JSON.stringify({ fileId: p.fileId, uploaded: p.uploaded, fingerprint: fp }));
-          } catch { /* storage unavailable: the upload itself still runs */ }
-        },
-      );
-      try { localStorage.removeItem(DEPLOY_STATE_KEY); } catch { /* nothing stored */ }
-      return id;
-    } finally {
-      setDeployProgress(null);
+        local = { fileId: stored.fileId, uploaded: stored.uploaded };
+    } catch { local = null; }
+    const chain = id ? await findDeployOnMirror(MIRROR_URL, id, bc).catch(() => null) : null;
+    if (chain?.contractId) return { resume: chain.state, contractId: chain.contractId };
+    let resume = chain?.state ?? local;
+    if (chain?.state && local && local.fileId === chain.state.fileId)
+      resume = { fileId: local.fileId, uploaded: Math.max(local.uploaded, chain.state.uploaded) };
+    // First part of the 4096-byte upload already paid for on 16 Oct 2026 (before step memos existed).
+    if (!resume && id === LEGACY_DEPLOY.account) resume = LEGACY_DEPLOY.state;
+    return { resume, contractId: null };
+  }, [accountId]);
+
+  const checkDeploy: WalletCtx["checkDeploy"] = useCallback(async (bytecode) => {
+    const { resume, contractId } = await resolveDeploy(bytecode);
+    const p = deployProgressOf(bytecode, resume, contractId);
+    setDeployProgress(p);
+    return p;
+  }, [resolveDeploy]);
+
+  const deploy: WalletCtx["deploy"] = useCallback(async ({ bytecode, constructorParams, gas }) => {
+    if (evmSigner.current) throw new Error("Deploy with HashPack, not an email wallet");
+    const { sdk } = await loadLibs();
+    const s = signer();
+    const fp = fingerprint(bytecode.replace(/^0x/, ""));
+    const { resume, contractId } = await resolveDeploy(bytecode);
+    if (contractId) {
+      const done = deployProgressOf(bytecode, resume, contractId);
+      setDeployProgress(done);
+      return done;
     }
-  }, []);
+    const p = await deployStep(sdk, s, MIRROR_URL, { bytecode, constructorParams, gas, resume });
+    setDeployProgress(p);
+    try {
+      if (p.contractId) localStorage.removeItem(DEPLOY_STATE_KEY);
+      else if (p.fileId) localStorage.setItem(DEPLOY_STATE_KEY, JSON.stringify({ fileId: p.fileId, uploaded: p.uploaded, fingerprint: fp }));
+      else localStorage.removeItem(DEPLOY_STATE_KEY);
+    } catch { /* storage unavailable: Hedera's record still has the progress */ }
+    return p;
+  }, [resolveDeploy]);
 
   return (
     <Ctx.Provider
@@ -320,6 +342,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         disconnect,
         execute,
         deploy,
+        checkDeploy,
         deployProgress,
         refresh: () => setTick((t) => t + 1),
       }}

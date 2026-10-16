@@ -1,6 +1,6 @@
 import * as sdk from "@hiero-ledger/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { deployWithHashPack, DEPLOY_CHUNK } from "@/lib/hashpack-deploy";
+import { deployWithHashPack, deployFingerprint, findDeployOnMirror, DEPLOY_CHUNK } from "@/lib/hashpack-deploy";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -49,7 +49,7 @@ describe("HashPack contract deployment", () => {
     const id = await deployWithHashPack(
       sdk, signer, "https://mirror.example",
       { bytecode: `0x${BYTECODE}`, constructorParams: "0x1234", gas: 4000000 },
-      (p) => progress.push(`${p.phase} ${p.part}/${p.parts}`),
+      (p) => progress.push(`${p.phase} ${p.done}/${p.approvals}`),
     );
     expect(id).toBe("0.0.9999");
     expect(getAccountKey).not.toHaveBeenCalled();
@@ -57,7 +57,11 @@ describe("HashPack contract deployment", () => {
     expect(transactions.filter((tx) => tx instanceof sdk.FileAppendTransaction)).toHaveLength(2);
     expect(new TextDecoder().decode(Uint8Array.from(uploadedBytes(transactions)))).toBe(BYTECODE);
     expect(transactions.at(-1)).toBeInstanceOf(sdk.ContractCreateTransaction);
-    expect(progress).toEqual(["upload 1/3", "upload 2/3", "upload 3/3", "create 3/3"]);
+    expect(progress).toEqual(["upload 1/4", "upload 2/4", "create 3/4", "done 4/4"]);
+    const fp = deployFingerprint(BYTECODE);
+    expect(transactions.map((tx) => tx.transactionMemo)).toEqual([
+      `hpump:${fp}:0:4096`, `hpump:${fp}:4096:4096`, `hpump:${fp}:8192:868`, `hpump:${fp}:9060:0`,
+    ]);
     const chunkSizes = transactions
       .filter((tx) => tx instanceof sdk.FileCreateTransaction || tx instanceof sdk.FileAppendTransaction)
       .map((tx) => (tx.contents ?? []).length);
@@ -100,6 +104,19 @@ describe("HashPack contract deployment", () => {
     expect(transactions.filter((tx) => tx instanceof sdk.FileCreateTransaction)).toHaveLength(1);
     // The failed attempt is dropped; the fresh upload re-sends the whole contract.
     expect(new TextDecoder().decode(Uint8Array.from(uploadedBytes(transactions).slice(DEPLOY_CHUNK)))).toBe(BYTECODE);
+  });
+
+  it("rebuilds upload progress from the account's own Hedera history", async () => {
+    const fp = deployFingerprint(BYTECODE);
+    const memo = (m: string) => btoa(m);
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ transactions: [
+      { name: "FILEAPPEND", result: "SUCCESS", entity_id: "0.0.77", memo_base64: memo(`hpump:${fp}:4096:4096`), nonce: 0 },
+      { name: "FILEAPPEND", result: "INSUFFICIENT_PAYER_BALANCE", entity_id: "0.0.77", memo_base64: memo(`hpump:${fp}:4096:4096`), nonce: 0 },
+      { name: "FILECREATE", result: "SUCCESS", entity_id: "0.0.77", memo_base64: memo(`hpump:${fp}:0:4096`), nonce: 0 },
+      { name: "FILECREATE", result: "SUCCESS", entity_id: "0.0.66", memo_base64: memo("hpump:00000000:0:4096"), nonce: 0 },
+    ] }) })));
+    expect(await findDeployOnMirror("https://mirror.example", "0.0.1234", BYTECODE))
+      .toEqual({ state: { fileId: "0.0.77", uploaded: 8192 }, contractId: null });
   });
 
   it("rejects unsupported account keys before requesting a wallet signature", async () => {
