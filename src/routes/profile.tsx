@@ -8,8 +8,16 @@ import { TokenCard } from "@/components/TokenCard";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
-import { encodePump } from "@/lib/curve";
-import { GAS, HASHSCAN_URL, MIRROR_URL, NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
+import { encodePump, encodePumpV2 } from "@/lib/curve";
+import {
+  GAS,
+  GAS_V2,
+  HASHSCAN_URL,
+  MIRROR_URL,
+  NETWORK,
+  PUMP_CONTRACT_ID,
+  PUMP_CONTRACT_V2_ID,
+} from "@/lib/hedera-config";
 import { fmtAge, fmtHbar } from "@/lib/queries";
 
 export const Route = createFileRoute("/profile")({
@@ -30,16 +38,25 @@ const longZero = (id: string) =>
   "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
 const contractEvm = "0x" + BigInt((PUMP_CONTRACT_ID ?? "0.0.0").split(".")[2] ?? "0").toString(16).padStart(40, "0");
+const contractEvmV2 = PUMP_CONTRACT_V2_ID
+  ? "0x" + BigInt(PUMP_CONTRACT_V2_ID.split(".")[2] ?? "0").toString(16).padStart(40, "0")
+  : null;
 
 async function readFees(addr: string): Promise<bigint> {
-  const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ data: encodePump("creatorFees", [addr]), to: contractEvm, estimate: false }),
-  });
-  const j = await r.json();
-  if (!j.result || j.result === "0x") return 0n;
-  return BigInt(j.result as Hex);
+  const call = async (data: string, to: string) => {
+    const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ data, to, estimate: false }),
+    });
+    const j = await r.json();
+    return !j.result || j.result === "0x" ? 0n : BigInt(j.result as Hex);
+  };
+  const v1 = await call(encodePump("creatorFees", [addr]), contractEvm);
+  const v2 = contractEvmV2
+    ? await call(encodePumpV2("creatorFees", [addr]), contractEvmV2).catch(() => 0n)
+    : 0n;
+  return v1 + v2;
 }
 
 function Profile() {
@@ -92,6 +109,12 @@ function Profile() {
     setBusy(true);
     try {
       await w.execute({ calldata: encodePump("claimCreatorFees"), gas: GAS.claim });
+      if (PUMP_CONTRACT_V2_ID)
+        await w.execute({
+          calldata: encodePumpV2("claimCreatorFees"),
+          gas: GAS_V2.claim,
+          contractId: PUMP_CONTRACT_V2_ID,
+        });
       toast.success("Fees claimed — sent to your wallet");
       setTimeout(() => fees.refetch(), 5000);
     } catch (e) {
