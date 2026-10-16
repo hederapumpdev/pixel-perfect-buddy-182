@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
-import { getBotInfo } from "@/lib/chain.functions";
+import { getBotInfo, saveBotSettings } from "@/lib/chain.functions";
 import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
@@ -195,13 +195,63 @@ function BotPanel() {
   });
   const names = new Map((useAll().data?.tokens ?? []).map((t) => [t.address, t.symbol]));
   const b = bot.data;
+  const save = useServerFn(saveBotSettings);
+  const cfg = useQuery({
+    queryKey: ["bot-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("bot_settings").select("*").eq("id", 1).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const [enabled, setEnabled] = useState(true);
+  const [usd, setUsd] = useState(String(BOT_BUY_USD));
+  const [pin, setPin] = useState("");
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    if (cfg.data) {
+      setEnabled(cfg.data.enabled);
+      setUsd(String(cfg.data.usd_amount));
+    }
+  }, [cfg.data]);
+  async function onSave() {
+    setSaving(true);
+    try {
+      await save({ data: { pin, enabled, usd: Number(usd) } });
+      toast.success("Bot settings saved");
+      cfg.refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Saving failed");
+    } finally {
+      setSaving(false);
+    }
+  }
   return (
     <section>
       <h2 className="text-xl font-semibold">Auto-buy bot</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Buys ${BOT_BUY_USD} of every new coin, once. It stops by itself when its balance drops below 5 HBAR.
+        Buys a fixed dollar amount of every new coin, once. It stops by itself when its balance drops below 5 HBAR.
         Send HBAR to the address below to fund it.
       </p>
+      <div className="mt-3 space-y-3 rounded-lg border border-border bg-card p-4 text-sm">
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-medium">Bot is {enabled ? "on" : "off"}</span>
+          <Button size="sm" variant={enabled ? "default" : "outline"} onClick={() => setEnabled(!enabled)}>
+            {enabled ? "Turn off" : "Turn on"}
+          </Button>
+        </div>
+        <label className="block space-y-1.5">
+          <span className="text-xs text-muted-foreground">Amount per new coin (USD)</span>
+          <Input value={usd} onChange={(e) => setUsd(e.target.value)} inputMode="decimal" className="font-mono" />
+        </label>
+        <label className="block space-y-1.5">
+          <span className="text-xs text-muted-foreground">Admin PIN</span>
+          <Input type="password" value={pin} onChange={(e) => setPin(e.target.value)} />
+        </label>
+        <Button className="w-full" disabled={saving || !pin} onClick={onSave}>
+          {saving ? "Saving…" : "Save bot settings"}
+        </Button>
+      </div>
       <div className="mt-3 rounded-lg border border-border bg-card p-4 text-sm">
         <p className="text-xs text-muted-foreground">Bot address</p>
         <div className="mt-1 flex flex-wrap items-center gap-2">

@@ -201,3 +201,23 @@ export const getBotInfo = createServerFn({ method: "GET" }).handler(async () => 
   const { botInfo } = await import("./bot.server");
   return botInfo();
 });
+
+/** Changes the bot on/off switch and buy amount. Requires the admin PIN. */
+export const saveBotSettings = createServerFn({ method: "POST" })
+  .inputValidator((d: { pin: string; enabled: boolean; usd: number }) => {
+    if (typeof d.pin !== "string" || d.pin.length > 200) throw new Error("Invalid PIN");
+    if (typeof d.enabled !== "boolean") throw new Error("Invalid switch");
+    if (!(typeof d.usd === "number" && d.usd >= 0.5 && d.usd <= 100)) throw new Error("Amount must be $0.50–$100");
+    return d;
+  })
+  .handler(async ({ data }) => {
+    const pin = process.env["ADMIN_PIN"];
+    if (!pin || data.pin !== pin) throw new Error("Wrong PIN");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("bot_settings")
+      .update({ enabled: data.enabled, usd_amount: data.usd, updated_at: new Date().toISOString() })
+      .eq("id", 1);
+    if (error) throw new Error("Saving failed");
+    return { ok: true };
+  });
