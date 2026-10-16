@@ -54,6 +54,13 @@ function Index() {
   return (
     <Shell>
       <section className="grid-bg rounded-xl border border-border bg-card px-5 py-10 md:px-10 md:py-16">
+        <img
+          src={banner}
+          alt="HederaPump banner"
+          width={1600}
+          height={512}
+          className="mb-8 w-full rounded-lg border border-border"
+        />
         <p className="font-mono text-xs uppercase tracking-widest text-primary">
           Built on Hedera · Paid in ℏ
         </p>
