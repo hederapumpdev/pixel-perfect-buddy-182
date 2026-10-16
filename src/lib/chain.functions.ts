@@ -221,3 +221,14 @@ export const saveBotSettings = createServerFn({ method: "POST" })
     if (error) throw new Error("Saving failed");
     return { ok: true };
   });
+
+/** Checks the admin PIN (gates the admin page). */
+export const checkAdminPin = createServerFn({ method: "POST" })
+  .inputValidator((d: { pin: string }) => {
+    if (typeof d.pin !== "string" || d.pin.length > 200) throw new Error("Invalid PIN");
+    return d;
+  })
+  .handler(async ({ data }) => {
+    const pin = process.env["ADMIN_PIN"];
+    return { ok: !!pin && data.pin === pin };
+  });
