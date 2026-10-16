@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Home, Compass, PlusCircle, Wallet, BookOpen, LogOut } from "lucide-react";
+import { Home, Compass, PlusCircle, Wallet, BookOpen, LogOut, LifeBuoy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/wallet";
 import { NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
@@ -12,6 +12,7 @@ const nav = [
   { to: "/create", label: "Create Coin" },
   { to: "/how-it-works", label: "How It Works" },
   { to: "/profile", label: "Profile" },
+  { to: "/support", label: "Support" },
 ] as const;
 
 export function Logo() {
@@ -90,13 +91,14 @@ export function Shell({ children }: { children: ReactNode }) {
       <footer className="mx-auto hidden max-w-7xl px-4 py-10 text-xs text-muted-foreground md:block">
         Meme coins are highly speculative. Nothing here is financial advice. © 2026 HederaPump
       </footer>
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-background/95 backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-background/95 backdrop-blur md:hidden">
         {[
           { to: "/", label: "Home", Icon: Home },
           { to: "/explore", label: "Explore", Icon: Compass },
           { to: "/create", label: "Create", Icon: PlusCircle },
           { to: "/how-it-works", label: "Guide", Icon: BookOpen },
           { to: "/profile", label: "Profile", Icon: Wallet },
+          { to: "/support", label: "Help", Icon: LifeBuoy },
         ].map(({ to, label, Icon }) => (
           <Link
             key={to}
