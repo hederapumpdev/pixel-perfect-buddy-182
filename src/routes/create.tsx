@@ -31,7 +31,7 @@ export const Route = createFileRoute("/create")({
 });
 
 async function readCreationFee(): Promise<bigint> {
-  const data = encodePump("creationFee");
+  const data = (PUMP_CONTRACT_V2_ID ? encodePumpV2 : encodePump)("creationFee");
   const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -41,7 +41,9 @@ async function readCreationFee(): Promise<bigint> {
   return BigInt(j.result ?? "0x0");
 }
 async function contractEvm() {
-  const r = await fetch(`${MIRROR_URL}/api/v1/contracts/${PUMP_CONTRACT_ID}`);
+  const r = await fetch(
+    `${MIRROR_URL}/api/v1/contracts/${PUMP_CONTRACT_V2_ID ?? PUMP_CONTRACT_ID}`,
+  );
   return (await r.json()).evm_address as string;
 }
 
