@@ -134,7 +134,12 @@ function TokenPage() {
     }
   }
 
-  const pts = [...trades].reverse().map((r) => Number(r.price));
+  // Start from the launch price so a single trade already draws a line.
+  const pts = [
+    20_000 / 1_073_000_000,
+    ...[...trades].reverse().map((r) => Number(r.price)),
+    ...(trades.length ? [priceOf(t)] : []),
+  ];
   const max = Math.max(...pts, 0),
     min = Math.min(...pts, max);
   const path =
