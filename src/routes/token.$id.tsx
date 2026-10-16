@@ -287,9 +287,8 @@ function TokenPage() {
                   <span>Amount ({side === "buy" ? "HBAR" : t.symbol})</span>
                   {w.accountId && (
                     <span className="font-mono">
-                      {side === "buy"
-                        ? `${w.balanceHbar?.toFixed(2) ?? "—"} ℏ`
-                        : `${fromUnits(bal, t.contract).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${t.symbol}`}
+                      In wallet: {w.balanceHbar?.toFixed(2) ?? "—"} ℏ ·{" "}
+                      {fromUnits(bal, t.contract).toLocaleString(undefined, { maximumFractionDigits: 0 })} {t.symbol}
                     </span>
                   )}
                 </div>
