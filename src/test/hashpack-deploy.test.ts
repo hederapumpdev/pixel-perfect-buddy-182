@@ -22,6 +22,7 @@ function mockSigner(transactions: sdk.Transaction[]) {
     getAccountId: () => sdk.AccountId.fromString("0.0.1234"),
     getNetwork: () => ({ "node:50211": sdk.AccountId.fromString("0.0.3") }),
     populateTransaction: async (tx: sdk.Transaction) => tx.setTransactionId(sdk.TransactionId.generate("0.0.1234")),
+    signTransaction: async (txs: sdk.Transaction[]) => txs,
     call: async (tx: sdk.Transaction) => {
       transactions.push(tx);
       expect(tx.toBytes().length).toBeGreaterThan(0);
