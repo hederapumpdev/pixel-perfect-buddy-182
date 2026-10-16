@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shell } from "@/components/Shell";
+import { About } from "@/components/About";
 import { TokenCard } from "@/components/TokenCard";
 import { Button } from "@/components/ui/button";
 import { tokensQuery, fmtHbar, mcapOf } from "@/lib/queries";
