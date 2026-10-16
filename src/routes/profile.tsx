@@ -15,8 +15,8 @@ import {
   HASHSCAN_URL,
   MIRROR_URL,
   NETWORK,
+  HTS_CONTRACTS,
   PUMP_CONTRACT_ID,
-  PUMP_CONTRACT_V2_ID,
 } from "@/lib/hedera-config";
 import { fmtAge, fmtHbar } from "@/lib/queries";
 
@@ -37,12 +37,12 @@ export const Route = createFileRoute("/profile")({
 const longZero = (id: string) =>
   "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
-const contractEvm = "0x" + BigInt((PUMP_CONTRACT_ID ?? "0.0.0").split(".")[2] ?? "0").toString(16).padStart(40, "0");
-const contractEvmV2 = PUMP_CONTRACT_V2_ID
-  ? "0x" + BigInt(PUMP_CONTRACT_V2_ID.split(".")[2] ?? "0").toString(16).padStart(40, "0")
-  : null;
+const idEvm = (id: string) => "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
-async function readFees(addr: string): Promise<bigint> {
+type Fees = { contract: string; amount: bigint }[];
+
+/** Unclaimed creator fees per contract (v1 + every HTS contract). */
+async function readFees(addr: string): Promise<Fees> {
   const call = async (data: string, to: string) => {
     const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, {
       method: "POST",
@@ -52,11 +52,12 @@ async function readFees(addr: string): Promise<bigint> {
     const j = await r.json();
     return !j.result || j.result === "0x" ? 0n : BigInt(j.result as Hex);
   };
-  const v1 = await call(encodePump("creatorFees", [addr]), contractEvm);
-  const v2 = contractEvmV2
-    ? await call(encodePumpV2("creatorFees", [addr]), contractEvmV2).catch(() => 0n)
-    : 0n;
-  return v1 + v2;
+  const out: Fees = [];
+  if (PUMP_CONTRACT_ID)
+    out.push({ contract: PUMP_CONTRACT_ID, amount: await call(encodePump("creatorFees", [addr]), idEvm(PUMP_CONTRACT_ID)).catch(() => 0n) });
+  for (const c of HTS_CONTRACTS)
+    out.push({ contract: c, amount: await call(encodePumpV2("creatorFees", [addr]), idEvm(c)).catch(() => 0n) });
+  return out;
 }
 
 function Profile() {
@@ -98,8 +99,10 @@ function Profile() {
     queryKey: ["my-fees", addrs],
     enabled: addrs.length > 0 && !!PUMP_CONTRACT_ID,
     queryFn: async () => {
-      const all = await Promise.all(addrs.map((a) => readFees(a).catch(() => 0n)));
-      return all.reduce((s, v) => s + v, 0n);
+      const all = (await Promise.all(addrs.map((a) => readFees(a).catch(() => [])))).flat();
+      const by = new Map<string, bigint>();
+      for (const f of all) by.set(f.contract, (by.get(f.contract) ?? 0n) + f.amount);
+      return [...by].map(([contract, amount]) => ({ contract, amount }));
     },
     refetchInterval: 15_000,
   });
@@ -108,13 +111,14 @@ function Profile() {
   async function claim() {
     setBusy(true);
     try {
-      await w.execute({ calldata: encodePump("claimCreatorFees"), gas: GAS.claim });
-      if (PUMP_CONTRACT_V2_ID)
-        await w.execute({
-          calldata: encodePumpV2("claimCreatorFees"),
-          gas: GAS_V2.claim,
-          contractId: PUMP_CONTRACT_V2_ID,
-        });
+      for (const f of fees.data ?? []) {
+        if (f.amount <= 0n) continue;
+        await w.execute(
+          f.contract === PUMP_CONTRACT_ID
+            ? { calldata: encodePump("claimCreatorFees"), gas: GAS.claim }
+            : { calldata: encodePumpV2("claimCreatorFees"), gas: GAS_V2.claim, contractId: f.contract },
+        );
+      }
       toast.success("Fees claimed — sent to your wallet");
       setTimeout(() => fees.refetch(), 5000);
     } catch (e) {
@@ -139,7 +143,7 @@ function Profile() {
       </Shell>
     );
 
-  const feeHbar = Number(fees.data ?? 0n) / 1e8;
+  const feeHbar = Number((fees.data ?? []).reduce((a, f) => a + f.amount, 0n)) / 1e8;
   return (
     <Shell>
       <h1 className="text-3xl font-bold">My profile</h1>
