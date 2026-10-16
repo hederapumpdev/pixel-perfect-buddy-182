@@ -286,10 +286,29 @@ function TokenPage() {
             <div className="mt-2">
               <Progress v={p} />
             </div>
+            <div className="mt-3 space-y-1 font-mono text-xs">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Left until graduation</span>
+                <span className="text-foreground">
+                  {t.graduated
+                    ? "0"
+                    : Math.max(0, 800_000_000 - Number(t.tokens_sold)).toLocaleString(undefined, {
+                        maximumFractionDigits: 0,
+                      })}{" "}
+                  {t.symbol}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">On SaucerSwap</span>
+                <span className={t.graduated ? "text-up" : "text-muted-foreground"}>
+                  {t.graduated ? "Yes" : "Not yet"}
+                </span>
+              </div>
+            </div>
             <p className="mt-2 text-xs text-muted-foreground">
               {t.graduated
-                ? "Graduated."
-                : "When 800M tokens are sold, the coin graduates and liquidity moves to a Hedera DEX."}
+                ? "Graduated — curve trading is closed."
+                : "When 800M tokens are sold, the coin graduates and moves to SaucerSwap."}
             </p>
           </div>
           {(t.description || t.website || t.twitter || t.telegram) && (
