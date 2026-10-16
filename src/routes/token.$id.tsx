@@ -18,9 +18,28 @@ import {
   progressPct,
   shortAddr,
 } from "@/lib/queries";
-import { quoteBuy, quoteSell, toTinybars, toUnits, fromTinybars, fromUnits } from "@/lib/curve";
-import { encodePump, encodeToken } from "@/lib/curve";
-import { GAS, HASHSCAN_URL, MIRROR_URL, TOKEN_UNIT } from "@/lib/hedera-config";
+import {
+  quoteBuy,
+  quoteSell,
+  toTinybars,
+  toUnits,
+  fromTinybars,
+  fromUnits,
+  isV2,
+  tokenUnit,
+} from "@/lib/curve";
+import { encodePump, encodePumpV2, encodeToken } from "@/lib/curve";
+import {
+  CURVE_SUPPLY_V2,
+  GAS,
+  GAS_V2,
+  HASHSCAN_URL,
+  MIRROR_URL,
+  PUMP_CONTRACT_V2_ID,
+} from "@/lib/hedera-config";
+
+/** Long-zero EVM address of a 0.0.N token/contract -> its "0.0.N" ID. */
+const evmToId = (addr: string) => `0.0.${BigInt(addr).toString()}`;
 
 export const Route = createFileRoute("/token/$id")({
   head: () => ({
@@ -106,10 +125,12 @@ function TokenPage() {
       </Shell>
     );
 
+  const v2 = isV2(t.contract);
+  const unit = tokenUnit(t.contract);
   const state = {
     virtualHbar: BigInt(Math.round(Number(t.virtual_hbar) * 1e8)),
-    virtualTokens: BigInt(Math.round(Number(t.virtual_tokens))) * TOKEN_UNIT,
-    tokensSold: BigInt(Math.round(Number(t.tokens_sold))) * TOKEN_UNIT,
+    virtualTokens: BigInt(Math.round(Number(t.virtual_tokens))) * unit,
+    tokensSold: BigInt(Math.round(Number(t.tokens_sold))) * unit,
   };
   const ready = state.virtualHbar > 0n;
   let est = "—";
@@ -117,10 +138,25 @@ function TokenPage() {
     if (ready && Number(amt) > 0)
       est =
         side === "buy"
-          ? `${fromUnits(quoteBuy(state, toTinybars(amt)).tokensOut).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${t.symbol}`
-          : `${fromTinybars(quoteSell(state, toUnits(amt)).hbarOut).toFixed(4)} ℏ`;
+          ? `${fromUnits(quoteBuy(state, toTinybars(amt), t.contract).tokensOut, t.contract).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${t.symbol}`
+          : `${fromTinybars(quoteSell(state, toUnits(amt, t.contract)).hbarOut).toFixed(4)} ℏ`;
   } catch {
     /* bad input */
+  }
+
+  // V2 coins are HTS tokens: the wallet must hold the token (associate) before
+  // the first buy and let the contract spend it (allowance) before the first sell.
+  async function isAssociated(tokenId: string, accountId: string) {
+    const j = await fetch(
+      `${MIRROR_URL}/api/v1/accounts/${accountId}/tokens?token.id=${tokenId}&limit=1`,
+    ).then((r) => (r.ok ? r.json() : null));
+    return (j?.tokens?.length ?? 0) > 0;
+  }
+  async function allowance(tokenId: string, accountId: string, spenderId: string) {
+    const j = await fetch(
+      `${MIRROR_URL}/api/v1/accounts/${accountId}/allowances/tokens?token.id=${tokenId}&spender.id=${spenderId}&limit=1`,
+    ).then((r) => (r.ok ? r.json() : null));
+    return BigInt(j?.allowances?.[0]?.amount ?? 0);
   }
 
   async function trade() {
