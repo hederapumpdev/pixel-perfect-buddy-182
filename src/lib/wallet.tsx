@@ -82,6 +82,8 @@ async function initWeb3Auth() {
       } as never,
     ],
     defaultChainId: "0x" + EVM_CHAIN_ID.toString(16),
+    // Trades sign instantly in the app (pump.fun-style quick trading), no confirm popup.
+    walletServicesConfig: { confirmationStrategy: "auto-approve" },
   } as never);
   await w.init();
   web3auth = w;
