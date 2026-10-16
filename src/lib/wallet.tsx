@@ -261,10 +261,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       }
       const { sdk } = await loadLibs();
       const s = signer();
+      // WalletConnect's signer has no client, so the transaction needs an explicit node.
+      const nodes = Object.values(s.getNetwork()).slice(0, 1)
+        .map((n) => (typeof n === "string" ? sdk.AccountId.fromString(n) : n));
+      if (!nodes.length) throw new Error("No Hedera network node is available. Reconnect HashPack.");
       let tx = new sdk.ContractExecuteTransaction()
         .setContractId(sdk.ContractId.fromString(id))
         .setGas(gas)
-        .setFunctionParameters(hexToBytes(calldata));
+        .setFunctionParameters(hexToBytes(calldata))
+        .setNodeAccountIds(nodes);
       if (payableTinybars && payableTinybars > 0n)
         tx = tx.setPayableAmount(sdk.Hbar.fromTinybars(payableTinybars.toString()));
       await tx.freezeWithSigner(s as never);
