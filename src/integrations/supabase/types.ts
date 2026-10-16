@@ -62,6 +62,30 @@ export type Database = {
         }
         Relationships: []
       }
+      coin_comments: {
+        Row: {
+          author: string
+          body: string
+          created_at: string
+          id: string
+          token: string
+        }
+        Insert: {
+          author: string
+          body: string
+          created_at?: string
+          id?: string
+          token: string
+        }
+        Update: {
+          author?: string
+          body?: string
+          created_at?: string
+          id?: string
+          token?: string
+        }
+        Relationships: []
+      }
       support_requests: {
         Row: {
           contact: string
