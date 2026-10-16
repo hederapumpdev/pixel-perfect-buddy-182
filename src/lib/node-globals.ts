@@ -4,5 +4,5 @@
 // This installs the browser shim before any wallet library is loaded.
 import processShim from "process/browser.js";
 
-const g = globalThis as { process?: typeof processShim };
+const g = globalThis as unknown as { process?: unknown };
 if (!g.process) g.process = processShim;
