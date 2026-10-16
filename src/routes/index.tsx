@@ -7,6 +7,7 @@ import { TokenCard } from "@/components/TokenCard";
 import { Button } from "@/components/ui/button";
 import { tokensQuery, fmtHbar, mcapOf } from "@/lib/queries";
 import { useChainSync } from "@/hooks/use-sync";
+import banner from "@/assets/banner.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
