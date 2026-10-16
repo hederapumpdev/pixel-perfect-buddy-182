@@ -11,7 +11,7 @@
 - [x] Admin page only behind PIN
 - [ ] Daily X tweets link to hederapump.dev instead of the lovable.app URL
 - [x] One branded image per tweet topic (49 images, text and image matched)
-- [ ] Delete the first X tweet and post a fresh one on hederapump.dev
+- [x] Delete the first X tweet and post a fresh one on hederapump.dev
 - [x] 40 extra tweet images, each matched to its own tweet text (49 topics total)
 - [x] Remove every Lovable logo and badge from the site
 - [ ] Fix: signing in with a wallet does not work
