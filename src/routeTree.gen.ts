@@ -21,6 +21,7 @@ import { Route as ApiPublicDexscreenerEventsRouteImport } from './routes/api/pub
 import { Route as ApiPublicDexscreenerLatestBlockRouteImport } from './routes/api/public/dexscreener/latest-block'
 import { Route as ApiPublicDexscreenerPairRouteImport } from './routes/api/public/dexscreener/pair'
 import { Route as ApiPublicImgHashRouteImport } from './routes/api/public/img.$hash'
+import { Route as ApiPublicJobsAutobuyRouteImport } from './routes/api/public/jobs/autobuy'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -86,6 +87,11 @@ const ApiPublicImgHashRoute = ApiPublicImgHashRouteImport.update({
   path: '/api/public/img/$hash',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsAutobuyRoute = ApiPublicJobsAutobuyRouteImport.update({
+  id: '/api/public/jobs/autobuy',
+  path: '/api/public/jobs/autobuy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/api/public/dexscreener/latest-block': typeof ApiPublicDexscreenerLatestBlockRoute
   '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
+  '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/api/public/dexscreener/latest-block': typeof ApiPublicDexscreenerLatestBlockRoute
   '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
+  '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/api/public/dexscreener/latest-block': typeof ApiPublicDexscreenerLatestBlockRoute
   '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
+  '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/api/public/dexscreener/latest-block'
     | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
+    | '/api/public/jobs/autobuy'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/api/public/dexscreener/latest-block'
     | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
+    | '/api/public/jobs/autobuy'
   id:
     | '__root__'
     | '/'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/api/public/dexscreener/latest-block'
     | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
+    | '/api/public/jobs/autobuy'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -188,6 +200,7 @@ export interface RootRouteChildren {
   ApiPublicDexscreenerLatestBlockRoute: typeof ApiPublicDexscreenerLatestBlockRoute
   ApiPublicDexscreenerPairRoute: typeof ApiPublicDexscreenerPairRoute
   ApiPublicImgHashRoute: typeof ApiPublicImgHashRoute
+  ApiPublicJobsAutobuyRoute: typeof ApiPublicJobsAutobuyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -276,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicImgHashRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/autobuy': {
+      id: '/api/public/jobs/autobuy'
+      path: '/api/public/jobs/autobuy'
+      fullPath: '/api/public/jobs/autobuy'
+      preLoaderRoute: typeof ApiPublicJobsAutobuyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -292,6 +312,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDexscreenerLatestBlockRoute: ApiPublicDexscreenerLatestBlockRoute,
   ApiPublicDexscreenerPairRoute: ApiPublicDexscreenerPairRoute,
   ApiPublicImgHashRoute: ApiPublicImgHashRoute,
+  ApiPublicJobsAutobuyRoute: ApiPublicJobsAutobuyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

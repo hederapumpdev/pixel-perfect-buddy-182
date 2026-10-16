@@ -8,8 +8,21 @@ export const PUMP_CONTRACT_ID: string | null = "0.0.10923845";
 // Null until deployed on mainnet; coins stay on the contract that made them.
 export const PUMP_CONTRACT_V2_ID: string | null = "0.0.10924256";
 
+// v3: same coin type as v2, but the platform fee goes straight to FEE_WALLET and
+// creators claim their share. Null until deployed from /admin.
+export const PUMP_CONTRACT_V3_ID: string | null = null;
+
+/** Contracts whose coins are native HTS tokens (v2 + v3 share the same ABI). */
+export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID].filter(
+  (c): c is string => !!c,
+);
+
+/** Contract new coins are created on. */
+export const LATEST_CONTRACT_ID: string | null =
+  PUMP_CONTRACT_V3_ID ?? PUMP_CONTRACT_V2_ID ?? PUMP_CONTRACT_ID;
+
 /** Every launchpad contract the app reads and trades on, oldest first. */
-export const PUMP_CONTRACTS: string[] = [PUMP_CONTRACT_ID, PUMP_CONTRACT_V2_ID].filter(
+export const PUMP_CONTRACTS: string[] = [PUMP_CONTRACT_ID, PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID].filter(
   (c): c is string => !!c,
 );
 
@@ -62,3 +75,7 @@ export const GAS_V2 = {
 // Wallet that receives platform fees (set as fee recipient at deploy).
 export const FEE_WALLET_ID = "0.0.10923241";
 export const FEE_WALLET_EVM = "0x" + (10923241).toString(16).padStart(40, "0");
+
+// Platform bot: buys this many US dollars of every coin created after BOT_START.
+export const BOT_BUY_USD = 2;
+export const BOT_START = "2026-10-16T19:00:00Z";

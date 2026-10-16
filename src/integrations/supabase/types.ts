@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      bot_buys: {
+        Row: {
+          created_at: string
+          error: string | null
+          hbar_amount: number
+          status: string
+          token: string
+          tx_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          hbar_amount?: number
+          status?: string
+          token: string
+          tx_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          hbar_amount?: number
+          status?: string
+          token?: string
+          tx_hash?: string | null
+        }
+        Relationships: []
+      }
       sync_state: {
         Row: {
           contract: string

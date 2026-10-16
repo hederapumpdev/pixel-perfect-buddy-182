@@ -2,7 +2,7 @@ import {
   CURVE_SUPPLY,
   CURVE_SUPPLY_V2,
   FEE_BPS,
-  PUMP_CONTRACT_V2_ID,
+  HTS_CONTRACTS,
   TINYBARS,
   TOKEN_UNIT,
   TOKEN_UNIT_V2,
@@ -13,9 +13,9 @@ import {
 // only the curve supply and token unit differ.
 export type CurveState = { virtualHbar: bigint; virtualTokens: bigint; tokensSold: bigint };
 
-/** True for coins created by the v2 (HTS) contract. */
+/** True for coins created by an HTS contract (v2 or v3). */
 export const isV2 = (contract: string | null | undefined) =>
-  !!PUMP_CONTRACT_V2_ID && contract === PUMP_CONTRACT_V2_ID;
+  !!contract && HTS_CONTRACTS.includes(contract);
 
 export const tokenUnit = (contract: string | null | undefined) =>
   isV2(contract) ? TOKEN_UNIT_V2 : TOKEN_UNIT;

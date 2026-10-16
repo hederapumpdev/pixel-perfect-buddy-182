@@ -181,7 +181,7 @@ function TokenPage() {
             calldata: encodePumpV2("buy", [t.address, min]),
             gas: final ? GAS_V2.buyFinal : GAS_V2.buy,
             payableTinybars: value,
-            contractId: PUMP_CONTRACT_V2_ID!,
+            contractId: t.contract,
           });
         } else {
           await w.execute({
@@ -198,15 +198,15 @@ function TokenPage() {
           const tokenId = evmToId(t.address);
           if (
             w.accountId.includes(".") &&
-            (await allowance(tokenId, w.accountId, PUMP_CONTRACT_V2_ID!)) < units
+            (await allowance(tokenId, w.accountId, t.contract)) < units
           ) {
             toast("One-time step: allowing the sale of this coin…");
-            await w.approveToken(tokenId, PUMP_CONTRACT_V2_ID!, CURVE_SUPPLY_V2);
+            await w.approveToken(tokenId, t.contract, CURVE_SUPPLY_V2);
           }
           await w.execute({
             calldata: encodePumpV2("sell", [t.address, units, min]),
             gas: GAS_V2.sell,
-            contractId: PUMP_CONTRACT_V2_ID!,
+            contractId: t.contract,
           });
         } else {
           await w.execute({ calldata: encodePump("sell", [t.address, units, min]), gas: GAS.sell });
