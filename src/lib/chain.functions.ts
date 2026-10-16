@@ -83,9 +83,13 @@ const tsToIso = (ts: string) =>
   ).toISOString();
 const hbar = (v: bigint) => Number(v) / 1e8;
 const tok = (v: bigint) => Number(v / 10n ** 10n) / 1e8;
+// V2 coins are HTS tokens with 8 decimals.
+const tokV2 = (v: bigint) => Number(v) / 1e8;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleLog(db: any, log: MirrorLog) {
+async function handleLog(db: any, log: MirrorLog, contract: string) {
+  const v2 = !!PUMP_CONTRACT_V2_ID && contract === PUMP_CONTRACT_V2_ID;
+  const toTok = v2 ? tokV2 : tok;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ev: { eventName: string; args: any };
   try {
@@ -117,6 +121,7 @@ async function handleLog(db: any, log: MirrorLog) {
         telegram: s("telegram"),
         virtual_hbar: 0,
         virtual_tokens: 0,
+        contract,
         created_tx: log.transaction_hash,
         created_at: tsToIso(log.timestamp),
       },
