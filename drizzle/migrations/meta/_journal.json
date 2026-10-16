@@ -43,6 +43,13 @@
       "when": 1792179444931,
       "tag": "0005_token_texts",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792182784469,
+      "tag": "0006_migration",
+      "breakpoints": true
     }
   ]
 }
