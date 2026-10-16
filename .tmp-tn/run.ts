@@ -50,6 +50,7 @@ if (step === "deploy") {
     log("allowance ok");
     await call(cid, "sell", [tok, H(Number(process.argv[5])), 0n], 0, 1_000_000);
   }
+  if (step === "migrate") await call(cid, "migrate", [process.argv[4]], 0, 6_000_000);
   if (step === "state") log(await view(caddr, "curves", [process.argv[4]]));
 }
 process.exit(0);
