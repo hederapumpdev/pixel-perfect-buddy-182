@@ -481,6 +481,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         mode,
         disconnect,
         execute,
+        associateToken,
+        approveToken,
         deploy,
         checkDeploy,
         deployProgress,
