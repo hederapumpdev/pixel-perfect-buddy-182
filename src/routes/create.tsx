@@ -131,11 +131,14 @@ function Create() {
       const fee = await readCreationFee();
       const firstBuy = f.firstBuy ? toTinybars(f.firstBuy) : 0n;
       setBusy("Confirm in your wallet…");
-      const { transactionHash } = isV2(LATEST_CONTRACT_ID)
+      const hts = isV2(LATEST_CONTRACT_ID);
+      // A brand-new HTS token can't be sent to the creator before their wallet
+      // associates it, so the launch buy happens as a separate step afterwards.
+      const { transactionHash } = hts
         ? await w.execute({
-            calldata: encodePumpV2("createToken", [f.name.trim(), f.ticker, meta, firstBuy]),
+            calldata: encodePumpV2("createToken", [f.name.trim(), f.ticker, meta, 0n]),
             gas: GAS_V2.create,
-            payableTinybars: fee + firstBuy + HTS_CREATE_BUDGET,
+            payableTinybars: fee + HTS_CREATE_BUDGET,
             contractId: LATEST_CONTRACT_ID!,
           })
         : await w.execute({
@@ -154,6 +157,23 @@ function Create() {
           .maybeSingle();
         if (data) {
           toast.success("Coin launched!");
+          if (hts && firstBuy > 0n) {
+            try {
+              const tokenId = `0.0.${BigInt(data.address)}`;
+              setBusy("Adding the coin to your wallet…");
+              await w.associateToken(tokenId);
+              setBusy("Confirm your launch buy…");
+              await w.execute({
+                calldata: encodePumpV2("buy", [data.address, 0n]),
+                gas: GAS_V2.buy,
+                payableTinybars: firstBuy,
+                contractId: LATEST_CONTRACT_ID!,
+              });
+              toast.success("Launch buy done!");
+            } catch (e) {
+              toast.error(`Coin is live, but the launch buy failed: ${e instanceof Error ? e.message : e}. You can buy on the coin page.`);
+            }
+          }
           return nav({ to: "/token/$id", params: { id: data.address } });
         }
       }
