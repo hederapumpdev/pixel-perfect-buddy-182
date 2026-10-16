@@ -6,7 +6,7 @@ import {
   NETWORK,
   PUMP_CONTRACTS,
   PUMP_CONTRACT_ID,
-  PUMP_CONTRACT_V2_ID,
+  HTS_CONTRACTS,
 } from "./hedera-config";
 
 const abi = artifact.pumpAbi as never;
@@ -88,7 +88,7 @@ const tokV2 = (v: bigint) => Number(v) / 1e8;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleLog(db: any, log: MirrorLog, contract: string) {
-  const v2 = !!PUMP_CONTRACT_V2_ID && contract === PUMP_CONTRACT_V2_ID;
+  const v2 = HTS_CONTRACTS.includes(contract);
   const toTok = v2 ? tokV2 : tok;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ev: { eventName: string; args: any };
