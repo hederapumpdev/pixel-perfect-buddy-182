@@ -49,6 +49,8 @@ async function usdToTinybars(usd: number) {
 export async function runAutobuy() {
   const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
   const w = botWallet();
+  const { data: cfg } = await db.from("bot_settings").select("*").eq("id", 1).maybeSingle();
+  const usd = Number(cfg?.usd_amount ?? BOT_BUY_USD);
 
   // 1) Advance a coin that is mid-way.
   const { data: open } = await db
@@ -73,10 +75,11 @@ export async function runAutobuy() {
       return { step: "buy confirmed", token: row.token, ok: rc.status === 1 };
     }
     // associate done (a revert usually means it was already associated) → buy
-    return sendBuy(db, w, row.token);
+    return sendBuy(db, w, row.token, usd);
   }
 
-  // 2) Pick the next new coin.
+  // 2) Pick the next new coin (only while switched on in admin).
+  if (cfg && !cfg.enabled) return { step: "off" };
   const { data: done } = await db.from("bot_buys").select("token");
   const seen = new Set((done ?? []).map((d) => d.token));
   const { data: coins } = await db
@@ -107,17 +110,17 @@ export async function runAutobuy() {
       return { step: "associate failed" };
     }
   }
-  return sendBuy(db, w, next.address);
+  return sendBuy(db, w, next.address, usd);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function sendBuy(db: any, w: ethers.Wallet, token: string) {
+async function sendBuy(db: any, w: ethers.Wallet, token: string, usd: number) {
   const { data: t } = await db.from("tokens").select("contract,graduated").eq("address", token).maybeSingle();
   if (!t || t.graduated) {
     await db.from("bot_buys").update({ status: "skipped" }).eq("token", token);
     return { step: "skipped" };
   }
-  const amount = await usdToTinybars(BOT_BUY_USD);
+  const amount = await usdToTinybars(usd);
   const bal = (await w.provider!.getBalance(w.address)) / WEI;
   if (bal < amount + RESERVE_TINYBARS) {
     // Leave it pending-free so it is retried once the wallet is topped up.
