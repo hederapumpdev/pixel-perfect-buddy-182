@@ -316,6 +316,24 @@ export type Database = {
         }
         Relationships: []
       }
+      x_daily_media: {
+        Row: {
+          expires_at: string
+          media_id: string
+          slot: string
+        }
+        Insert: {
+          expires_at: string
+          media_id: string
+          slot: string
+        }
+        Update: {
+          expires_at?: string
+          media_id?: string
+          slot?: string
+        }
+        Relationships: []
+      }
       x_daily_posts: {
         Row: {
           created_at: string

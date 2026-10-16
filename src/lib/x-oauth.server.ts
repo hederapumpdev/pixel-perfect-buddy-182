@@ -14,8 +14,8 @@ export function xAuthorization(method: string, url: string, query: Record<string
     oauth_timestamp: String(Math.floor(Date.now() / 1000)),
     oauth_signature_method: "HMAC-SHA1", oauth_version: "1.0",
   };
-  const parameters = Object.entries({ ...query, ...oauth }).map(([k, v]) => [encode(k), encode(v)]).sort(([a, av], [b, bv]) => a.localeCompare(b) || av.localeCompare(bv)).map(([k, v]) => `${k}=${v}`).join("&");
-  oauth.oauth_signature = createHmac("sha1", `${encode(secret)}&${encode(tokenSecret)}`).update(`${method.toUpperCase()}&${encode(url)}&${encode(parameters)}`).digest("base64");
+  const parameters = Object.entries({ ...query, ...oauth }).map(([k, v]): [string, string] => [encode(k), encode(v)]).sort(([a, av], [b, bv]) => a < b ? -1 : a > b ? 1 : av < bv ? -1 : av > bv ? 1 : 0).map(([k, v]) => `${k}=${v}`).join("&");
+  oauth["oauth_signature"] = createHmac("sha1", `${encode(secret)}&${encode(tokenSecret)}`).update(`${method.toUpperCase()}&${encode(url)}&${encode(parameters)}`).digest("base64");
   return "OAuth " + Object.entries(oauth).map(([k, v]) => `${encode(k)}="${encode(v)}"`).join(", ");
 }
 
