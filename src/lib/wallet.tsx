@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
-import { deployWithHashPack } from "./hashpack-deploy";
+import { deployWithHashPack, type DeployProgress, type DeployState } from "./hashpack-deploy";
 import {
   MIRROR_URL,
   NETWORK,
@@ -43,6 +43,8 @@ type WalletCtx = {
     constructorParams: `0x${string}`;
     gas: number;
   }) => Promise<string>;
+  /** Live progress of a contract upload, so the UI can say which approval is next. */
+  deployProgress: DeployProgress | null;
   refresh: () => void;
 };
 
@@ -86,6 +88,11 @@ async function initWeb3Auth() {
 const hexToBytes = (h: string) =>
   Uint8Array.from((h.replace(/^0x/, "").match(/.{2}/g) ?? []).map((b) => parseInt(b, 16)));
 
+// Remembers an interrupted contract upload so the next attempt continues where it
+// stopped instead of paying for the same bytes again.
+const DEPLOY_STATE_KEY = "hederaPump.deploy.v1";
+const fingerprint = (bc: string) => `${bc.length}:${bc.slice(0, 16)}:${bc.slice(-16)}`;
+
 async function loadLibs() {
   const [wc, sdk] = await Promise.all([
     import("@hashgraph/hedera-wallet-connect"),
@@ -103,6 +110,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [tick, setTick] = useState(0);
   const [mode, setMode] = useState<"hashpack" | "email" | null>(null);
   const evmSigner = useRef<EvmSigner | null>(null);
+  const [deployProgress, setDeployProgress] = useState<DeployProgress | null>(null);
 
   const attachEmail = useCallback(async (w: import("@web3auth/modal").Web3Auth) => {
     if (!w.provider) return;
@@ -272,7 +280,31 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (evmSigner.current) throw new Error("Deploy with HashPack, not an email wallet");
     const { sdk } = await loadLibs();
     const s = signer();
-    return deployWithHashPack(sdk, s, MIRROR_URL, { bytecode, constructorParams, gas });
+    const bc = bytecode.replace(/^0x/, "");
+    const fp = fingerprint(bc);
+    let resume: DeployState | null = null;
+    try {
+      const stored = JSON.parse(localStorage.getItem(DEPLOY_STATE_KEY) ?? "null") as
+        (DeployState & { fingerprint?: string }) | null;
+      if (stored?.fileId && stored.fingerprint === fp && typeof stored.uploaded === "number")
+        resume = { fileId: stored.fileId, uploaded: stored.uploaded };
+    } catch { resume = null; }
+    try {
+      const id = await deployWithHashPack(
+        sdk, s, MIRROR_URL,
+        { bytecode, constructorParams, gas, resume },
+        (p) => {
+          setDeployProgress(p);
+          try {
+            if (p.fileId) localStorage.setItem(DEPLOY_STATE_KEY, JSON.stringify({ fileId: p.fileId, uploaded: p.uploaded, fingerprint: fp }));
+          } catch { /* storage unavailable: the upload itself still runs */ }
+        },
+      );
+      try { localStorage.removeItem(DEPLOY_STATE_KEY); } catch { /* nothing stored */ }
+      return id;
+    } finally {
+      setDeployProgress(null);
+    }
   }, []);
 
   return (
@@ -288,6 +320,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         disconnect,
         execute,
         deploy,
+        deployProgress,
         refresh: () => setTick((t) => t + 1),
       }}
     >
