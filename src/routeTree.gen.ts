@@ -24,6 +24,7 @@ import { Route as ApiPublicDexscreenerLatestBlockRouteImport } from './routes/ap
 import { Route as ApiPublicDexscreenerPairRouteImport } from './routes/api/public/dexscreener/pair'
 import { Route as ApiPublicImgHashRouteImport } from './routes/api/public/img.$hash'
 import { Route as ApiPublicJobsAutobuyRouteImport } from './routes/api/public/jobs/autobuy'
+import { Route as ApiPublicJobsDailyXRouteImport } from './routes/api/public/jobs/daily-x'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -104,6 +105,11 @@ const ApiPublicJobsAutobuyRoute = ApiPublicJobsAutobuyRouteImport.update({
   path: '/api/public/jobs/autobuy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsDailyXRoute = ApiPublicJobsDailyXRouteImport.update({
+  id: '/api/public/jobs/daily-x',
+  path: '/api/public/jobs/daily-x',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
+  '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
+  '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
+  '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
+    | '/api/public/jobs/daily-x'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
+    | '/api/public/jobs/daily-x'
   id:
     | '__root__'
     | '/'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
+    | '/api/public/jobs/daily-x'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -227,6 +239,7 @@ export interface RootRouteChildren {
   ApiPublicDexscreenerPairRoute: typeof ApiPublicDexscreenerPairRoute
   ApiPublicImgHashRoute: typeof ApiPublicImgHashRoute
   ApiPublicJobsAutobuyRoute: typeof ApiPublicJobsAutobuyRoute
+  ApiPublicJobsDailyXRoute: typeof ApiPublicJobsDailyXRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -336,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsAutobuyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/daily-x': {
+      id: '/api/public/jobs/daily-x'
+      path: '/api/public/jobs/daily-x'
+      fullPath: '/api/public/jobs/daily-x'
+      preLoaderRoute: typeof ApiPublicJobsDailyXRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -355,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDexscreenerPairRoute: ApiPublicDexscreenerPairRoute,
   ApiPublicImgHashRoute: ApiPublicImgHashRoute,
   ApiPublicJobsAutobuyRoute: ApiPublicJobsAutobuyRoute,
+  ApiPublicJobsDailyXRoute: ApiPublicJobsDailyXRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

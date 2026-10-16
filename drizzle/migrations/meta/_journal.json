@@ -71,6 +71,20 @@
       "when": 1792185646762,
       "tag": "0009_lock_internal_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792187708264,
+      "tag": "0010_daily_x_posts",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792187857535,
+      "tag": "0011_daily_x_media_progress",
+      "breakpoints": true
     }
   ]
 }
