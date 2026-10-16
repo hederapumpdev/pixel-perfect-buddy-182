@@ -14,4 +14,4 @@
 - [x] Delete the first X tweet and post a fresh one on hederapump.dev
 - [x] 40 extra tweet images, each matched to its own tweet text (49 topics total)
 - [x] Remove every Lovable logo and badge from the site
-- [ ] Fix: signing in with a wallet does not work
+- [ ] Fix: signing in with a wallet does not work — live HashPack blocked by WalletConnect relay: Unauthorized: origin not allowed; user must allow https://hederapump.dev and https://www.hederapump.dev in the Reown project's domain allowlist
