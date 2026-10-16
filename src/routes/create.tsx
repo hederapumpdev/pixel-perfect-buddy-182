@@ -9,9 +9,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { useWallet } from "@/lib/wallet";
 import { syncChain, uploadImage } from "@/lib/chain.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { GAS, MIRROR_URL, NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
+import {
+  GAS,
+  GAS_V2,
+  MIRROR_URL,
+  NETWORK,
+  PUMP_CONTRACT_ID,
+  PUMP_CONTRACT_V2_ID,
+} from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
-import { encodePump, encodeToken } from "@/lib/curve";
+import { encodePump, encodePumpV2 } from "@/lib/curve";
+
+// HBAR sent along to pay for creating the HTS token itself (~15 measured on testnet).
+const HTS_CREATE_BUDGET = 2_000_000_000n; // 20 ℏ
 
 export const Route = createFileRoute("/create")({
   head: () => ({
@@ -99,12 +109,18 @@ function Create() {
       const fee = await readCreationFee();
       const firstBuy = f.firstBuy ? toTinybars(f.firstBuy) : 0n;
       setBusy("Confirm in your wallet…");
-      const calldata = encodePump("createToken", [f.name.trim(), f.ticker, meta]);
-      const { transactionHash } = await w.execute({
-        calldata,
-        gas: GAS.create,
-        payableTinybars: fee + firstBuy,
-      });
+      const { transactionHash } = PUMP_CONTRACT_V2_ID
+        ? await w.execute({
+            calldata: encodePumpV2("createToken", [f.name.trim(), f.ticker, meta, firstBuy]),
+            gas: GAS_V2.create,
+            payableTinybars: fee + firstBuy + HTS_CREATE_BUDGET,
+            contractId: PUMP_CONTRACT_V2_ID,
+          })
+        : await w.execute({
+            calldata: encodePump("createToken", [f.name.trim(), f.ticker, meta]),
+            gas: GAS.create,
+            payableTinybars: fee + firstBuy,
+          });
       setBusy("Waiting for the network…");
       for (let i = 0; i < 15; i++) {
         await new Promise((r) => setTimeout(r, 3000));
