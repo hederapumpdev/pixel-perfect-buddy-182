@@ -319,6 +319,107 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  // Sends one non-contract Hedera transaction (associate / allowance) through
+  // the connected wallet, same freeze + mirror-confirm pattern as execute().
+  const submitTx = useCallback(
+    async (tx: {
+      setNodeAccountIds: (n: never) => unknown;
+      setTransactionId: (id: never) => unknown;
+      freezeWith: (c: never) => Promise<unknown>;
+      executeWithSigner: (s: never) => Promise<{ transactionId: { toString(): string } }>;
+    }) => {
+      const { sdk } = await loadLibs();
+      const s = signer();
+      const client = sdk.Client.forMainnet();
+      tx.setNodeAccountIds(WALLET_NODE_IDS.map((n) => sdk.AccountId.fromString(n)) as never);
+      tx.setTransactionId(sdk.TransactionId.generate(s.getAccountId()) as never);
+      await tx.freezeWith(client as never);
+      let res: { transactionId: { toString(): string } };
+      try {
+        res = await tx.executeWithSigner(s as never);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (/getByKey|unhealthy|txError/i.test(msg))
+          throw new Error(
+            "HashPack couldn't send this to Hedera. Nothing was charged — please try again.",
+          );
+        throw e;
+      }
+      const [acct, ts] = res.transactionId.toString().split("@");
+      const mirrorId = `${acct}-${(ts ?? "").replace(".", "-")}`;
+      let result: string | null = null;
+      for (let i = 0; i < 40 && !result; i++) {
+        await new Promise((r) => setTimeout(r, 1500));
+        const j = await fetch(`${MIRROR_URL}/api/v1/transactions/${mirrorId}`)
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null);
+        result = j?.transactions?.[0]?.result ?? null;
+      }
+      if (!result) throw new Error("Sent, but no confirmation yet. Check your wallet history.");
+      if (result !== "SUCCESS") throw new Error(`Transaction failed: ${result}`);
+      setTick((t) => t + 1);
+    },
+    [],
+  );
+
+  const associateToken: WalletCtx["associateToken"] = useCallback(
+    async (tokenId) => {
+      if (evmSigner.current) {
+        // HTS precompile: associateToken(address account, address token)
+        const data =
+          "0x0914e2e2" +
+          (await evmSigner.current.getAddress()).slice(2).padStart(64, "0") +
+          idToEvm(tokenId).slice(2).padStart(64, "0");
+        const tx = await evmSigner.current.sendTransaction({
+          to: "0x0000000000000000000000000000000000000167",
+          data: data as `0x${string}`,
+          gasLimit: 800_000n,
+        });
+        const r = await tx.wait();
+        if (!r || r.status !== 1) throw new Error("Adding the token failed");
+        setTick((t) => t + 1);
+        return;
+      }
+      const { sdk } = await loadLibs();
+      const tx = new sdk.TokenAssociateTransaction()
+        .setAccountId(signer().getAccountId())
+        .setTokenIds([sdk.TokenId.fromString(tokenId)]);
+      await submitTx(tx as never);
+    },
+    [submitTx],
+  );
+
+  const approveToken: WalletCtx["approveToken"] = useCallback(
+    async (tokenId, spenderId, amount) => {
+      if (evmSigner.current) {
+        // ERC20 approve(spender, amount) on the token's EVM address.
+        const data =
+          "0x095ea7b3" +
+          idToEvm(spenderId).slice(2).padStart(64, "0") +
+          amount.toString(16).padStart(64, "0");
+        const tx = await evmSigner.current.sendTransaction({
+          to: idToEvm(tokenId),
+          data: data as `0x${string}`,
+          gasLimit: 800_000n,
+        });
+        const r = await tx.wait();
+        if (!r || r.status !== 1) throw new Error("Approving the sale failed");
+        setTick((t) => t + 1);
+        return;
+      }
+      const { sdk } = await loadLibs();
+      const tx = new sdk.AccountAllowanceApproveTransaction().approveTokenAllowance(
+        sdk.TokenId.fromString(tokenId),
+        signer().getAccountId(),
+        sdk.AccountId.fromString(spenderId),
+        // SDK wants a whole-token Long here; v2 coins have 8 decimals.
+        Number(amount / 100_000_000n) as never,
+      );
+      await submitTx(tx as never);
+    },
+    [submitTx],
+  );
+
   // Where the upload stands: Hedera's own record first, this browser's memory second.
   const resolveDeploy = useCallback(async (bc: string): Promise<{ resume: DeployState | null; contractId: string | null }> => {
     const id = accountId && /^\d+\.\d+\.\d+$/.test(accountId) ? accountId : null;
