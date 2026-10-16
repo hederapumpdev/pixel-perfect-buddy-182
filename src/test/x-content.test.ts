@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { appTweet, dailyXSlot, DAILY_X_HOURS, localXTime } from "@/lib/x-content";
+import { appTweet, dailyXSlot, DAILY_X_HOURS, localXTime, topics } from "@/lib/x-content";
+import { topicImages } from "@/lib/x-images";
 
 describe("daily app posting", () => {
   it("begins with an introduction outside normal posting hours", () => {
@@ -20,5 +21,10 @@ describe("daily app posting", () => {
       const weighted = appTweet(n, "2026-10-17").replace(/https:\/\/\S+/g, "x".repeat(23));
       expect([...weighted].length).toBeLessThanOrEqual(280);
     }
+  });
+  it("has exactly one branded image for every tweet topic", () => {
+    expect(topicImages.length).toBe(topics.length);
+    expect(new Set(topicImages).size).toBe(topicImages.length);
+    expect(topicImages.every((src) => typeof src === "string" && src.length > 0)).toBe(true);
   });
 });

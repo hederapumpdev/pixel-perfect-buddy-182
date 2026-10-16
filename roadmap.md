@@ -14,3 +14,4 @@
 - [ ] Delete the first X tweet and post a fresh one on hederapump.dev
 - [ ] 40 extra tweet images, each matched to its own tweet text (49 topics total)
 - [ ] Remove every Lovable logo and badge from the site
+- [ ] Fix: signing in with a wallet does not work
