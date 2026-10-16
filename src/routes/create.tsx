@@ -15,10 +15,10 @@ import {
   MIRROR_URL,
   NETWORK,
   PUMP_CONTRACT_ID,
-  PUMP_CONTRACT_V2_ID,
+  LATEST_CONTRACT_ID,
 } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
-import { encodePump, encodePumpV2 } from "@/lib/curve";
+import { encodePump, encodePumpV2, isV2 } from "@/lib/curve";
 
 // HBAR sent along to pay for creating the HTS token itself (~15 measured on testnet).
 const HTS_CREATE_BUDGET = 2_000_000_000n; // 20 ℏ
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/create")({
 });
 
 async function readCreationFee(): Promise<bigint> {
-  const data = (PUMP_CONTRACT_V2_ID ? encodePumpV2 : encodePump)("creationFee");
+  const data = (isV2(LATEST_CONTRACT_ID) ? encodePumpV2 : encodePump)("creationFee");
   const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -52,7 +52,7 @@ async function readCreationFee(): Promise<bigint> {
 }
 async function contractEvm() {
   const r = await fetch(
-    `${MIRROR_URL}/api/v1/contracts/${PUMP_CONTRACT_V2_ID ?? PUMP_CONTRACT_ID}`,
+    `${MIRROR_URL}/api/v1/contracts/${LATEST_CONTRACT_ID}`,
   );
   return (await r.json()).evm_address as string;
 }
@@ -109,12 +109,12 @@ function Create() {
       const fee = await readCreationFee();
       const firstBuy = f.firstBuy ? toTinybars(f.firstBuy) : 0n;
       setBusy("Confirm in your wallet…");
-      const { transactionHash } = PUMP_CONTRACT_V2_ID
+      const { transactionHash } = isV2(LATEST_CONTRACT_ID)
         ? await w.execute({
             calldata: encodePumpV2("createToken", [f.name.trim(), f.ticker, meta, firstBuy]),
             gas: GAS_V2.create,
             payableTinybars: fee + firstBuy + HTS_CREATE_BUDGET,
-            contractId: PUMP_CONTRACT_V2_ID,
+            contractId: LATEST_CONTRACT_ID!,
           })
         : await w.execute({
             calldata: encodePump("createToken", [f.name.trim(), f.ticker, meta]),
