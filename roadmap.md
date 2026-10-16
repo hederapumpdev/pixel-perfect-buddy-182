@@ -9,3 +9,5 @@
 - [ ] Fund bot wallet 0xD14aDF40256C7FDab669Ec2a5eEE25aFaa755392 — waits on user
 - [ ] DexScreener listing request (user submits)
 - [x] Admin page only behind PIN
+- [ ] Daily X tweets link to hederapump.dev instead of the lovable.app URL
+- [ ] One branded image per tweet topic (9 images, text and image matched)
