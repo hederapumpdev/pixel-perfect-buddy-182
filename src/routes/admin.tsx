@@ -6,9 +6,13 @@ import { Shell } from "@/components/Shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
-import { NETWORK, PUMP_CONTRACT_ID, HASHSCAN_URL, FEE_WALLET_EVM } from "@/lib/hedera-config";
+import { NETWORK, PUMP_CONTRACT_V2_ID, HASHSCAN_URL, FEE_WALLET_EVM } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
-import artifact from "@/lib/contract-artifact.json";
+import artifact from "@/lib/contract-artifact-hts.json";
+
+// SaucerSwap V1 mainnet (docs.saucerswap.finance/developers/contracts)
+const SAUCER_ROUTER_EVM = "0x00000000000000000000000000000000002e7a5d"; // 0.0.3045981
+const SAUCER_FACTORY_EVM = "0x0000000000000000000000000000000000103680"; // 0.0.1062784
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -36,7 +40,7 @@ function Admin() {
 
   // Show where the upload stands as soon as HashPack is connected.
   useEffect(() => {
-    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_ID) {
+    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_V2_ID) {
       w.checkDeploy(artifact.bytecode).then((s) => s.contractId && setDeployed(s.contractId)).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
