@@ -139,7 +139,7 @@ function Create() {
       const hts = isV2(LATEST_CONTRACT_ID);
       // A brand-new HTS token can't be sent to the creator before their wallet
       // associates it, so the launch buy happens as a separate step afterwards.
-      let v4Calldata: string | undefined;
+      let v4Calldata: `0x${string}` | undefined;
       if (hts && isV4(LATEST_CONTRACT_ID)) {
         // HIP-405 metadata URL stored on the token: resolved by creator + creation index.
         const creator = (w.evmAddress ?? longZero(w.accountId!)).toLowerCase();
