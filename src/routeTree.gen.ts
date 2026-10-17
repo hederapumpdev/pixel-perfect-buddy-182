@@ -15,6 +15,7 @@ import { Route as CreateRouteImport } from './routes/create'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TokenIdRouteImport } from './routes/token.$id'
 import { Route as ApiPublicSupportChatRouteImport } from './routes/api/public/support-chat'
@@ -54,6 +55,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SupportRoute = SupportRouteImport.update({
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/token/$id': typeof TokenIdRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/token/$id': typeof TokenIdRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/token/$id': typeof TokenIdRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/how-it-works'
     | '/profile'
+    | '/sitemap.xml'
     | '/support'
     | '/token/$id'
     | '/api/public/support-chat'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/how-it-works'
     | '/profile'
+    | '/sitemap.xml'
     | '/support'
     | '/token/$id'
     | '/api/public/support-chat'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/how-it-works'
     | '/profile'
+    | '/sitemap.xml'
     | '/support'
     | '/token/$id'
     | '/api/public/support-chat'
@@ -230,6 +242,7 @@ export interface RootRouteChildren {
   ExploreRoute: typeof ExploreRoute
   HowItWorksRoute: typeof HowItWorksRoute
   ProfileRoute: typeof ProfileRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
   TokenIdRoute: typeof TokenIdRoute
   ApiPublicSupportChatRoute: typeof ApiPublicSupportChatRoute
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/support': {
@@ -366,6 +386,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreRoute: ExploreRoute,
   HowItWorksRoute: HowItWorksRoute,
   ProfileRoute: ProfileRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
   TokenIdRoute: TokenIdRoute,
   ApiPublicSupportChatRoute: ApiPublicSupportChatRoute,
