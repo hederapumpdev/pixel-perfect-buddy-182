@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Telegram: post app introduction now and recurring app messages
 - [ ] Telegram: hourly edit of one bonding-progress top 10 post and separate graduation alerts in @hederapump
 - [x] Write an English Reddit introduction for HederaPump with official website and social links
 - [x] SEO: sitemap added and verified with public pages and real tokens; robots.txt references it
