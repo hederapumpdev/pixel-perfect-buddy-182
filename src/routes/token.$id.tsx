@@ -11,6 +11,7 @@ import { Progress, TokenImage } from "@/components/TokenCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
+import { socialUrl } from "@/lib/social-links";
 import { useChainSync } from "@/hooks/use-sync";
 import {
   tokenQuery,
@@ -384,25 +385,6 @@ function TokenPage() {
                 : "When 800M tokens are sold, the coin graduates and moves to SaucerSwap."}
             </p>
           </div>
-          {(t.description || t.website || t.twitter || t.telegram) && (
-            <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm">
-              {t.description && <p className="text-muted-foreground">{t.description}</p>}
-              <div className="flex flex-wrap gap-3 text-xs">
-                {t.website && /^https?:\/\//.test(t.website) && (
-                  <a
-                    className="text-accent"
-                    href={t.website}
-                    target="_blank"
-                    rel="noreferrer nofollow"
-                  >
-                    Website
-                  </a>
-                )}
-                {t.twitter && <span className="text-muted-foreground">X: {t.twitter}</span>}
-                {t.telegram && <span className="text-muted-foreground">TG: {t.telegram}</span>}
-              </div>
-            </div>
-          )}
         </aside>
 
         <div className="space-y-6">
@@ -429,28 +411,6 @@ function TokenPage() {
                 Chart appears after the first trades.
               </p>
             )}
-          </div>
-
-          <div className="rounded-lg border border-border bg-card">
-            <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <p className="text-sm font-semibold">DexScreener chart</p>
-              <a
-                href={`https://dexscreener.com/hedera/${t.address}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs text-accent"
-              >
-                Open on DexScreener
-              </a>
-            </div>
-            <iframe
-              title={`${t.symbol} on DexScreener`}
-              src={`https://dexscreener.com/hedera/${t.address}?embed=1&theme=dark&trades=0&info=0`}
-              className="h-96 w-full rounded-b-lg"
-            />
-            <p className="px-4 pb-3 pt-2 text-xs text-muted-foreground">
-              The chart appears here as soon as this coin is listed on DexScreener.
-            </p>
           </div>
 
           <div className="rounded-lg border border-border bg-card">
@@ -529,15 +489,26 @@ function TokenPage() {
                   {t.description || "No description yet."}
                 </p>
                 <div className="flex flex-wrap gap-3 text-xs">
-                  {t.twitter && (
-                    <a href={t.twitter} target="_blank" rel="noreferrer" className="text-accent">X / Twitter</a>
-                  )}
-                  {t.telegram && (
-                    <a href={t.telegram} target="_blank" rel="noreferrer" className="text-accent">Telegram</a>
-                  )}
-                  {t.website && (
-                    <a href={t.website} target="_blank" rel="noreferrer" className="text-accent">Website</a>
-                  )}
+                  {(
+                    [
+                      ["X / Twitter", socialUrl("twitter", t.twitter) ?? undefined],
+                      ["Telegram", socialUrl("telegram", t.telegram) ?? undefined],
+                      ["Website", socialUrl("website", t.website) ?? undefined],
+                      ["DexScreener", `https://dexscreener.com/hedera/${t.address}`],
+                    ] as const
+                  )
+                    .filter(([, href]) => href)
+                    .map(([label, href]) => (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-accent"
+                      >
+                        {label}
+                      </a>
+                    ))}
                 </div>
               </div>
             )}
