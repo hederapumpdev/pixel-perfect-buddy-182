@@ -71,7 +71,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <LiveTicker />
       <AlertWatcher />
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4">
+        <div className="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center gap-2 px-4 py-2 lg:flex-nowrap lg:gap-6">
           <Logo />
           <nav className="hidden gap-1 md:flex">
             {nav.map((n) => (

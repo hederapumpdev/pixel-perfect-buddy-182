@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Clarify wallet options: WalletConnect, separate MetaMask, social-only Sign in; display native Hedera IDs without changing on-chain addresses
+- [x] Clarify wallet options: WalletConnect, separate MetaMask, social-only Sign in; native token/creator/trader IDs verified on real coin, nine tests passed; completed connection still requires user's wallet/social approval
 - [x] Coin page: 5m/1h/1d buy/sell statistics, HBAR/USD volume and unique wallets; six tests passed, all periods verified on real HEDERAPUMP trades, desktop/mobile panel fits
 - [x] Coin page: reference-style bonding progress panel with real percentage, estimated HBAR/USD remaining and working explanation link; verified with real token on desktop/mobile
 - [x] Admin: pre-v4 HTS token selector, copyable SaucerSwap request, token-info JSON and official Davinci Pics links; verified using real HEDERAPUMP token; external submission eligibility remains unconfirmed
