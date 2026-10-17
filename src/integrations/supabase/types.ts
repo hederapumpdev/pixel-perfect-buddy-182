@@ -41,6 +41,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_payouts: {
+        Row: {
+          created_at: string
+          error: string | null
+          hbar_amount: number
+          id: string
+          kind: string
+          recipient: string
+          status: string
+          token: string | null
+          tx_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          hbar_amount?: number
+          id: string
+          kind: string
+          recipient: string
+          status?: string
+          token?: string | null
+          tx_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          hbar_amount?: number
+          id?: string
+          kind?: string
+          recipient?: string
+          status?: string
+          token?: string | null
+          tx_hash?: string | null
+        }
+        Relationships: []
+      }
       bot_settings: {
         Row: {
           enabled: boolean
