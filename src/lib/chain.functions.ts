@@ -168,10 +168,11 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
       })
       .eq("address", token);
   } else if (ev.eventName === "Graduated" || ev.eventName === "Migrated") {
-    await db
+    const { error } = await db
       .from("tokens")
       .update({ graduated: true })
       .eq("address", String(a.token).toLowerCase());
+    if (error) throw error;
   }
 }
 

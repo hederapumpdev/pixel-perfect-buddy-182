@@ -1,5 +1,6 @@
 import { NETWORK, HTS_CONTRACTS } from './hedera-config';
 import { topCoinsMessage, graduationMessage, type TelegramCoin } from './telegram-content';
+import { telegramAppSlot, telegramAppMessage } from './telegram-app-content';
 
 class TelegramError extends Error {
   constructor(public status: number, public body: string) { super(`Telegram [${status}]: ${body}`); }
@@ -76,6 +77,32 @@ export async function dispatchTelegramGraduation() {
   } catch (e) {
     const definite = !attempted || (e instanceof TelegramError && e.status < 500);
     await db.from('telegram_graduation_posts').update({ status: definite ? 'failed' : 'unknown', last_error: e instanceof Error ? e.message : 'Telegram failed' }).eq('token', job.token);
+    throw e;
+  }
+}
+
+export async function postTelegramApp(now = new Date()) {
+  const { supabaseAdmin: db } = await import('@/integrations/supabase/client.server');
+  const first = await db.from('telegram_app_posts').select('slot').eq('slot', 'introduction').maybeSingle();
+  if (first.error) throw first.error;
+  const slot = first.data ? telegramAppSlot(now) : 'introduction';
+  if (!slot) return { step: 'outside posting hours' };
+  const uncertain = await db.from('telegram_app_posts').select('slot').in('status', ['unknown','sending']).limit(1);
+  if (uncertain.error) throw uncertain.error;
+  if (uncertain.data?.length) return { step: 'awaiting review' };
+  const count = await db.from('telegram_app_posts').select('slot', { count: 'exact', head: true }).eq('status', 'sent');
+  if (count.error) throw count.error;
+  const reserve = await db.from('telegram_app_posts').insert({ slot });
+  if (reserve.error?.code === '23505') return { step: 'already processed' };
+  if (reserve.error) throw reserve.error;
+  try {
+    const sent = await telegram('sendMessage', { chat_id: '@hederapump', text: telegramAppMessage(count.count ?? 0), link_preview_options: { is_disabled: true } });
+    if (!sent?.message_id) throw new Error('No Telegram confirmation');
+    const saved = await db.from('telegram_app_posts').update({ status: 'sent', message_id: sent.message_id }).eq('slot', slot);
+    if (saved.error) throw saved.error;
+    return { step: 'app post sent' };
+  } catch (e) {
+    await db.from('telegram_app_posts').update({ status: e instanceof TelegramError && e.status < 500 ? 'failed' : 'unknown', last_error: e instanceof Error ? e.message : 'Telegram failed' }).eq('slot', slot);
     throw e;
   }
 }
