@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Telegram: pin top 10, delete first introduction, add images, and refresh every 15 minutes
 - [x] Telegram: introduction posted and verified in @hederapump; app messages scheduled at 10:00, 15:00 and 20:00 Amsterdam time
 - [x] Telegram: same top 10 message sent and edited successfully; hourly updates scheduled; graduation alerts queued from real chain transitions
 - [ ] Telegram: verify a real graduation alert — waits for a coin to graduate
