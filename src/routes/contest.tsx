@@ -4,7 +4,7 @@ import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { NETWORK } from "@/lib/hedera-config";
 import { tokensQuery } from "@/lib/queries";
-import { useUsd, fmtUsd } from "@/lib/usd";
+import { useUsd } from "@/lib/usd";
 import {
   CONTEST_MIN_VOLUME_HBAR,
   CONTEST_PRIZE_HBAR,
@@ -74,7 +74,7 @@ function Contest() {
           <h1 className="text-3xl font-bold">Weekly launch contest</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             The coin with the most trading volume this week wins <b className="text-primary">{CONTEST_PRIZE_HBAR} HBAR</b>
-            {usd ? ` (≈ ${fmtUsd(CONTEST_PRIZE_HBAR * usd)})` : ""} for its creator, paid automatically on Monday.
+            {` (≈ ${usd(CONTEST_PRIZE_HBAR)})`} for its creator, paid automatically on Monday.
             Minimum {CONTEST_MIN_VOLUME_HBAR.toLocaleString()} HBAR volume. Official coins don't take part. Ends in {days} day{days === 1 ? "" : "s"}.
           </p>
         </div>
