@@ -10,7 +10,7 @@ export const isValidRef = (ref: string) => EVM_RE.test(ref) || HEDERA_RE.test(re
 /** Hedera account id → long-zero EVM address. */
 export const refToEvm = (ref: string) =>
   HEDERA_RE.test(ref)
-    ? "0x" + BigInt(ref.split(".")[2]).toString(16).padStart(40, "0")
+    ? "0x" + BigInt(ref.split(".")[2] ?? "0").toString(16).padStart(40, "0")
     : ref.toLowerCase();
 
 /** Call once on app load: stores ?ref= from the URL (first referrer wins). */

@@ -23,7 +23,7 @@ export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID
 );
 
 /** Contracts with the v4 ABI (referral args on buy/sell, metadataUrl on createToken). */
-export const V4_CONTRACTS: string[] = [PUMP_CONTRACT_V4_ID].filter((c): c is string => !!c);
+export const V4_CONTRACTS: string[] = [PUMP_CONTRACT_V4_ID].filter((c): c is string => typeof c === "string");
 
 /** Contract new coins are created on. */
 export const LATEST_CONTRACT_ID: string | null =
