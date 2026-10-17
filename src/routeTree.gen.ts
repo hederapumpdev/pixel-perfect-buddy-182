@@ -26,6 +26,8 @@ import { Route as ApiPublicDexscreenerPairRouteImport } from './routes/api/publi
 import { Route as ApiPublicImgHashRouteImport } from './routes/api/public/img.$hash'
 import { Route as ApiPublicJobsAutobuyRouteImport } from './routes/api/public/jobs/autobuy'
 import { Route as ApiPublicJobsDailyXRouteImport } from './routes/api/public/jobs/daily-x'
+import { Route as ApiPublicJobsTelegramAppRouteImport } from './routes/api/public/jobs/telegram-app'
+import { Route as ApiPublicJobsTelegramTopRouteImport } from './routes/api/public/jobs/telegram-top'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -116,6 +118,18 @@ const ApiPublicJobsDailyXRoute = ApiPublicJobsDailyXRouteImport.update({
   path: '/api/public/jobs/daily-x',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsTelegramAppRoute =
+  ApiPublicJobsTelegramAppRouteImport.update({
+    id: '/api/public/jobs/telegram-app',
+    path: '/api/public/jobs/telegram-app',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicJobsTelegramTopRoute =
+  ApiPublicJobsTelegramTopRouteImport.update({
+    id: '/api/public/jobs/telegram-top',
+    path: '/api/public/jobs/telegram-top',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -135,6 +149,8 @@ export interface FileRoutesByFullPath {
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
+  '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
+  '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -154,6 +170,8 @@ export interface FileRoutesByTo {
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
+  '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
+  '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -174,6 +192,8 @@ export interface FileRoutesById {
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
+  '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
+  '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -195,6 +215,8 @@ export interface FileRouteTypes {
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
     | '/api/public/jobs/daily-x'
+    | '/api/public/jobs/telegram-app'
+    | '/api/public/jobs/telegram-top'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -214,6 +236,8 @@ export interface FileRouteTypes {
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
     | '/api/public/jobs/daily-x'
+    | '/api/public/jobs/telegram-app'
+    | '/api/public/jobs/telegram-top'
   id:
     | '__root__'
     | '/'
@@ -233,6 +257,8 @@ export interface FileRouteTypes {
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
     | '/api/public/jobs/daily-x'
+    | '/api/public/jobs/telegram-app'
+    | '/api/public/jobs/telegram-top'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -253,6 +279,8 @@ export interface RootRouteChildren {
   ApiPublicImgHashRoute: typeof ApiPublicImgHashRoute
   ApiPublicJobsAutobuyRoute: typeof ApiPublicJobsAutobuyRoute
   ApiPublicJobsDailyXRoute: typeof ApiPublicJobsDailyXRoute
+  ApiPublicJobsTelegramAppRoute: typeof ApiPublicJobsTelegramAppRoute
+  ApiPublicJobsTelegramTopRoute: typeof ApiPublicJobsTelegramTopRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -376,6 +404,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsDailyXRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/telegram-app': {
+      id: '/api/public/jobs/telegram-app'
+      path: '/api/public/jobs/telegram-app'
+      fullPath: '/api/public/jobs/telegram-app'
+      preLoaderRoute: typeof ApiPublicJobsTelegramAppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/telegram-top': {
+      id: '/api/public/jobs/telegram-top'
+      path: '/api/public/jobs/telegram-top'
+      fullPath: '/api/public/jobs/telegram-top'
+      preLoaderRoute: typeof ApiPublicJobsTelegramTopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -397,6 +439,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicImgHashRoute: ApiPublicImgHashRoute,
   ApiPublicJobsAutobuyRoute: ApiPublicJobsAutobuyRoute,
   ApiPublicJobsDailyXRoute: ApiPublicJobsDailyXRoute,
+  ApiPublicJobsTelegramAppRoute: ApiPublicJobsTelegramAppRoute,
+  ApiPublicJobsTelegramTopRoute: ApiPublicJobsTelegramTopRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

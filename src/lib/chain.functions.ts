@@ -74,6 +74,10 @@ async function runSync(): Promise<{ synced: number; configured: boolean; error?:
       if (logs.length < 100) break;
     }
   }
+  try {
+    const { dispatchTelegramGraduation } = await import('./telegram.server');
+    await dispatchTelegramGraduation();
+  } catch (e) { console.error('Telegram graduation notification failed', e); }
   return { synced: count, configured: true };
 }
 
@@ -164,10 +168,11 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
       })
       .eq("address", token);
   } else if (ev.eventName === "Graduated" || ev.eventName === "Migrated") {
-    await db
+    const { error } = await db
       .from("tokens")
       .update({ graduated: true })
       .eq("address", String(a.token).toLowerCase());
+    if (error) throw error;
   }
 }
 
