@@ -386,14 +386,6 @@ function TokenPage() {
           </div>
         </aside>
 
-                )}
-                {t.twitter && <span className="text-muted-foreground">X: {t.twitter}</span>}
-                {t.telegram && <span className="text-muted-foreground">TG: {t.telegram}</span>}
-              </div>
-            </div>
-          )}
-        </aside>
-
         <div className="space-y-6">
           <div className="rounded-lg border border-border bg-card p-4">
             <div className="flex flex-wrap items-baseline gap-3">
