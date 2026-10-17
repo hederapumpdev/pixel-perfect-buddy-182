@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Discord: footer link (https://discord.gg/bYPD27QtZ), automatische top-10 en graduation-posts via connector, en deremaining kanalen/onderwerpen invullen
+- [ ] Discord: serverstructuur en kanaalonderwerpen invullen — wacht op gekoppelde connector zodat de kanalen zichtbaar zijn
 - [x] Clarify wallet options: WalletConnect, separate MetaMask, social-only Sign in; native token/creator/trader IDs verified on real coin, nine tests passed; completed connection still requires user's wallet/social approval
 - [x] Coin page: 5m/1h/1d buy/sell statistics, HBAR/USD volume and unique wallets; six tests passed, all periods verified on real HEDERAPUMP trades, desktop/mobile panel fits
 - [x] Coin page: reference-style bonding progress panel with real percentage, estimated HBAR/USD remaining and working explanation link; verified with real token on desktop/mobile
