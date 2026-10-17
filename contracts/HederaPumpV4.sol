@@ -233,21 +233,35 @@ contract HederaPumpV4 {
     }
 
     /// Platform share goes straight to the fee wallet on every trade; if that payout fails it
-    /// is kept for claimPlatformFees so the trade never breaks. Creator and referrer shares are
-    /// kept in the contract until claimed. Without a referrer the platform keeps the full share.
-    function _takeFee(address token, address creator, uint256 fee, address referrer) internal {
+    /// is kept for claimPlatformFees so the trade never breaks. The creator share is kept for
+    /// claimCreatorFees. With a valid referrer, REFERRER_SHARE_BPS of the fee goes into the
+    /// shared referral pool; without one the platform keeps it.
+    function _takeFee(address token, address creator, uint256 fee, address referrer, uint256 volume) internal {
         uint256 cf = (fee * CREATOR_SHARE_BPS) / 10_000;
         creatorFees[creator] += cf;
         uint256 pf = fee - cf;
         if (referrer != address(0)) {
             uint256 rf = (fee * REFERRER_SHARE_BPS) / 10_000;
-            referralFees[referrer] += rf;
+            // Credit the volume first so the pool top-up below divides over all volume
+            // including this trade (and never by zero).
+            referralVolume[referrer] += volume;
+            totalReferralVolume += volume;
+            accReferralPerVolume += (rf * SCALE) / totalReferralVolume;
+            referralRewardDebt[referrer] = (referralVolume[referrer] * accReferralPerVolume) / SCALE;
             pf -= rf;
             emit ReferralFee(token, referrer, rf);
         }
         if (pf == 0) return;
         (bool ok, ) = payable(feeRecipient).call{value: pf, gas: 10_000}("");
         if (!ok) platformFees += pf;
+    }
+
+    /// Referral rewards claimable right now: share of the pool earned on attributed volume,
+    /// minus what was already claimed.
+    function pendingReferralFees(address referrer) public view returns (uint256) {
+        uint256 earned = (referralVolume[referrer] * accReferralPerVolume) / SCALE;
+        uint256 debt = referralRewardDebt[referrer];
+        return earned > debt ? earned - debt : 0;
     }
 
     function claimCreatorFees() external nonReentrant {
