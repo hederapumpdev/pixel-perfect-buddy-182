@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 - On-chain logic lives in `contracts/HederaPump.sol`; recompile with `bun contracts/compile.mjs` into `src/lib/contract-artifact.json` — the app encodes calls from that ABI, so they must stay in sync.
-- Network, deployed contract ID and WalletConnect ID live in `src/lib/hedera-config.ts` — one place to switch networks or contracts.
+- Network, contract IDs and WalletConnect ID live in `src/lib/hedera-config.ts` for centralized configuration.
 - Coin/trade tables are filled only by `syncChain` from Hedera mirror-node events — the chain is the source of truth, never write them from user input.
 - Browser Node polyfills in Vite must resolve directly to absolute npm package files, only in the client environment; re-resolving bare built-ins can recurse through aliases and exhaust the build.
 - Wallet SDKs (hedera-wallet-connect, hiero sdk, web3auth, grpc-js) are stubbed out of server builds in `vite.config.ts` and may only be loaded via dynamic import in browser code — on the Worker they crash at load and the bundler merges viem/ethers into their chunk, which broke every server function (PIN, sync, bot).
@@ -26,8 +26,9 @@
 - Daily X posting uses a managed authenticated schedule, server-only OAuth1 credentials, a database lease and unique slots; uncertain sends pause instead of retrying because X has no posting idempotency key. Images are bundled branded assets and no background AI calls are needed.
 - Telegram uses a persisted pinned message ID and lease for scheduled photo-caption edits; images are bundled inline and uploaded through the gateway to avoid unpublished asset URLs, and chain-derived graduation alerts retain unique claims to prevent duplicates.
 - Telegram app messages reserve unique slots before sending and reuse a browser-safe topic module; an authenticated hourly callback checks Amsterdam posting windows without depending on X credentials.
-- Wallet profile display uses the shared useProfiles hook, resolving Hedera account IDs through mirror-node EVM aliases with long-zero fallback so holders and trades show the same identity.
+- Profiles use shared useProfiles with mirror-node EVM aliases and long-zero fallback for consistent holder/trader identity.
 - The sitemap uses required route-level staticData.sitemap decisions and paginated public-key token reads; exclude private surfaces and omit non-authoritative lastmod dates so search discovery stays safe and complete.
 - v4 contract `contracts/HederaPumpV4.sol` (compile-v4.mjs → contract-artifact-v4.json) adds HIP-405 token metadata (metadataUrl = /api/public/token-meta/<creatorEvm>/<index>, index = creator's prior coin count) and a shared referral pool: REFERRER_SHARE_BPS 700 of each referred trade's fee, split pro-rata by attributed volume via a scaled accumulator (referralVolume/referralRewardDebt); referrers self-claim with claimReferralFees, the owner never signs. V4_CONTRACTS in hedera-config.ts gates the v4 ABI (extra referrer arg on buy/sell, metadataUrl on createToken); encode via encodePumpV4.
 - Referral links: ?ref=<wallet> captured once into localStorage (src/lib/referral.ts, first referrer wins) and sent with every v4 trade; profile shows the Referrals block only when PUMP_CONTRACT_V4_ID is set.
 - Legacy SaucerSwap assistance exports synced pre-v4 HTS information client-side with Davinci Pics guidance; never imply submission success or attempt metadata updates because those tokens lack update keys.
+- BondingProgress uses synced reserves for a display-only HBAR/USD graduation estimate, including the existing fee; never use it to execute trades.
