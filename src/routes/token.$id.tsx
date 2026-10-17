@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Shell } from "@/components/Shell";
 import { TokenImage } from "@/components/TokenCard";
 import { BondingProgress } from "@/components/BondingProgress";
+import { TradeStatistics } from "@/components/TradeStatistics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
@@ -387,6 +388,8 @@ function TokenPage() {
               </p>
             )}
           </div>
+
+          <TradeStatistics token={t.address} />
 
           <div className="rounded-lg border border-border bg-card">
             <div className="flex gap-2 p-2 border-b border-border">
