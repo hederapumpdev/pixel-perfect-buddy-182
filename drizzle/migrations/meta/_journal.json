@@ -99,6 +99,13 @@
       "when": 1792199670750,
       "tag": "0013_telegram_channel_posts",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792199843498,
+      "tag": "0014_telegram_app_posts",
+      "breakpoints": true
     }
   ]
 }
