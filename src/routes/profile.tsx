@@ -240,6 +240,66 @@ function Profile() {
         </div>
       </div>
 
+      {PUMP_CONTRACT_V4_ID && (
+        <div className="mt-6 rounded-lg border border-border bg-card p-4">
+          <h2 className="text-xl font-semibold">Referrals</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Share your link — when people trade after opening it, 10% of our fee goes into a
+            shared pool for all referrers. Your slice grows with the trading volume of the
+            people you brought in.
+          </p>
+          {referralLink(w.accountId, w.evmAddress) && (
+            <div className="mt-3 flex items-center gap-2">
+              <code className="flex-1 truncate rounded-md border border-border bg-muted/40 px-3 py-2 font-mono text-xs">
+                {referralLink(w.accountId, w.evmAddress)}
+              </code>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(referralLink(w.accountId, w.evmAddress)!);
+                  toast.success("Referral link copied");
+                }}
+              >
+                Copy
+              </Button>
+            </div>
+          )}
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div>
+              <p className="text-xs text-muted-foreground">Referred trading volume</p>
+              <p className="mt-1 font-mono text-lg font-semibold">
+                {referral.isLoading ? "…" : fmtHbar(Number(referral.data?.volume ?? 0n) / 1e8)}
+              </p>
+              {!referral.isLoading && (
+                <p className="font-mono text-xs text-muted-foreground">
+                  {usd(Number(referral.data?.volume ?? 0n) / 1e8)}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Referral reward to claim</p>
+              <p className="mt-1 font-mono text-lg font-semibold">
+                {referral.isLoading ? "…" : fmtHbar(Number(referral.data?.pending ?? 0n) / 1e8)}
+              </p>
+              {!referral.isLoading && (
+                <p className="font-mono text-xs text-muted-foreground">
+                  {usd(Number(referral.data?.pending ?? 0n) / 1e8)}
+                </p>
+              )}
+              <Button
+                size="sm"
+                className="mt-2"
+                disabled={busy || !(Number(referral.data?.pending ?? 0n) > 0)}
+                onClick={claimReferral}
+              >
+                {busy ? "Confirm in your wallet…" : "Claim reward"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h2 className="mt-10 text-xl font-semibold">Coins you launched</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {coins.data?.map((t) => <TokenCard key={t.address} t={t} />)}
