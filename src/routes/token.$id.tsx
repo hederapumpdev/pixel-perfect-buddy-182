@@ -384,19 +384,8 @@ function TokenPage() {
                 : "When 800M tokens are sold, the coin graduates and moves to SaucerSwap."}
             </p>
           </div>
-          {(t.description || t.website || t.twitter || t.telegram) && (
-            <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm">
-              {t.description && <p className="text-muted-foreground">{t.description}</p>}
-              <div className="flex flex-wrap gap-3 text-xs">
-                {t.website && /^https?:\/\//.test(t.website) && (
-                  <a
-                    className="text-accent"
-                    href={t.website}
-                    target="_blank"
-                    rel="noreferrer nofollow"
-                  >
-                    Website
-                  </a>
+        </aside>
+
                 )}
                 {t.twitter && <span className="text-muted-foreground">X: {t.twitter}</span>}
                 {t.telegram && <span className="text-muted-foreground">TG: {t.telegram}</span>}
