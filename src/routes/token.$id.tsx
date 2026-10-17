@@ -513,9 +513,9 @@ function TokenPage() {
                 <div className="flex flex-wrap gap-3 text-xs">
                   {(
                     [
-                      ["X / Twitter", socialUrl("twitter", t.twitter)],
-                      ["Telegram", socialUrl("telegram", t.telegram)],
-                      ["Website", socialUrl("website", t.website)],
+                      ["X / Twitter", socialUrl("twitter", t.twitter) ?? undefined],
+                      ["Telegram", socialUrl("telegram", t.telegram) ?? undefined],
+                      ["Website", socialUrl("website", t.website) ?? undefined],
                     ] as const
                   )
                     .filter(([, href]) => href)
