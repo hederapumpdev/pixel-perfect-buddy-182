@@ -47,6 +47,8 @@ const f = vi.fn(async (url: string) => {
 describe("debug", () => {
   it("renders", async () => {
     vi.stubGlobal("fetch", f);
+    const sb: any = await import("@/integrations/supabase/client");
+    console.log("SB:", typeof sb.supabase?.from, JSON.stringify(await sb.supabase?.from("trades").select("a").in("trader", [ADDR])));
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={client}>
