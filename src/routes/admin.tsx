@@ -33,6 +33,7 @@ const SAUCER_FACTORY_EVM = "0x0000000000000000000000000000000000103680"; // 0.0.
 const PLATFORM_SHARE = 0.7;
 
 export const Route = createFileRoute("/admin")({
+  staticData: { sitemap: "exclude-subtree" },
   head: () => ({
     meta: [
       { title: "Admin — HederaPump" },

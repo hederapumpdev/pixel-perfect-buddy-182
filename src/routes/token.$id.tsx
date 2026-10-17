@@ -47,6 +47,7 @@ import {
 const evmToId = (addr: string) => `0.0.${BigInt(addr).toString()}`;
 
 export const Route = createFileRoute("/token/$id")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Coin — HederaPump" },

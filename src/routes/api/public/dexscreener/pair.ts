@@ -3,6 +3,7 @@ import { HBAR_ASSET, db, isAddr, json, toBlock } from "@/lib/dexscreener";
 
 // Each coin's bonding curve is one pair: coin (asset0) / HBAR (asset1). Pair id = coin address.
 export const Route = createFileRoute("/api/public/dexscreener/pair")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       GET: async ({ request }) => {

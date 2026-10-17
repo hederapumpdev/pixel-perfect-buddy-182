@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 // Serves coin images by content hash. Read-only; returns only stored image bytes.
 export const Route = createFileRoute("/api/public/img/$hash")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       GET: async ({ params }) => {

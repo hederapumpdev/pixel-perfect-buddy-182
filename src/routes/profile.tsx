@@ -24,6 +24,7 @@ import {
 import { fmtAge, fmtHbar } from "@/lib/queries";
 
 export const Route = createFileRoute("/profile")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "My profile — HederaPump" },

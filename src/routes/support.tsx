@@ -12,6 +12,7 @@ import { useWallet } from "@/lib/wallet";
 import { submitSupport } from "@/lib/support.functions";
 
 export const Route = createFileRoute("/support")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Support — HederaPump" },

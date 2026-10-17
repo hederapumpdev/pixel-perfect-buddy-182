@@ -24,6 +24,7 @@ import { encodePump, encodePumpV2, isV2 } from "@/lib/curve";
 const HTS_CREATE_BUDGET = 2_000_000_000n; // 20 ℏ
 
 export const Route = createFileRoute("/create")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Create a coin — HederaPump" },
