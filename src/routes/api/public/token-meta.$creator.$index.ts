@@ -24,22 +24,10 @@ export const Route = createFileRoute("/api/public/token-meta/$creator/$index")({
         const t = data?.[0];
         if (!t) return new Response("Not found", { status: 404 });
 
-        // Long descriptions live in token_texts behind a "text:<hash>" marker.
-        let description = t.description ?? "";
-        const textMatch = description.match(/^text:([a-f0-9]{64})$/);
-        if (textMatch) {
-          const { data: row } = await supabaseAdmin
-            .from("token_texts")
-            .select("body")
-            .eq("hash", textMatch[1])
-            .maybeSingle();
-          if (row?.body) description = row.body;
-        }
-
         const body = {
           name: t.name,
           symbol: t.symbol,
-          description: description.slice(0, 1000),
+          description: (t.description ?? "").slice(0, 1000),
           lightLogo: t.image_url ? `https://hederapump.dev/api/public/img/${t.image_url}` : undefined,
           website: t.website ?? "https://hederapump.dev",
           properties: {
