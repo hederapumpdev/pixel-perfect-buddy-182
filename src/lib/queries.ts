@@ -2,6 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { NETWORK } from "./hedera-config";
+import { TRADE_WINDOWS, type TradeWindow, type StatisticsTrade } from "./trade-statistics";
 
 export type TokenRow = Tables<"tokens">;
 export type TradeRow = Tables<"trades">;
@@ -50,6 +51,29 @@ export const tradesQuery = (address: string) =>
       return data;
     },
     refetchInterval: 10_000,
+  });
+
+export const tradeStatisticsQuery = (address: string, window: TradeWindow) =>
+  queryOptions({
+    queryKey: ["trade-statistics", address, window],
+    queryFn: async ({ signal }) => {
+      const now = Date.now();
+      const rows: StatisticsTrade[] = [];
+      const pageSize = 500;
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await supabase.from("trades")
+          .select("created_at,is_buy,hbar_amount,trader")
+          .eq("token", address)
+          .gte("created_at", new Date(now - TRADE_WINDOWS[window]).toISOString())
+          .lte("created_at", new Date(now).toISOString())
+          .order("created_at", { ascending: true }).order("id", { ascending: true })
+          .range(offset, offset + pageSize - 1).abortSignal(signal);
+        if (error) throw error;
+        rows.push(...(data ?? []));
+        if (!data || data.length < pageSize) return { rows, now };
+      }
+    },
+    refetchInterval: 15_000,
   });
 
 export const progressPct = (t: TokenRow) =>
