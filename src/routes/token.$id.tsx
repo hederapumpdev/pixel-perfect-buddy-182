@@ -185,8 +185,11 @@ function TokenPage() {
           // The buy that sells the last curve tokens also lists on SaucerSwap,
           // which needs much more gas.
           const final = !!q && q.tokensOut >= CURVE_SUPPLY_V2 - state.tokensSold;
+          const ref = getReferrer();
           await w.execute({
-            calldata: encodePumpV2("buy", [t.address, min]),
+            calldata: isV4(t.contract)
+              ? encodePumpV4("buy", [t.address, min, ref ?? "0x0000000000000000000000000000000000000000"])
+              : encodePumpV2("buy", [t.address, min]),
             gas: final ? GAS_V2.buyFinal : GAS_V2.buy,
             payableTinybars: value,
             contractId: t.contract,

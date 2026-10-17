@@ -18,7 +18,7 @@ import {
   LATEST_CONTRACT_ID,
 } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
-import { encodePump, encodePumpV2, isV2 } from "@/lib/curve";
+import { encodePump, encodePumpV2, encodePumpV4, isV2, isV4 } from "@/lib/curve";
 
 // HBAR sent along to pay for creating the HTS token itself (~15 measured on testnet).
 const HTS_CREATE_BUDGET = 2_000_000_000n; // 20 ℏ
