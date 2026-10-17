@@ -2,6 +2,7 @@ import { ShareButton } from "@/components/ShareCard";
 import { Comments, Holders } from "@/components/CoinExtras";
 import { FollowButton } from "@/components/PriceAlerts";
 import { Avatar, useProfiles } from "@/components/ProfileEditor";
+import { HederaAddress, useHederaId } from "@/components/HederaAddress";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -22,7 +23,6 @@ import {
   fmtAge,
   mcapOf,
   priceOf,
-  shortAddr,
 } from "@/lib/queries";
 import {
   quoteBuy,
@@ -81,19 +81,21 @@ async function tokenBalance(token: string, holder: string): Promise<bigint> {
 const SLIPPAGE_BPS = 300n;
 
 function AddrRow({ label, addr, href }: { label: string; addr: string; href: string }) {
+  const nativeId = useHederaId(addr);
+  const displayAddress = nativeId ?? addr;
   return (
     <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
       <span className="shrink-0 text-xs font-semibold text-muted-foreground">{label}</span>
-      <span className="min-w-0 flex-1 truncate font-mono text-xs">{addr}</span>
-      <button
+      <span className="min-w-0 flex-1 truncate font-mono text-xs" title={addr}>{displayAddress}</span>
+      <Button size="sm" variant="secondary"
         onClick={() =>
-          navigator.clipboard.writeText(addr).then(() => toast.success(`${label} copied`))
+          navigator.clipboard.writeText(displayAddress).then(() => toast.success(`${label} copied`))
         }
         className="shrink-0 rounded bg-secondary px-2 py-1 text-xs"
       >
         Copy
-      </button>
-      <a href={href} target="_blank" rel="noreferrer" className="shrink-0 text-xs text-accent">
+      </Button>
+      <a href={nativeId ? href.replace(addr, nativeId) : href} target="_blank" rel="noreferrer" className="shrink-0 text-xs text-accent">
         HashScan
       </a>
     </div>
@@ -268,7 +270,7 @@ function TokenPage() {
         </div>
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        <AddrRow label="CA" addr={t.address} href={`${HASHSCAN_URL}/contract/${t.address}`} />
+        <AddrRow label={isV2(t.contract) ? "Token ID" : "CA"} addr={t.address} href={`${HASHSCAN_URL}/${isV2(t.contract) ? "token" : "contract"}/${t.address}`} />
         <AddrRow label="Creator" addr={t.creator} href={`${HASHSCAN_URL}/account/${t.creator}`} />
       </div>
 
@@ -431,7 +433,7 @@ function TokenPage() {
                   </span>
                   <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground" title={r.trader}>
                     {profiles[r.trader.toLowerCase()] && <Avatar hash={profiles[r.trader.toLowerCase()]?.avatar} size={24} />}
-                    <span className="truncate">{profiles[r.trader.toLowerCase()]?.name ?? shortAddr(r.trader)}</span>
+                    <span className="truncate">{profiles[r.trader.toLowerCase()]?.name ?? <HederaAddress address={r.trader} />}</span>
                   </span>
                   <span>{Number(r.hbar_amount).toFixed(2)} ℏ</span>
                   <span className="text-right text-muted-foreground">

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { NETWORK } from "./hedera-config";
 import { TRADE_WINDOWS, type TradeWindow, type StatisticsTrade } from "./trade-statistics";
+import { fallbackAddress } from "./hedera-address";
 
 export type TokenRow = Tables<"tokens">;
 export type TradeRow = Tables<"trades">;
@@ -82,7 +83,7 @@ export const priceOf = (t: TokenRow) =>
   Number(t.virtual_tokens) > 0 ? Number(t.virtual_hbar) / Number(t.virtual_tokens) : 0;
 export const mcapOf = (t: TokenRow) => priceOf(t) * 1_000_000_000;
 export const imageUrl = (hash: string | null) => (hash ? `/api/public/img/${hash}` : null);
-export const shortAddr = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
+export const shortAddr = fallbackAddress;
 
 export const fmtHbar = (n: number) =>
   n >= 1e6

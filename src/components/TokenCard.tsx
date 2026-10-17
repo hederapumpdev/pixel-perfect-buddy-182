@@ -6,8 +6,8 @@ import {
   imageUrl,
   mcapOf,
   progressPct,
-  shortAddr,
 } from "@/lib/queries";
+import { HederaAddress } from "@/components/HederaAddress";
 
 export function Progress({ v }: { v: number }) {
   return (
@@ -48,7 +48,7 @@ export function TokenCard({ t }: { t: TokenRow }) {
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{t.name}</p>
           <p className="font-mono text-xs text-muted-foreground">
-            ${t.symbol} · {fmtAge(t.created_at)} · by {shortAddr(t.creator)}
+            ${t.symbol} · {fmtAge(t.created_at)} · by <HederaAddress address={t.creator} />
           </p>
           <div className="mt-1 flex flex-wrap gap-x-3 font-mono text-xs">
             <span>

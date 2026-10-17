@@ -92,6 +92,16 @@ async function initWeb3Auth() {
       } as never,
     ],
     defaultChainId: "0x" + EVM_CHAIN_ID.toString(16),
+    modalConfig: {
+      hideWalletDiscovery: true,
+      connectors: {
+        auth: { label: "Sign in", showOnModal: true },
+        metamask: { label: "MetaMask", showOnModal: false },
+        "wallet-connect-v2": { label: "WalletConnect", showOnModal: false },
+        coinbase: { label: "Coinbase", showOnModal: false },
+        "base-account": { label: "Base Account", showOnModal: false },
+      },
+    },
     // Trades sign instantly in the app (pump.fun-style quick trading), no confirm popup.
     walletServicesConfig: { confirmationStrategy: "auto-approve" },
   } as never);
@@ -207,6 +217,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       .then((r) => (r.ok ? r.json() : null))
       .then((a) => {
         if (!a) return setBal(0);
+        if (typeof a.account === "string" && /^\d+\.\d+\.\d+$/.test(a.account)) setAccountId(a.account);
         if (a.evm_address) setEvm((a.evm_address as string).toLowerCase());
         setBal(a.balance ? a.balance.balance / 1e8 : 0);
       })
