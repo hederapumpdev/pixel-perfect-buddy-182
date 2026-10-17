@@ -415,7 +415,7 @@ function TokenPage() {
           </div>
 
           <div className="rounded-lg border border-border bg-card">
-            <div className="flex border-b border-border">
+            <div className="flex gap-2 p-2 border-b border-border">
               {(
                 [
                   ["trades", "Trades"],
@@ -428,10 +428,10 @@ function TokenPage() {
                   key={key}
                   type="button"
                   onClick={() => setTab(key)}
-                  className={`flex-1 px-3 py-3 text-sm font-semibold transition-colors ${
+                  className={`flex-1 rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
                     tab === key
-                      ? "border-b-2 border-accent text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-accent text-accent-foreground"
+                      : "bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
                   {label}
@@ -505,7 +505,7 @@ function TokenPage() {
                         href={href}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-accent"
+                        className="rounded-md border border-accent/40 bg-accent/10 px-3 py-1.5 text-accent transition-colors hover:bg-accent hover:text-accent-foreground"
                       >
                         {label}
                       </a>
