@@ -13,7 +13,8 @@
 - Network, contract IDs and WalletConnect ID live in `src/lib/hedera-config.ts` for centralized configuration.
 - Coin/trade tables are filled only by `syncChain` from Hedera mirror-node events — the chain is the source of truth, never write them from user input.
 - Browser Node polyfills in Vite must resolve directly to absolute npm package files, only in the client environment; re-resolving bare built-ins can recurse through aliases and exhaust the build.
-- Wallet SDKs (hedera-wallet-connect, hiero sdk, web3auth, grpc-js) are stubbed out of server builds in `vite.config.ts` and may only be loaded via dynamic import in browser code — on the Worker they crash at load and the bundler merges viem/ethers into their chunk, which broke every server function (PIN, sync, bot).
+- Wallet SDKs are stubbed server-side in `vite.config.ts`; dynamically import in browsers only to avoid Worker crashes.
+- TradeStatistics paginates full synced windows; distinct buyers/sellers are per side, not holder arrivals/exits; USD uses the current HBAR rate.
 - HashPack deployment uses explicit file-create, file-append, and contract-create transactions with a public mirror-node account key; ContractCreateFlow calls an unimplemented WalletConnect signer method.
 - Deploy sends one wallet request per user tap, tags each tx memo `hpump:<fp>:<offset>:<len>`, and rebuilds progress from mirror-node history — mobile wallets miss requests sent while the browser is backgrounded, and nothing may be paid twice.
 - DexScreener adapter lives in `src/routes/api/public/dexscreener/*` (read-only, from synced tables); block numbers are Unix seconds because Hedera has no EVM blocks — DexScreener needs monotonic integers.
