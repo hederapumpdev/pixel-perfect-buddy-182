@@ -48,7 +48,20 @@ describe("debug", () => {
   it("renders", async () => {
     vi.stubGlobal("fetch", f);
     const sb: any = await import("@/integrations/supabase/client");
-    console.log("SB:", typeof sb.supabase?.from, JSON.stringify(await sb.supabase?.from("trades").select("a").in("trader", [ADDR])));
+    const { isV2 } = await import("@/lib/curve");
+    const { NETWORK } = await import("@/lib/hedera-config");
+    const { priceOf } = await import("@/lib/queries");
+    const idToEvm = (id: string) => "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
+    const acc: any = await fetch("https://mainnet-public.mirrornode.hedera.com/api/v1/accounts/0.0.500?transactions=false").then((r) => r.json());
+    const hts = new Map<string, number>();
+    const tj: any = await fetch("https://mainnet-public.mirrornode.hedera.com/api/v1/accounts/0.0.500/tokens?limit=100").then((r) => r.json());
+    for (const t of tj.tokens ?? []) if (t.balance > 0) hts.set(idToEvm(t.token_id), t.balance / 1e8);
+    const traded: any = await sb.supabase.from("trades").select("a").in("trader", [ADDR]);
+    const cand = [...new Set([...hts.keys(), ...(traded.data ?? []).map((r: any) => r.token.toLowerCase())])];
+    const coins: any = await sb.supabase.from("tokens").select("*").eq("network", NETWORK).in("address", cand);
+    console.log("BAL:", acc?.balance?.balance, "HTS:", [...hts], "CAND:", cand, "COINS:", coins?.data);
+    const c: any = coins?.data?.[0];
+    console.log("ISV2:", c && isV2(c.contract), "AMT:", c && hts.get(c.address.toLowerCase()), "PRICE:", c && priceOf(c));
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={client}>
