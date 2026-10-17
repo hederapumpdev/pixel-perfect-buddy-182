@@ -215,7 +215,9 @@ function TokenPage() {
             await w.approveToken(tokenId, t.contract, CURVE_SUPPLY_V2);
           }
           await w.execute({
-            calldata: encodePumpV2("sell", [t.address, units, min]),
+            calldata: isV4(t.contract)
+              ? encodePumpV4("sell", [t.address, units, min, getReferrer() ?? "0x0000000000000000000000000000000000000000"])
+              : encodePumpV2("sell", [t.address, units, min]),
             gas: GAS_V2.sell,
             contractId: t.contract,
           });
