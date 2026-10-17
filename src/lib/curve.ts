@@ -6,6 +6,7 @@ import {
   TINYBARS,
   TOKEN_UNIT,
   TOKEN_UNIT_V2,
+  V4_CONTRACTS,
 } from "./hedera-config";
 
 // Mirrors the on-chain math in contracts/HederaPump.sol (v1, 18 decimals) and
@@ -13,9 +14,13 @@ import {
 // only the curve supply and token unit differ.
 export type CurveState = { virtualHbar: bigint; virtualTokens: bigint; tokensSold: bigint };
 
-/** True for coins created by an HTS contract (v2 or v3). */
+/** True for coins created by an HTS contract (v2 or later). */
 export const isV2 = (contract: string | null | undefined) =>
   !!contract && HTS_CONTRACTS.includes(contract);
+
+/** True for coins on the v4 ABI (referral args, metadataUrl). */
+export const isV4 = (contract: string | null | undefined) =>
+  !!contract && V4_CONTRACTS.includes(contract);
 
 export const tokenUnit = (contract: string | null | undefined) =>
   isV2(contract) ? TOKEN_UNIT_V2 : TOKEN_UNIT;
@@ -61,9 +66,12 @@ export const fromUnits = (v: bigint, contract?: string | null) =>
 import { encodeFunctionData, type Abi } from "viem";
 import artifact from "./contract-artifact.json";
 import artifactV2 from "./contract-artifact-hts.json";
+import artifactV4 from "./contract-artifact-v4.json";
 export const encodePump = (functionName: string, args: unknown[] = []) =>
   encodeFunctionData({ abi: artifact.pumpAbi as Abi, functionName, args } as never);
 export const encodePumpV2 = (functionName: string, args: unknown[] = []) =>
   encodeFunctionData({ abi: artifactV2.pumpAbi as Abi, functionName, args } as never);
+export const encodePumpV4 = (functionName: string, args: unknown[] = []) =>
+  encodeFunctionData({ abi: artifactV4.pumpAbi as Abi, functionName, args } as never);
 export const encodeToken = (functionName: string, args: unknown[] = []) =>
   encodeFunctionData({ abi: artifact.tokenAbi as Abi, functionName, args } as never);
