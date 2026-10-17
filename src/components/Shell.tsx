@@ -52,7 +52,7 @@ function WalletButton() {
       </Button>
       <Button size="sm" onClick={w.connect} disabled={w.connecting}>
         <Wallet className="h-4 w-4" />
-        {w.connecting ? "…" : "HashPack"}
+        {w.connecting ? "…" : "WalletConnect"}
       </Button>
     </div>
   );
