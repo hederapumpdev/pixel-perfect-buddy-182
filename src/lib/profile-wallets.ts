@@ -2,7 +2,7 @@
 export function profileWalletAddress(wallet: string): string {
   const normalized = wallet.trim().toLowerCase();
   const parts = normalized.match(/^(\d+)\.(\d+)\.(\d+)$/);
-  if (!parts) return normalized;
+  if (!parts?.[1] || !parts[2] || !parts[3]) return normalized;
   const shard = BigInt(parts[1]);
   const realm = BigInt(parts[2]);
   const account = BigInt(parts[3]);
