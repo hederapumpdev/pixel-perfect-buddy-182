@@ -11,7 +11,8 @@ import { TokenCard } from "@/components/TokenCard";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
-import { encodePump, encodePumpV2 } from "@/lib/curve";
+import { encodePump, encodePumpV2, encodePumpV4 } from "@/lib/curve";
+import { referralLink } from "@/lib/referral";
 import {
   GAS,
   GAS_V2,
@@ -20,6 +21,7 @@ import {
   NETWORK,
   HTS_CONTRACTS,
   PUMP_CONTRACT_ID,
+  PUMP_CONTRACT_V4_ID,
 } from "@/lib/hedera-config";
 import { fmtAge, fmtHbar } from "@/lib/queries";
 import { useUsd } from "@/lib/usd";
@@ -123,6 +125,47 @@ function Profile() {
   });
   const usd = useUsd();
   const names = new Map((coins.data ?? []).map((c) => [c.address, c.symbol]));
+
+  // Referral pool (v4): pending reward + attributed trading volume, read from the contract.
+  const refAddr = (w.evmAddress ?? (w.accountId ? longZero(w.accountId) : null))?.toLowerCase();
+  const referral = useQuery({
+    queryKey: ["my-referral", refAddr],
+    enabled: !!refAddr && !!PUMP_CONTRACT_V4_ID,
+    queryFn: async () => {
+      const call = async (data: string) => {
+        const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ data, to: idEvm(PUMP_CONTRACT_V4_ID!), estimate: false }),
+        });
+        const j = await r.json();
+        return !j.result || j.result === "0x" ? 0n : BigInt(j.result as Hex);
+      };
+      const [pending, volume] = await Promise.all([
+        call(encodePumpV4("pendingReferralFees", [refAddr])).catch(() => 0n),
+        call(encodePumpV4("referralVolume", [refAddr])).catch(() => 0n),
+      ]);
+      return { pending, volume };
+    },
+    refetchInterval: 15_000,
+  });
+
+  async function claimReferral() {
+    setBusy(true);
+    try {
+      await w.execute({
+        calldata: encodePumpV4("claimReferralFees"),
+        gas: GAS_V2.claim,
+        contractId: PUMP_CONTRACT_V4_ID!,
+      });
+      toast.success("Referral reward claimed — sent to your wallet");
+      setTimeout(() => referral.refetch(), 5000);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Claim failed");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function claim() {
     setBusy(true);
