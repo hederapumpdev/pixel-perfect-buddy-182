@@ -34,6 +34,7 @@ import { XPostingPanel } from "@/components/XPostingPanel";
 import { getUserStats } from "@/lib/users.functions";
 import { userRows } from "@/lib/user-stats";
 import { Avatar } from "@/components/ProfileEditor";
+import { LegacyTokenInfoPanel } from "@/components/LegacyTokenInfoPanel";
 
 // SaucerSwap V1 mainnet (docs.saucerswap.finance/developers/contracts)
 const SAUCER_ROUTER_EVM = "0x00000000000000000000000000000000002e7a5d"; // 0.0.3045981
@@ -126,6 +127,7 @@ function Admin() {
         <XPostingPanel pin={pin || sessionStorage.getItem(PIN_KEY) || ""} />
         <FeeOverview />
         <TopCoins />
+        <LegacyTokenInfo />
         <BotPanel />
         <Deploy />
       </div>
