@@ -178,7 +178,7 @@ function Profile() {
         <Stat
           label="Total creator fees made"
           value={totalFees.isLoading ? "…" : fmtHbar(totalFees.data ?? 0)}
-          sub={totalFees.isLoading ? undefined : usd(totalFees.data ?? 0)}
+          sub={totalFees.isLoading ? "" : usd(totalFees.data ?? 0)}
         />
         <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Creator fees to claim</p>
