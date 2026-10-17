@@ -111,6 +111,16 @@ function Profile() {
     },
     refetchInterval: 15_000,
   });
+  const totalFees = useQuery({
+    queryKey: ["my-total-fees", addrs],
+    enabled: addrs.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("creator_fee_totals", { creators: addrs });
+      if (error) throw error;
+      return Number(data ?? 0);
+    },
+    refetchInterval: 15_000,
+  });
   const usd = useUsd();
   const names = new Map((coins.data ?? []).map((c) => [c.address, c.symbol]));
 
@@ -162,9 +172,14 @@ function Profile() {
       <InstantWallet />
       <WalletHoldings accountId={w.accountId!} addrs={addrs} balanceHbar={w.balanceHbar} />
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Coins created" value={String(coins.data?.length ?? 0)} />
         <Stat label="Your trades" value={String(trades.data?.length ?? 0)} />
+        <Stat
+          label="Total creator fees made"
+          value={totalFees.isLoading ? "…" : fmtHbar(totalFees.data ?? 0)}
+          sub={totalFees.isLoading ? undefined : usd(totalFees.data ?? 0)}
+        />
         <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Creator fees to claim</p>
           <p className="mt-1 font-mono text-2xl font-semibold">
@@ -221,11 +236,12 @@ function Profile() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 font-mono text-2xl font-semibold">{value}</p>
+      {sub && <p className="font-mono text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
 }
