@@ -59,7 +59,7 @@ export function legacyInfoRequest(token: LegacyTokenInfo) {
     "Proposed token information:",
     JSON.stringify(metadata, null, 2),
     "",
-    "Is a manual token-information override available for this legacy token? We understand this is not a listing or verification approval.",
+    "Your project guide recommends Davinci Pics for tokens without admin or metadata keys. Our token has a contract treasury. Which connected account can submit its information through Davinci Pics, or is another manual route available? We understand this is not a listing or verification approval.",
     "Thank you!",
   ].join("\n");
 }

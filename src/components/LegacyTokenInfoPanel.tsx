@@ -36,7 +36,7 @@ export function LegacyTokenInfoPanel({ tokens, loading, error }: { tokens: Legac
     <section className="space-y-4">
       <div>
         <h2 className="text-xl font-semibold">SaucerSwap · older tokens</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Pre-v4 tokens have no editable on-chain metadata. Manual display changes require SaucerSwap’s support; preparing a request does not update or list the token.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Pre-v4 tokens have no admin or metadata key. SaucerSwap uses Davinci Pics for legacy token information. Davinci requires the treasury or token-creation account; eligibility for our contract-created tokens is not yet confirmed. This does not update on-chain metadata or confirm a listing.</p>
       </div>
       {error ? <p className="text-sm text-destructive">Could not load tokens. Refresh to try again.</p> : loading ? <p className="text-sm text-muted-foreground">Loading tokens…</p> : !token ? <p className="text-sm text-muted-foreground">No pre-v4 HTS tokens found.</p> : (
         <>
@@ -57,6 +57,8 @@ export function LegacyTokenInfoPanel({ tokens, loading, error }: { tokens: Legac
           <div className="flex flex-wrap gap-2">
             <Button onClick={copyRequest}><Copy />Copy request</Button>
             <Button variant="outline" onClick={download}><Download />Token-info JSON</Button>
+            <Button variant="outline" asChild><a href="https://davincigraph.io/#pics_home" target="_blank" rel="noreferrer"><ExternalLink />Davinci Pics</a></Button>
+            <Button variant="outline" asChild><a href="https://docs.saucerswap.finance/resources/for-projects" target="_blank" rel="noreferrer"><ExternalLink />Official requirements</a></Button>
           </div>
           <Textarea aria-label="SaucerSwap token-info request" readOnly value={request} className="min-h-72 font-mono text-xs" />
         </>

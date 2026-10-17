@@ -155,6 +155,11 @@ function useAll() {
   });
 }
 
+function LegacyTokenInfo() {
+  const q = useAll();
+  return <LegacyTokenInfoPanel tokens={q.data?.tokens ?? []} loading={q.isLoading} error={q.isError} />;
+}
+
 function FeeOverview() {
   const q = useAll();
   const s = useMemo(() => {
