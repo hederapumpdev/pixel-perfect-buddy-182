@@ -28,6 +28,7 @@ import { Route as ApiPublicJobsAutobuyRouteImport } from './routes/api/public/jo
 import { Route as ApiPublicJobsDailyXRouteImport } from './routes/api/public/jobs/daily-x'
 import { Route as ApiPublicJobsTelegramAppRouteImport } from './routes/api/public/jobs/telegram-app'
 import { Route as ApiPublicJobsTelegramTopRouteImport } from './routes/api/public/jobs/telegram-top'
+import { Route as ApiPublicTokenMetaCreatorIndexRouteImport } from './routes/api/public/token-meta.$creator.$index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -130,6 +131,12 @@ const ApiPublicJobsTelegramTopRoute =
     path: '/api/public/jobs/telegram-top',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicTokenMetaCreatorIndexRoute =
+  ApiPublicTokenMetaCreatorIndexRouteImport.update({
+    id: '/api/public/token-meta/$creator/$index',
+    path: '/api/public/token-meta/$creator/$index',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
+  '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -172,6 +180,7 @@ export interface FileRoutesByTo {
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
+  '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -194,6 +203,7 @@ export interface FileRoutesById {
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
+  '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/daily-x'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
+    | '/api/public/token-meta/$creator/$index'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/daily-x'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
+    | '/api/public/token-meta/$creator/$index'
   id:
     | '__root__'
     | '/'
@@ -259,6 +271,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/daily-x'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
+    | '/api/public/token-meta/$creator/$index'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -281,6 +294,7 @@ export interface RootRouteChildren {
   ApiPublicJobsDailyXRoute: typeof ApiPublicJobsDailyXRoute
   ApiPublicJobsTelegramAppRoute: typeof ApiPublicJobsTelegramAppRoute
   ApiPublicJobsTelegramTopRoute: typeof ApiPublicJobsTelegramTopRoute
+  ApiPublicTokenMetaCreatorIndexRoute: typeof ApiPublicTokenMetaCreatorIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -418,6 +432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsTelegramTopRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/token-meta/$creator/$index': {
+      id: '/api/public/token-meta/$creator/$index'
+      path: '/api/public/token-meta/$creator/$index'
+      fullPath: '/api/public/token-meta/$creator/$index'
+      preLoaderRoute: typeof ApiPublicTokenMetaCreatorIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -441,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsDailyXRoute: ApiPublicJobsDailyXRoute,
   ApiPublicJobsTelegramAppRoute: ApiPublicJobsTelegramAppRoute,
   ApiPublicJobsTelegramTopRoute: ApiPublicJobsTelegramTopRoute,
+  ApiPublicTokenMetaCreatorIndexRoute: ApiPublicTokenMetaCreatorIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
