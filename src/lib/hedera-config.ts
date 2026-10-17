@@ -12,17 +12,27 @@ export const PUMP_CONTRACT_V2_ID: string | null = "0.0.10924256";
 // creators claim their share. Null until deployed from /admin.
 export const PUMP_CONTRACT_V3_ID: string | null = "0.0.10924285";
 
+// v4: adds on-chain HIP-405 token metadata (SaucerSwap picks up logo/info automatically)
+// and a shared referral pool (10% of the platform fee, split pro-rata by attributed
+// trading volume, self-serve claims). Null until deployed from /admin.
+export const PUMP_CONTRACT_V4_ID: string | null = null;
+
 /** Contracts whose coins are native HTS tokens (v2 + v3 share the same ABI). */
-export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID].filter(
+export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID].filter(
   (c): c is string => !!c,
+);
+
+/** Contracts with the v4 ABI (referral args on buy/sell, metadataUrl on createToken). */
+export const V4_CONTRACTS: string[] = ([PUMP_CONTRACT_V4_ID] as (string | null)[]).filter(
+  (c): c is string => typeof c === "string",
 );
 
 /** Contract new coins are created on. */
 export const LATEST_CONTRACT_ID: string | null =
-  PUMP_CONTRACT_V3_ID ?? PUMP_CONTRACT_V2_ID ?? PUMP_CONTRACT_ID;
+  PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID ?? PUMP_CONTRACT_V2_ID ?? PUMP_CONTRACT_ID;
 
 /** Every launchpad contract the app reads and trades on, oldest first. */
-export const PUMP_CONTRACTS: string[] = [PUMP_CONTRACT_ID, PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID].filter(
+export const PUMP_CONTRACTS: string[] = [PUMP_CONTRACT_ID, PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID].filter(
   (c): c is string => !!c,
 );
 

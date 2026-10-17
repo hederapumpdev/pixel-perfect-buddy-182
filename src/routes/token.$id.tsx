@@ -31,9 +31,11 @@ import {
   fromTinybars,
   fromUnits,
   isV2,
+  isV4,
   tokenUnit,
 } from "@/lib/curve";
-import { encodePump, encodePumpV2, encodeToken } from "@/lib/curve";
+import { encodePump, encodePumpV2, encodePumpV4, encodeToken } from "@/lib/curve";
+import { getReferrer } from "@/lib/referral";
 import {
   CURVE_SUPPLY_V2,
   GAS,
@@ -185,8 +187,11 @@ function TokenPage() {
           // The buy that sells the last curve tokens also lists on SaucerSwap,
           // which needs much more gas.
           const final = !!q && q.tokensOut >= CURVE_SUPPLY_V2 - state.tokensSold;
+          const ref = getReferrer();
           await w.execute({
-            calldata: encodePumpV2("buy", [t.address, min]),
+            calldata: isV4(t.contract)
+              ? encodePumpV4("buy", [t.address, min, ref ?? "0x0000000000000000000000000000000000000000"])
+              : encodePumpV2("buy", [t.address, min]),
             gas: final ? GAS_V2.buyFinal : GAS_V2.buy,
             payableTinybars: value,
             contractId: t.contract,
@@ -212,7 +217,9 @@ function TokenPage() {
             await w.approveToken(tokenId, t.contract, CURVE_SUPPLY_V2);
           }
           await w.execute({
-            calldata: encodePumpV2("sell", [t.address, units, min]),
+            calldata: isV4(t.contract)
+              ? encodePumpV4("sell", [t.address, units, min, getReferrer() ?? "0x0000000000000000000000000000000000000000"])
+              : encodePumpV2("sell", [t.address, units, min]),
             gas: GAS_V2.sell,
             contractId: t.contract,
           });

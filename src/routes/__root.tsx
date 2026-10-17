@@ -14,6 +14,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { WalletProvider } from "@/lib/wallet";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { captureReferral } from "../lib/referral";
 
 function NotFoundComponent() {
   return (
@@ -122,6 +123,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    captureReferral();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

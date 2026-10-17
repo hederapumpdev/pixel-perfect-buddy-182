@@ -11,7 +11,8 @@ import { TokenCard } from "@/components/TokenCard";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
-import { encodePump, encodePumpV2 } from "@/lib/curve";
+import { encodePump, encodePumpV2, encodePumpV4 } from "@/lib/curve";
+import { referralLink } from "@/lib/referral";
 import {
   GAS,
   GAS_V2,
@@ -20,6 +21,7 @@ import {
   NETWORK,
   HTS_CONTRACTS,
   PUMP_CONTRACT_ID,
+  PUMP_CONTRACT_V4_ID,
 } from "@/lib/hedera-config";
 import { fmtAge, fmtHbar } from "@/lib/queries";
 import { useUsd } from "@/lib/usd";
@@ -124,6 +126,47 @@ function Profile() {
   const usd = useUsd();
   const names = new Map((coins.data ?? []).map((c) => [c.address, c.symbol]));
 
+  // Referral pool (v4): pending reward + attributed trading volume, read from the contract.
+  const refAddr = (w.evmAddress ?? (w.accountId ? longZero(w.accountId) : null))?.toLowerCase();
+  const referral = useQuery({
+    queryKey: ["my-referral", refAddr],
+    enabled: !!refAddr && !!PUMP_CONTRACT_V4_ID,
+    queryFn: async () => {
+      const call = async (data: string) => {
+        const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ data, to: idEvm(PUMP_CONTRACT_V4_ID!), estimate: false }),
+        });
+        const j = await r.json();
+        return !j.result || j.result === "0x" ? 0n : BigInt(j.result as Hex);
+      };
+      const [pending, volume] = await Promise.all([
+        call(encodePumpV4("pendingReferralFees", [refAddr])).catch(() => 0n),
+        call(encodePumpV4("referralVolume", [refAddr])).catch(() => 0n),
+      ]);
+      return { pending, volume };
+    },
+    refetchInterval: 15_000,
+  });
+
+  async function claimReferral() {
+    setBusy(true);
+    try {
+      await w.execute({
+        calldata: encodePumpV4("claimReferralFees"),
+        gas: GAS_V2.claim,
+        contractId: PUMP_CONTRACT_V4_ID!,
+      });
+      toast.success("Referral reward claimed — sent to your wallet");
+      setTimeout(() => referral.refetch(), 5000);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Claim failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function claim() {
     setBusy(true);
     try {
@@ -196,6 +239,66 @@ function Profile() {
           </Button>
         </div>
       </div>
+
+      {PUMP_CONTRACT_V4_ID && (
+        <div className="mt-6 rounded-lg border border-border bg-card p-4">
+          <h2 className="text-xl font-semibold">Referrals</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Share your link — when people trade after opening it, 10% of our fee goes into a
+            shared pool for all referrers. Your slice grows with the trading volume of the
+            people you brought in.
+          </p>
+          {referralLink(w.accountId, w.evmAddress) && (
+            <div className="mt-3 flex items-center gap-2">
+              <code className="flex-1 truncate rounded-md border border-border bg-muted/40 px-3 py-2 font-mono text-xs">
+                {referralLink(w.accountId, w.evmAddress)}
+              </code>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(referralLink(w.accountId, w.evmAddress)!);
+                  toast.success("Referral link copied");
+                }}
+              >
+                Copy
+              </Button>
+            </div>
+          )}
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div>
+              <p className="text-xs text-muted-foreground">Referred trading volume</p>
+              <p className="mt-1 font-mono text-lg font-semibold">
+                {referral.isLoading ? "…" : fmtHbar(Number(referral.data?.volume ?? 0n) / 1e8)}
+              </p>
+              {!referral.isLoading && (
+                <p className="font-mono text-xs text-muted-foreground">
+                  {usd(Number(referral.data?.volume ?? 0n) / 1e8)}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Referral reward to claim</p>
+              <p className="mt-1 font-mono text-lg font-semibold">
+                {referral.isLoading ? "…" : fmtHbar(Number(referral.data?.pending ?? 0n) / 1e8)}
+              </p>
+              {!referral.isLoading && (
+                <p className="font-mono text-xs text-muted-foreground">
+                  {usd(Number(referral.data?.pending ?? 0n) / 1e8)}
+                </p>
+              )}
+              <Button
+                size="sm"
+                className="mt-2"
+                disabled={busy || !(Number(referral.data?.pending ?? 0n) > 0)}
+                onClick={claimReferral}
+              >
+                {busy ? "Confirm in your wallet…" : "Claim reward"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <h2 className="mt-10 text-xl font-semibold">Coins you launched</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -13,6 +13,7 @@ import { checkAdminPin, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/c
 import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
+  PUMP_CONTRACT_V4_ID,
   HASHSCAN_URL,
   FEE_WALLET_EVM,
   FEE_WALLET_ID,
@@ -23,6 +24,11 @@ import { toTinybars } from "@/lib/curve";
 import { fmtAge, fmtHbar } from "@/lib/queries";
 import { useUsd } from "@/lib/usd";
 import artifact from "@/lib/contract-artifact-v3.json";
+import artifactV4 from "@/lib/contract-artifact-v4.json";
+
+// Deploy targets the newest contract not yet on mainnet (v4 once v3 is live).
+const DEPLOY_TARGET = PUMP_CONTRACT_V3_ID && !PUMP_CONTRACT_V4_ID ? artifactV4 : artifact;
+const DEPLOYED_ID = PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID;
 import { listSupport, setSupportStatus } from "@/lib/support.functions";
 import { XPostingPanel } from "@/components/XPostingPanel";
 import { getUserStats } from "@/lib/users.functions";
@@ -384,8 +390,8 @@ function Deploy() {
   const p = w.deployProgress;
 
   useEffect(() => {
-    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_V3_ID) {
-      w.checkDeploy(artifact.bytecode).then((s) => s.contractId && setDeployed(s.contractId)).catch(() => {});
+    if (w.accountId && w.mode === "hashpack" && !DEPLOYED_ID) {
+      w.checkDeploy(DEPLOY_TARGET.bytecode).then((s) => s.contractId && setDeployed(s.contractId)).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [w.accountId, w.mode]);
@@ -405,7 +411,7 @@ function Deploy() {
           SAUCER_FACTORY_EVM as `0x${string}`,
         ],
       );
-      const r = await w.deploy({ bytecode: artifact.bytecode, constructorParams: params, gas: 6_000_000 });
+      const r = await w.deploy({ bytecode: DEPLOY_TARGET.bytecode, constructorParams: params, gas: 6_000_000 });
       if (r.contractId) {
         setDeployed(r.contractId);
         toast.success(`Deployed ${r.contractId}`);
@@ -427,11 +433,11 @@ function Deploy() {
   return (
     <section className="space-y-4">
       <h2 className="text-xl font-semibold">Launchpad contract</h2>
-      {PUMP_CONTRACT_V3_ID ? (
+      {DEPLOYED_ID ? (
         <p className="rounded-md border border-border bg-card p-4 text-sm">
           Live contract:{" "}
-          <a className="font-mono text-accent" href={`${HASHSCAN_URL}/contract/${PUMP_CONTRACT_V3_ID}`} target="_blank" rel="noreferrer">
-            {PUMP_CONTRACT_V3_ID}
+          <a className="font-mono text-accent" href={`${HASHSCAN_URL}/contract/${DEPLOYED_ID}`} target="_blank" rel="noreferrer">
+            {DEPLOYED_ID}
           </a>
         </p>
       ) : (

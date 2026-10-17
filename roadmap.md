@@ -27,3 +27,6 @@
 - [x] Coin page: tabs (Trades/Holders/Comments/About); duplicate token info removed from the sidebar
 - [x] Coin page: DexScreener chart card removed, its link now sits in About with the other links
 - [x] Profile: dollar values next to HBAR balance, coin worth, PnL, creator fees and trade list
+- [ ] v4 contract: HIP-405 token metadata + shared referral pool (pro-rata by volume, self-serve claims, owner never signs) — compiled; app wiring (config, metadata endpoint, referral links, profile Referrals block) in progress; deploy via HashPack pending
+- [ ] Onderzoeken: Axiom-listing voor Hedera-munten (waarschijnlijk Solana-only) — antwoord aan gebruiker
+- [ ] Na referral-launch: Engelstalige promo-post met plaatje voor Telegram en X over het referral-systeem

@@ -18,7 +18,11 @@ import {
   LATEST_CONTRACT_ID,
 } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
-import { encodePump, encodePumpV2, isV2 } from "@/lib/curve";
+import { encodePump, encodePumpV2, encodePumpV4, isV2, isV4 } from "@/lib/curve";
+
+/** Hedera account id (0.0.x) → long-zero EVM address. */
+const longZero = (id: string) =>
+  "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
 // HBAR sent along to pay for creating the HTS token itself (~15 measured on testnet).
 const HTS_CREATE_BUDGET = 2_000_000_000n; // 20 ℏ
@@ -135,9 +139,20 @@ function Create() {
       const hts = isV2(LATEST_CONTRACT_ID);
       // A brand-new HTS token can't be sent to the creator before their wallet
       // associates it, so the launch buy happens as a separate step afterwards.
+      let v4Calldata: `0x${string}` | undefined;
+      if (hts && isV4(LATEST_CONTRACT_ID)) {
+        // HIP-405 metadata URL stored on the token: resolved by creator + creation index.
+        const creator = (w.evmAddress ?? longZero(w.accountId!)).toLowerCase();
+        const { count } = await supabase
+          .from("tokens")
+          .select("address", { count: "exact", head: true })
+          .ilike("creator", creator);
+        const metadataUrl = `https://hederapump.dev/api/public/token-meta/${creator}/${count ?? 0}`;
+        v4Calldata = encodePumpV4("createToken", [f.name.trim(), f.ticker, meta, metadataUrl, 0n]);
+      }
       const { transactionHash } = hts
         ? await w.execute({
-            calldata: encodePumpV2("createToken", [f.name.trim(), f.ticker, meta, 0n]),
+            calldata: v4Calldata ?? encodePumpV2("createToken", [f.name.trim(), f.ticker, meta, 0n]),
             gas: GAS_V2.create,
             payableTinybars: fee + HTS_CREATE_BUDGET,
             contractId: LATEST_CONTRACT_ID!,
