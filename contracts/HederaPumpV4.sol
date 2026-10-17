@@ -272,9 +272,9 @@ contract HederaPumpV4 {
     }
 
     function claimReferralFees() external nonReentrant {
-        uint256 a = referralFees[msg.sender];
+        uint256 a = pendingReferralFees(msg.sender);
         require(a > 0, "none");
-        referralFees[msg.sender] = 0;
+        referralRewardDebt[msg.sender] += a;
         _send(msg.sender, a);
     }
 
