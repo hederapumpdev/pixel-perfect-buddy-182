@@ -74,6 +74,10 @@ async function runSync(): Promise<{ synced: number; configured: boolean; error?:
       if (logs.length < 100) break;
     }
   }
+  try {
+    const { dispatchTelegramGraduation } = await import('./telegram.server');
+    await dispatchTelegramGraduation();
+  } catch (e) { console.error('Telegram graduation notification failed', e); }
   return { synced: count, configured: true };
 }
 
