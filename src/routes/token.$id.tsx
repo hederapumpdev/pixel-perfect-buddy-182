@@ -103,6 +103,7 @@ function TokenPage() {
   const { data: trades = [] } = useQuery(tradesQuery(id));
   const profiles = useProfiles(trades.slice(0, 50).map((trade) => trade.trader));
   const [side, setSide] = useState<"buy" | "sell">("buy");
+  const [tab, setTab] = useState<"trades" | "holders" | "comments" | "about">("trades");
   const [amt, setAmt] = useState("");
   const [busy, setBusy] = useState(false);
   const [bal, setBal] = useState<bigint>(0n);
