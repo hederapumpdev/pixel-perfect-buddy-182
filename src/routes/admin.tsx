@@ -379,14 +379,14 @@ function BotPanel() {
           ) : (
             "Not funded yet"
           )}{" "}
-          · {fmtHbar(b?.balanceHbar ?? 0)} <span className="text-muted-foreground">· {usd(b?.balanceHbar ?? 0)}</span>
+          · {fmtHbar(b?.balanceHbar ?? 0)} <span className="text-muted-foreground">· {usdOf(b?.balanceHbar ?? 0)}</span>
         </p>
       </div>
       <div className="mt-3 divide-y divide-border rounded-lg border border-border bg-card font-mono text-xs">
         {buys.data?.map((r) => (
           <div key={r.token} className="flex justify-between gap-2 px-4 py-2">
             <span>{names.get(r.token) ?? r.token.slice(0, 10)}</span>
-            <span>{fmtHbar(Number(r.hbar_amount))} <span className="text-muted-foreground">{usd(Number(r.hbar_amount))}</span></span>
+            <span>{fmtHbar(Number(r.hbar_amount))} <span className="text-muted-foreground">{usdOf(Number(r.hbar_amount))}</span></span>
             <span className={r.status === "done" ? "text-up" : r.status === "failed" ? "text-down" : "text-muted-foreground"}>{r.status}</span>
             <span className="text-muted-foreground">{fmtAge(r.created_at)}</span>
           </div>
