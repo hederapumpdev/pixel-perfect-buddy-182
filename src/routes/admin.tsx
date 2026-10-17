@@ -564,7 +564,7 @@ function UsersOverview() {
               <Avatar hash={r.avatar} size={24} />
               <span className="truncate font-medium">{r.label}</span>
             </span>
-            <span className="font-mono text-muted-foreground">{r.trades} trades</span>
+            <span className="font-mono text-muted-foreground">{r.trades} {r.trades === 1 ? "trade" : "trades"}</span>
             <span className="w-20 text-right text-xs text-muted-foreground">{fmtAge(r.last_at)}</span>
           </div>
         ))}
