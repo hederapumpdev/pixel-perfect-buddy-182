@@ -27,4 +27,12 @@ describe("socialUrl", () => {
     expect(socialUrl("twitter", "   ")).toBeNull();
     expect(socialUrl("telegram", null)).toBeNull();
   });
+
+  it("turns a Discord invite code into an invite link", () => {
+    expect(socialUrl("discord", "bYPD27QtZ")).toBe("https://discord.gg/bYPD27QtZ");
+    expect(socialUrl("discord", "discord.gg/bYPD27QtZ")).toBe("https://discord.gg/bYPD27QtZ");
+    expect(socialUrl("discord", "https://discord.gg/bYPD27QtZ")).toBe("https://discord.gg/bYPD27QtZ");
+    expect(socialUrl("discord", "discord.com/invite/bYPD27QtZ")).toBe("https://discord.gg/bYPD27QtZ");
+    expect(socialUrl("discord", "")).toBeNull();
+  });
 });
