@@ -193,6 +193,7 @@ function FeeOverview() {
       .map(([addr, f]) => ({ addr, f, t: names.get(addr) }));
     return { total, day, week, list };
   }, [q.data]);
+  const usd = useUsd();
 
   return (
     <section>
@@ -202,15 +203,17 @@ function FeeOverview() {
         {FEE_WALLET_ID} immediately; older contracts keep it until claimed.
       </p>
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
-        <Stat label="Today" value={fmtHbar(s.day)} />
-        <Stat label="Last 7 days" value={fmtHbar(s.week)} />
-        <Stat label="All time" value={fmtHbar(s.total)} />
+        <Stat label="Today" value={fmtHbar(s.day)} sub={usd(s.day)} />
+        <Stat label="Last 7 days" value={fmtHbar(s.week)} sub={usd(s.week)} />
+        <Stat label="All time" value={fmtHbar(s.total)} sub={usd(s.total)} />
       </div>
       <div className="mt-3 divide-y divide-border rounded-lg border border-border bg-card text-sm">
         {s.list.map((r) => (
-          <Link key={r.addr} to="/token/$id" params={{ id: r.addr }} className="flex justify-between px-4 py-2 hover:bg-muted/40">
+          <Link key={r.addr} to="/token/$id" params={{ id: r.addr }} className="flex justify-between gap-3 px-4 py-2 hover:bg-muted/40">
             <span>{r.t ? `$${r.t.symbol}` : r.addr.slice(0, 10)}</span>
-            <span className="font-mono">{fmtHbar(r.f)}</span>
+            <span className="font-mono">
+              {fmtHbar(r.f)} <span className="text-muted-foreground">· {usd(r.f)}</span>
+            </span>
           </Link>
         ))}
         {!s.list.length && <p className="px-4 py-3 text-muted-foreground">{q.isLoading ? "Loading…" : "No fees yet."}</p>}
