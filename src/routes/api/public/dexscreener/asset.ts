@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { HBAR_ASSET, TOTAL_SUPPLY, db, isAddr, json } from "@/lib/dexscreener";
 
 export const Route = createFileRoute("/api/public/dexscreener/asset")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       GET: async ({ request }) => {

@@ -11,6 +11,7 @@ import { KingOfTheHill } from "@/components/KingOfTheHill";
 import banner from "@/assets/banner.png";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "HederaPump — The home of Hedera meme coins" },

@@ -25,3 +25,4 @@
 - Auto-buy bot (`src/lib/bot.server.ts`, key derived from BOT_SEED) runs one transaction step per scheduled call to `/api/public/jobs/autobuy`, tracked in `bot_buys` (token unique) — scheduled requests are short and a coin must never be bought twice.
 - Daily X posting uses a managed authenticated schedule, server-only OAuth1 credentials, a database lease and unique slots; uncertain sends pause instead of retrying because X has no posting idempotency key. Images are bundled branded assets and no background AI calls are needed.
 - Wallet profile display uses the shared useProfiles hook, resolving Hedera account IDs through mirror-node EVM aliases with long-zero fallback so holders and trades show the same identity.
+- The sitemap uses required route-level staticData.sitemap decisions and paginated public-key token reads; exclude private surfaces and omit non-authoritative lastmod dates so search discovery stays safe and complete.

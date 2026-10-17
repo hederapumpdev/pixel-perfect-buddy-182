@@ -3,6 +3,7 @@ import { db, json, reservesAt, toBlock } from "@/lib/dexscreener";
 import { NETWORK } from "@/lib/hedera-config";
 
 export const Route = createFileRoute("/api/public/dexscreener/events")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       GET: async ({ request }) => {

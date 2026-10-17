@@ -16,6 +16,7 @@ Rules: answer briefly and in the user's language. Never ask for private keys or 
 type Msg = { role: "user" | "assistant"; content: string };
 
 export const Route = createFileRoute("/api/public/support-chat")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {

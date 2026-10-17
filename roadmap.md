@@ -1,6 +1,6 @@
 # Roadmap
 - [x] Write an English Reddit introduction for HederaPump with official website and social links
-- [ ] SEO: add sitemap — awaiting approval of review findings
+- [x] SEO: sitemap added and verified with public pages and real tokens; robots.txt references it
 - [x] Show existing profile names and avatars beside wallets in coin trades and top holders
 - [x] Daily X app tweets — live, first post sent
 - [x] Include branded images with daily X tweets

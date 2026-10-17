@@ -8,6 +8,7 @@ import { tokensQuery, mcapOf } from "@/lib/queries";
 import { useChainSync } from "@/hooks/use-sync";
 
 export const Route = createFileRoute("/explore")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Explore tokens — HederaPump" },
