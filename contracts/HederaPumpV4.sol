@@ -69,7 +69,14 @@ contract HederaPumpV4 {
     bool public paused;
     uint256 public platformFees;
     mapping(address => uint256) public creatorFees;
-    mapping(address => uint256) public referralFees;
+    // Shared referral pool: REFERRER_SHARE_BPS of every referred trade's fee goes into one
+    // pool, split pro-rata by the trading volume each referrer's recruits generated. More
+    // referrers = smaller slice each. Standard dividend accounting (scaled accumulator).
+    uint256 public constant SCALE = 1e18;
+    uint256 public accReferralPerVolume;
+    uint256 public totalReferralVolume;
+    mapping(address => uint256) public referralVolume;
+    mapping(address => uint256) public referralRewardDebt;
     mapping(address => Curve) public curves;
     address[] public allTokens;
     uint256 private locked = 1;
