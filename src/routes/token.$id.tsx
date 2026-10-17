@@ -31,9 +31,11 @@ import {
   fromTinybars,
   fromUnits,
   isV2,
+  isV4,
   tokenUnit,
 } from "@/lib/curve";
-import { encodePump, encodePumpV2, encodeToken } from "@/lib/curve";
+import { encodePump, encodePumpV2, encodePumpV4, encodeToken } from "@/lib/curve";
+import { getReferrer } from "@/lib/referral";
 import {
   CURVE_SUPPLY_V2,
   GAS,

@@ -20,6 +20,10 @@ import {
 import { toTinybars } from "@/lib/curve";
 import { encodePump, encodePumpV2, encodePumpV4, isV2, isV4 } from "@/lib/curve";
 
+/** Hedera account id (0.0.x) → long-zero EVM address. */
+const longZero = (id: string) =>
+  "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
+
 // HBAR sent along to pay for creating the HTS token itself (~15 measured on testnet).
 const HTS_CREATE_BUDGET = 2_000_000_000n; // 20 ℏ
 
