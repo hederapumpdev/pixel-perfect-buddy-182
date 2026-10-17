@@ -131,6 +131,66 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_channel_state: {
+        Row: {
+          chat_id: string
+          id: number
+          last_error: string | null
+          lease_until: string | null
+          message_id: number | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          chat_id?: string
+          id?: number
+          last_error?: string | null
+          lease_until?: string | null
+          message_id?: number | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          chat_id?: string
+          id?: number
+          last_error?: string | null
+          lease_until?: string | null
+          message_id?: number | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      telegram_graduation_posts: {
+        Row: {
+          created_at: string
+          last_error: string | null
+          message_id: number | null
+          network: string
+          sent_at: string | null
+          status: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          last_error?: string | null
+          message_id?: number | null
+          network: string
+          sent_at?: string | null
+          status?: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          last_error?: string | null
+          message_id?: number | null
+          network?: string
+          sent_at?: string | null
+          status?: string
+          token?: string
+        }
+        Relationships: []
+      }
       token_images: {
         Row: {
           created_at: string
@@ -390,8 +450,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acquire_telegram_top_lease: { Args: never; Returns: boolean }
       acquire_x_posting_lease: { Args: never; Returns: boolean }
       admin_user_stats: { Args: never; Returns: Json }
+      claim_telegram_graduation: {
+        Args: { p_network: string }
+        Returns: {
+          created_at: string
+          last_error: string | null
+          message_id: number | null
+          network: string
+          sent_at: string | null
+          status: string
+          token: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "telegram_graduation_posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
       [_ in never]: never
