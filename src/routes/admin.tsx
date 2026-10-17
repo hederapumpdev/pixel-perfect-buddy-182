@@ -303,7 +303,7 @@ function BotPanel() {
   const buys = { data: adminData.data?.buys };
   const names = new Map((useAll().data?.tokens ?? []).map((t) => [t.address, t.symbol]));
   const b = bot.data;
-  const usd = useUsd();
+  const usdOf = useUsd();
   const save = useServerFn(saveBotSettings);
   const cfg = { data: adminData.data?.settings };
   const [enabled, setEnabled] = useState(true);
