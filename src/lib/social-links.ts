@@ -5,7 +5,7 @@
  * not full URLs. Putting a bare "@handle" into an href points the browser back
  * at this site, so every social link on the coin page goes through here first.
  */
-export type SocialKind = "twitter" | "telegram" | "website";
+export type SocialKind = "twitter" | "telegram" | "discord" | "website";
 
 export function socialUrl(kind: SocialKind, raw: string | null | undefined): string | null {
   const v = (raw ?? "").trim();
@@ -21,6 +21,11 @@ export function socialUrl(kind: SocialKind, raw: string | null | undefined): str
   if (kind === "telegram") {
     const path = v.replace(/^@+/, "").replace(/^t\.me\//i, "");
     return path ? `https://t.me/${path}` : null;
+  }
+
+  if (kind === "discord") {
+    const code = v.replace(/^(?:discord\.gg\/|discord\.com\/invite\/)/i, "").trim();
+    return code && !/\s/.test(code) ? `https://discord.gg/${code}` : null;
   }
 
   // Website typed without a scheme, e.g. "hederapump.dev".

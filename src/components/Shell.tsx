@@ -111,6 +111,14 @@ export function Shell({ children }: { children: ReactNode }) {
           >
             <Send className="h-4 w-4 text-primary" /> Telegram
           </a>
+          <a
+            href="https://discord.gg/bYPD27QtZ"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:border-primary"
+          >
+            <DiscordIcon className="h-4 w-4 text-primary" /> Discord
+          </a>
         </div>
         Meme coins are highly speculative. Nothing here is financial advice. © 2026 HederaPump
       </footer>
