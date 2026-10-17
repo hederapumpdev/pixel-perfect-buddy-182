@@ -199,7 +199,7 @@ contract HederaPumpV4 {
         c.virtualTokens += tokenAmount;
         c.realHbar -= gross;
         c.tokensSold -= tokenAmount;
-        _takeFee(token, c.creator, fee, referrer == msg.sender ? address(0) : referrer);
+        _takeFee(token, c.creator, fee, referrer == msg.sender ? address(0) : referrer, gross);
         emit Trade(token, msg.sender, false, gross, tokenAmount, fee, c.virtualHbar, c.virtualTokens);
         _send(msg.sender, net);
     }
