@@ -22,6 +22,7 @@ import {
   PUMP_CONTRACT_ID,
 } from "@/lib/hedera-config";
 import { fmtAge, fmtHbar } from "@/lib/queries";
+import { useUsd } from "@/lib/usd";
 
 export const Route = createFileRoute("/profile")({
   staticData: { sitemap: false },
@@ -110,6 +111,7 @@ function Profile() {
     },
     refetchInterval: 15_000,
   });
+  const usd = useUsd();
   const names = new Map((coins.data ?? []).map((c) => [c.address, c.symbol]));
 
   async function claim() {
@@ -168,6 +170,7 @@ function Profile() {
           <p className="mt-1 font-mono text-2xl font-semibold">
             {fees.isLoading ? "…" : fmtHbar(feeHbar)}
           </p>
+          {!fees.isLoading && <p className="font-mono text-xs text-muted-foreground">{usd(feeHbar)}</p>}
           <Button
             size="sm"
             className="mt-3 w-full"
@@ -203,7 +206,10 @@ function Profile() {
           >
             <span className={r.is_buy ? "text-up" : "text-down"}>{r.is_buy ? "BUY" : "SELL"}</span>
             <span>{names.get(r.token) ?? `${r.token.slice(0, 8)}…`}</span>
-            <span>{fmtHbar(Number(r.hbar_amount))}</span>
+            <span>
+              {fmtHbar(Number(r.hbar_amount))}
+              <span className="text-muted-foreground"> · {usd(Number(r.hbar_amount))}</span>
+            </span>
             <span className="text-muted-foreground">{fmtAge(r.created_at)}</span>
           </Link>
         ))}
