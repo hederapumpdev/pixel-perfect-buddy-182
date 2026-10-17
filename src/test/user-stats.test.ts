@@ -18,15 +18,15 @@ describe("admin user list", () => {
     const rows = userRows(
       stats([{ wallet: "0xd14adf40256c7fdab669ec2a5eee25afaa755392", trades: 7, last_at: "2026-10-17T00:00:00Z", name: "Cookdevil", avatar: "abc" }]),
     );
-    expect(rows[0].label).toBe("Cookdevil");
-    expect(rows[0].trades).toBe(7);
+    expect(rows[0]?.label).toBe("Cookdevil");
+    expect(rows[0]?.trades).toBe(7);
   });
 
   it("falls back to a short wallet address without a profile", () => {
     const rows = userRows(
       stats([{ wallet: "0xd14adf40256c7fdab669ec2a5eee25afaa755392", trades: 2, last_at: "2026-10-17T00:00:00Z", name: null, avatar: null }]),
     );
-    expect(rows[0].label).toBe("0xd14a…5392");
+    expect(rows[0]?.label).toBe("0xd14a…5392");
   });
 
   it("lists at most 12 wallets, newest first", () => {
@@ -39,6 +39,6 @@ describe("admin user list", () => {
     }));
     const rows = userRows(stats(many));
     expect(rows.length).toBe(12);
-    expect(rows[0].trades).toBe(0);
+    expect(rows[0]?.trades).toBe(0);
   });
 });

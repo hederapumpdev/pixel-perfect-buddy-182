@@ -17,3 +17,4 @@
 - [x] Remove every Lovable logo and badge from the site
 - [x] Fix: wallet button opens on hederapump.dev — domain allowlist updated; live mobile wallet picker verified, relay no longer rejects origin
 - [ ] Verify completed HashPack account connection — requires user's wallet approval on their device
+- [x] Admin: user counts — wallets, active today/7 days, profiles, creators, recent wallets
