@@ -19,4 +19,4 @@
 - [ ] Verify completed HashPack account connection — requires user's wallet approval on their device
 - [x] Admin: user counts — wallets, active today/7 days, profiles, creators, recent wallets
 - [x] Coin page: tabs (Trades/Holders/Comments/About); duplicate token info removed from the sidebar
-- [ ] Coin page: drop the DexScreener chart card, move its link into About
+- [x] Coin page: DexScreener chart card removed, its link now sits in About with the other links
