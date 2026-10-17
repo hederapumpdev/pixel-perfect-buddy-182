@@ -303,6 +303,7 @@ function BotPanel() {
   const buys = { data: adminData.data?.buys };
   const names = new Map((useAll().data?.tokens ?? []).map((t) => [t.address, t.symbol]));
   const b = bot.data;
+  const usd = useUsd();
   const save = useServerFn(saveBotSettings);
   const cfg = { data: adminData.data?.settings };
   const [enabled, setEnabled] = useState(true);
@@ -378,14 +379,14 @@ function BotPanel() {
           ) : (
             "Not funded yet"
           )}{" "}
-          · {fmtHbar(b?.balanceHbar ?? 0)}
+          · {fmtHbar(b?.balanceHbar ?? 0)} <span className="text-muted-foreground">· {usd(b?.balanceHbar ?? 0)}</span>
         </p>
       </div>
       <div className="mt-3 divide-y divide-border rounded-lg border border-border bg-card font-mono text-xs">
         {buys.data?.map((r) => (
           <div key={r.token} className="flex justify-between gap-2 px-4 py-2">
             <span>{names.get(r.token) ?? r.token.slice(0, 10)}</span>
-            <span>{fmtHbar(Number(r.hbar_amount))}</span>
+            <span>{fmtHbar(Number(r.hbar_amount))} <span className="text-muted-foreground">{usd(Number(r.hbar_amount))}</span></span>
             <span className={r.status === "done" ? "text-up" : r.status === "failed" ? "text-down" : "text-muted-foreground"}>{r.status}</span>
             <span className="text-muted-foreground">{fmtAge(r.created_at)}</span>
           </div>
@@ -552,11 +553,12 @@ function SupportInbox() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 font-mono text-2xl font-semibold">{value}</p>
+      {sub && <p className="mt-0.5 font-mono text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
 }
