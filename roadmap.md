@@ -26,3 +26,4 @@
 - [x] Admin: user counts — wallets, active today/7 days, profiles, creators, recent wallets
 - [x] Coin page: tabs (Trades/Holders/Comments/About); duplicate token info removed from the sidebar
 - [x] Coin page: DexScreener chart card removed, its link now sits in About with the other links
+- [x] Profile: dollar values next to HBAR balance, coin worth, PnL, creator fees and trade list

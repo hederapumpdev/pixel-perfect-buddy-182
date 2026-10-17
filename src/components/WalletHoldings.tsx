@@ -5,6 +5,7 @@ import { TokenImage } from "@/components/TokenCard";
 import { encodeToken, isV2 } from "@/lib/curve";
 import { MIRROR_URL, NETWORK } from "@/lib/hedera-config";
 import { fmtHbar, priceOf } from "@/lib/queries";
+import { useHbarUsd, useUsd } from "@/lib/usd";
 
 const idToEvm = (id: string) => "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
@@ -28,6 +29,8 @@ export function WalletHoldings({
   addrs: string[];
   balanceHbar: number | null | undefined;
 }) {
+  const rate = useHbarUsd().data;
+  const usd = useUsd();
   const q = useQuery({
     queryKey: ["holdings", accountId, addrs],
     refetchInterval: 30_000,
@@ -81,14 +84,17 @@ export function WalletHoldings({
         <div>
           <p className="text-xs text-muted-foreground">HBAR in your wallet</p>
           <p className="mt-1 font-mono text-2xl font-semibold">{fmtHbar(hbar)}</p>
+          {rate && <p className="font-mono text-xs text-muted-foreground">{usd(hbar)}</p>}
         </div>
         <div>
           <p className="text-xs text-muted-foreground">Your coins are worth</p>
           <p className="mt-1 font-mono text-2xl font-semibold">{q.isLoading ? "…" : fmtHbar(total)}</p>
+          {!q.isLoading && rate && <p className="font-mono text-xs text-muted-foreground">{usd(total)}</p>}
           {!q.isLoading && pnlAll !== 0 && (
             <p className={`font-mono text-xs ${pnlAll >= 0 ? "text-up" : "text-down"}`}>
               {pnlAll >= 0 ? "+" : "−"}
               {fmtHbar(Math.abs(pnlAll))}
+              {rate && <span> · {usd(Math.abs(pnlAll))}</span>}
             </p>
           )}
         </div>
@@ -110,11 +116,15 @@ export function WalletHoldings({
               </p>
             </div>
             <div className="text-right font-mono">
-              <p className="text-sm">{fmtHbar(value)}</p>
+              <p className="text-sm">
+                {fmtHbar(value)}
+                {rate && <span className="text-xs text-muted-foreground"> · {usd(value)}</span>}
+              </p>
               {pnl !== null && pct !== null && (
                 <p className={`text-xs ${pnl >= 0 ? "text-up" : "text-down"}`}>
                   {pnl >= 0 ? "+" : "−"}
-                  {fmtHbar(Math.abs(pnl))}{" "}
+                  {fmtHbar(Math.abs(pnl))}
+                  {rate && <span> · {usd(Math.abs(pnl))}</span>}{" "}
                   <span className={`ml-1 rounded px-1 ${pnl >= 0 ? "bg-up/15" : "bg-down/15"}`}>
                     {pnl >= 0 ? "↑" : "↓"} {Math.abs(pct).toFixed(1)}%
                   </span>

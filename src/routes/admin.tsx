@@ -21,6 +21,7 @@ import {
 } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
 import { fmtAge, fmtHbar } from "@/lib/queries";
+import { useUsd } from "@/lib/usd";
 import artifact from "@/lib/contract-artifact-v3.json";
 import { listSupport, setSupportStatus } from "@/lib/support.functions";
 import { XPostingPanel } from "@/components/XPostingPanel";
@@ -33,30 +34,6 @@ const SAUCER_ROUTER_EVM = "0x00000000000000000000000000000000002e7a5d"; // 0.0.3
 const SAUCER_FACTORY_EVM = "0x0000000000000000000000000000000000103680"; // 0.0.1062784
 const PLATFORM_SHARE = 0.7;
 
-/** Live HBAR→USD rate from the Hedera mirror node (same source the bot uses). */
-function useHbarUsd() {
-  return useQuery({
-    queryKey: ["hbar-usd"],
-    queryFn: async () => {
-      const r = await fetch(`${MIRROR_URL}/api/v1/network/exchangerate`);
-      if (!r.ok) throw new Error("rate unavailable");
-      const { current_rate: c } = await r.json();
-      return c.cent_equivalent / c.hbar_equivalent / 100 as number;
-    },
-    staleTime: 5 * 60_000,
-    refetchInterval: 10 * 60_000,
-  });
-}
-
-const fmtUsd = (n: number) => {
-  const d = n > 0 && n < 0.01 ? 4 : 2;
-  return "$" + n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
-};
-/** HBAR value with its dollar equivalent next to it. */
-function useUsd() {
-  const rate = useHbarUsd().data;
-  return (hbar: number) => (rate ? fmtUsd(hbar * rate) : "…");
-}
 
 export const Route = createFileRoute("/admin")({
   staticData: { sitemap: "exclude-subtree" },
