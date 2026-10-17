@@ -13,6 +13,7 @@ import { checkAdminPin, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/c
 import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
+  PUMP_CONTRACT_V4_ID,
   HASHSCAN_URL,
   FEE_WALLET_EVM,
   FEE_WALLET_ID,
@@ -23,6 +24,11 @@ import { toTinybars } from "@/lib/curve";
 import { fmtAge, fmtHbar } from "@/lib/queries";
 import { useUsd } from "@/lib/usd";
 import artifact from "@/lib/contract-artifact-v3.json";
+import artifactV4 from "@/lib/contract-artifact-v4.json";
+
+// Deploy targets the newest contract not yet on mainnet (v4 once v3 is live).
+const DEPLOY_TARGET = PUMP_CONTRACT_V3_ID && !PUMP_CONTRACT_V4_ID ? artifactV4 : artifact;
+const DEPLOYED_ID = PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID;
 import { listSupport, setSupportStatus } from "@/lib/support.functions";
 import { XPostingPanel } from "@/components/XPostingPanel";
 import { getUserStats } from "@/lib/users.functions";
