@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { uploadImage } from "@/lib/chain.functions";
 import { getProfiles, saveProfile } from "@/lib/profile.functions";
 import { imageUrl } from "@/lib/queries";
+import { MIRROR_URL } from "@/lib/hedera-config";
+import { profileWalletAddress } from "@/lib/profile-wallets";
 
 const KEY = "hederaPump.profileKey";
 function editKey() {
@@ -47,13 +49,34 @@ const toB64 = (f: File) =>
 
 export function useProfiles(wallets: string[]) {
   const get = useServerFn(getProfiles);
-  const ws = [...new Set(wallets.map((w) => w.toLowerCase()))].sort();
-  return useQuery({
+  const originals = [...new Set(wallets.map((w) => w.trim().toLowerCase()))].sort();
+  const ids = originals.filter((w) => /^\d+\.\d+\.\d+$/.test(w));
+  const { data: aliases = {} } = useQuery({
+    queryKey: ["profile-wallet-aliases", ids],
+    enabled: ids.length > 0,
+    staleTime: Infinity,
+    queryFn: async () => Object.fromEntries(await Promise.all(ids.map(async (id) => {
+      try {
+        const response = await fetch(`${MIRROR_URL}/api/v1/accounts/${id}`);
+        if (!response.ok) return [id, profileWalletAddress(id)];
+        const account = await response.json();
+        return [id, typeof account.evm_address === "string" ? account.evm_address.toLowerCase() : profileWalletAddress(id)];
+      } catch {
+        return [id, profileWalletAddress(id)];
+      }
+    }))),
+  });
+  const ws = [...new Set(originals.flatMap((w) => [profileWalletAddress(w), aliases[w]].filter((a): a is string => Boolean(a))))].sort();
+  const profiles = useQuery({
     queryKey: ["profiles", ws],
     enabled: ws.length > 0,
     queryFn: () => get({ data: { wallets: ws } }),
     staleTime: 30_000,
   }).data ?? {};
+  return Object.fromEntries(originals.flatMap((w) => {
+    const profile = profiles[aliases[w] ?? profileWalletAddress(w)] ?? profiles[profileWalletAddress(w)];
+    return profile ? [[w, profile]] : [];
+  }));
 }
 
 export function Avatar({ hash, size = 40 }: { hash: string | null | undefined; size?: number }) {

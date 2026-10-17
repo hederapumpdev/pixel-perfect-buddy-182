@@ -136,6 +136,7 @@ export function Holders({
 
   const cId = contract.toLowerCase();
   const cr = creator.toLowerCase();
+  const profiles = useProfiles(rows.map((r) => r.who));
   return (
     <div className="rounded-lg border border-border bg-card">
       <p className="border-b border-border px-4 py-3 text-sm font-semibold">Top holders</p>
@@ -144,14 +145,16 @@ export function Holders({
           const w = r.who.toLowerCase();
           const tag = w === cId ? "bonding curve" : w === cr ? "dev" : null;
           return (
-            <div key={r.who} className="flex items-center justify-between px-4 py-2">
-              <span className="truncate">
-                {i + 1}. {r.who.startsWith("0x") ? shortAddr(r.who) : r.who}
+            <div key={r.who} className="flex items-center justify-between gap-2 px-4 py-2">
+              <span className="flex min-w-0 items-center gap-2" title={r.who}>
+                <span className="shrink-0">{i + 1}.</span>
+                {profiles[w] && <Avatar hash={profiles[w]?.avatar} size={24} />}
+                <span className="truncate">{profiles[w]?.name ?? (r.who.startsWith("0x") ? shortAddr(r.who) : r.who)}</span>
                 {tag && (
                   <span className="ml-2 rounded bg-secondary px-1.5 py-0.5 text-[10px] text-primary">{tag}</span>
                 )}
               </span>
-              <span>{((r.amt / supply) * 100).toFixed(2)}%</span>
+              <span className="shrink-0">{((r.amt / supply) * 100).toFixed(2)}%</span>
             </div>
           );
         })}
