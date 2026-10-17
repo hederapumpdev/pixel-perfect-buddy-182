@@ -23,6 +23,9 @@ import { fmtAge, fmtHbar } from "@/lib/queries";
 import artifact from "@/lib/contract-artifact-v3.json";
 import { listSupport, setSupportStatus } from "@/lib/support.functions";
 import { XPostingPanel } from "@/components/XPostingPanel";
+import { getUserStats } from "@/lib/users.functions";
+import { userRows } from "@/lib/user-stats";
+import { Avatar } from "@/components/ProfileEditor";
 
 // SaucerSwap V1 mainnet (docs.saucerswap.finance/developers/contracts)
 const SAUCER_ROUTER_EVM = "0x00000000000000000000000000000000002e7a5d"; // 0.0.3045981
@@ -108,6 +111,7 @@ function Admin() {
     <Shell>
       <div className="mx-auto max-w-4xl space-y-10">
         <h1 className="text-3xl font-bold">Admin</h1>
+        <UsersOverview />
         <SupportInbox />
         <XPostingPanel pin={pin || sessionStorage.getItem(PIN_KEY) || ""} />
         <FeeOverview />
@@ -519,5 +523,54 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 font-mono text-2xl font-semibold">{value}</p>
     </div>
+  );
+}
+
+const num = (n: number | undefined) => (n === undefined ? "…" : String(n));
+
+function UsersOverview() {
+  const stats = useServerFn(getUserStats);
+  const pin = (() => {
+    try {
+      return sessionStorage.getItem(PIN_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  })();
+  const q = useQuery({ queryKey: ["user-stats"], queryFn: () => stats({ data: { pin } }), refetchInterval: 60_000 });
+  const rows = userRows(q.data);
+  return (
+    <section>
+      <h2 className="text-xl font-semibold">Users</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        A wallet counts here as soon as it has traded — the site keeps no account list of its own.
+      </p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-4">
+        <Stat label="Wallets" value={num(q.data?.wallets)} />
+        <Stat label="Active today" value={num(q.data?.wallets_1d)} />
+        <Stat label="Active 7 days" value={num(q.data?.wallets_7d)} />
+        <Stat label="Profiles" value={num(q.data?.profiles)} />
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-4">
+        <Stat label="Coin creators" value={num(q.data?.creators)} />
+        <Stat label="Coins" value={num(q.data?.coins)} />
+        <Stat label="Trades" value={num(q.data?.trades)} />
+        <Stat label="Commenters" value={num(q.data?.comment_authors)} />
+      </div>
+      <div className="mt-3 divide-y divide-border rounded-lg border border-border bg-card text-sm">
+        {rows.map((r) => (
+          <div key={r.wallet} className="flex items-center justify-between gap-3 px-4 py-2">
+            <span className="flex min-w-0 items-center gap-2">
+              <Avatar hash={r.avatar} size={24} />
+              <span className="truncate font-medium">{r.label}</span>
+            </span>
+            <span className="font-mono text-muted-foreground">{r.trades} {r.trades === 1 ? "trade" : "trades"}</span>
+            <span className="w-20 text-right text-xs text-muted-foreground">{fmtAge(r.last_at)}</span>
+          </div>
+        ))}
+        {!rows.length && <p className="px-4 py-3 text-muted-foreground">{q.isLoading ? "Loading…" : "No users yet."}</p>}
+      </div>
+      {q.error && <p className="mt-2 text-sm text-destructive">Couldn't load user counts — reopen the admin page with your PIN.</p>}
+    </section>
   );
 }

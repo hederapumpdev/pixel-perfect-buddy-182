@@ -391,6 +391,7 @@ export type Database = {
     }
     Functions: {
       acquire_x_posting_lease: { Args: never; Returns: boolean }
+      admin_user_stats: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never

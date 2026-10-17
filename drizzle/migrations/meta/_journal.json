@@ -85,6 +85,13 @@
       "when": 1792187857535,
       "tag": "0011_daily_x_media_progress",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792195803236,
+      "tag": "0012_admin_user_stats",
+      "breakpoints": true
     }
   ]
 }
