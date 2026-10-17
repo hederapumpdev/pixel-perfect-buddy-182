@@ -170,7 +170,7 @@ contract HederaPumpV4 {
         c.virtualTokens -= out;
         c.realHbar += inAmt;
         c.tokensSold += out;
-        _takeFee(token, c.creator, fee, referrer == trader ? address(0) : referrer);
+        _takeFee(token, c.creator, fee, referrer == trader ? address(0) : referrer, inAmt);
         require(HTS.transferToken(token, address(this), trader, int64(int256(out))) == OK, "transfer (associate token first)");
         emit Trade(token, trader, true, inAmt, out, fee, c.virtualHbar, c.virtualTokens);
         if (c.tokensSold >= CURVE_SUPPLY) {
