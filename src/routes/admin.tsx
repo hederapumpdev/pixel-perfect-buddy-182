@@ -390,7 +390,7 @@ function Deploy() {
   const p = w.deployProgress;
 
   useEffect(() => {
-    if (w.accountId && w.mode === "hashpack" && !DEPLOYED_ID) {
+    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_V4_ID) {
       w.checkDeploy(DEPLOY_TARGET.bytecode).then((s) => s.contractId && setDeployed(s.contractId)).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -433,18 +433,20 @@ function Deploy() {
   return (
     <section className="space-y-4">
       <h2 className="text-xl font-semibold">Launchpad contract</h2>
-      {DEPLOYED_ID ? (
+      {DEPLOYED_ID && (
         <p className="rounded-md border border-border bg-card p-4 text-sm">
           Live contract:{" "}
           <a className="font-mono text-accent" href={`${HASHSCAN_URL}/contract/${DEPLOYED_ID}`} target="_blank" rel="noreferrer">
             {DEPLOYED_ID}
           </a>
         </p>
-      ) : (
+      )}
+      {!PUMP_CONTRACT_V4_ID && (
         <>
           <p className="text-sm text-muted-foreground">
-            Deploys the new contract to Hedera {NETWORK}: platform fee goes straight to {FEE_WALLET_ID}, creators
-            claim their share on their profile. <b>About 6 approvals</b>, one per tap. Roughly 20–30 HBAR.
+            Deploys the <b>v4</b> contract to Hedera {NETWORK} (referrals + automatic SaucerSwap token info):
+            platform fee goes straight to {FEE_WALLET_ID}, creators claim their share on their profile.{" "}
+            <b>About 6 approvals</b>, one per tap. Roughly 20–30 HBAR.
           </p>
           <label className="block space-y-1.5">
             <span className="text-sm font-medium">Starting virtual liquidity (HBAR)</span>
