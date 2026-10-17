@@ -453,7 +453,31 @@ function TokenPage() {
           </div>
 
           <div className="rounded-lg border border-border bg-card">
-            <p className="border-b border-border px-4 py-3 text-sm font-semibold">Trades</p>
+            <div className="flex border-b border-border">
+              {(
+                [
+                  ["trades", "Trades"],
+                  ["holders", "Holders"],
+                  ["comments", "Comments"],
+                  ["about", "About"],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setTab(key)}
+                  className={`flex-1 px-3 py-3 text-sm font-semibold transition-colors ${
+                    tab === key
+                      ? "border-b-2 border-accent text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {tab === "trades" && (
             <div className="divide-y divide-border font-mono text-xs">
               {trades.slice(0, 50).map((r) => (
                 <a
