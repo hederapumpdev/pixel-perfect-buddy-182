@@ -27,7 +27,13 @@ vi.mock("@/integrations/supabase/client", () => ({
                 virtual_tokens: "100",
               },
             ];
-      const b: any = { select: () => b, eq: () => b, in: () => Promise.resolve({ data: rows, error: null }) };
+      const b: any = {
+        select: () => b,
+        eq: () => b,
+        in: () => b,
+        limit: () => b,
+        then: (done: any) => done({ data: rows, error: null }),
+      };
       return b;
     },
   },

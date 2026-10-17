@@ -31,10 +31,13 @@ vi.mock("@/integrations/supabase/client", () => ({
                 virtual_tokens: "100",
               },
             ];
+      // Real query builders stay chainable and resolve when awaited.
       const builder: any = {
         select: () => builder,
         eq: () => builder,
-        in: () => Promise.resolve({ data: rows, error: null }),
+        in: () => builder,
+        limit: () => builder,
+        then: (done: any) => done({ data: rows, error: null }),
       };
       return builder;
     },
