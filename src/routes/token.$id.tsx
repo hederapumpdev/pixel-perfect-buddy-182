@@ -103,6 +103,7 @@ function TokenPage() {
   const { data: trades = [] } = useQuery(tradesQuery(id));
   const profiles = useProfiles(trades.slice(0, 50).map((trade) => trade.trader));
   const [side, setSide] = useState<"buy" | "sell">("buy");
+  const [tab, setTab] = useState<"trades" | "holders" | "comments" | "about">("trades");
   const [amt, setAmt] = useState("");
   const [busy, setBusy] = useState(false);
   const [bal, setBal] = useState<bigint>(0n);
@@ -453,7 +454,31 @@ function TokenPage() {
           </div>
 
           <div className="rounded-lg border border-border bg-card">
-            <p className="border-b border-border px-4 py-3 text-sm font-semibold">Trades</p>
+            <div className="flex border-b border-border">
+              {(
+                [
+                  ["trades", "Trades"],
+                  ["holders", "Holders"],
+                  ["comments", "Comments"],
+                  ["about", "About"],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setTab(key)}
+                  className={`flex-1 px-3 py-3 text-sm font-semibold transition-colors ${
+                    tab === key
+                      ? "border-b-2 border-accent text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {tab === "trades" && (
             <div className="divide-y divide-border font-mono text-xs">
               {trades.slice(0, 50).map((r) => (
                 <a
@@ -480,17 +505,44 @@ function TokenPage() {
                 <p className="px-4 py-6 text-center text-muted-foreground">No trades yet.</p>
               )}
           </div>
-          <FollowButton token={t.address} symbol={t.symbol} />
-          <Holders
-            tokenId={v2 ? `0.0.${BigInt(t.address)}` : null}
-            decimals={v2 ? 8 : 18}
-            creator={t.creator}
-            contract={t.contract}
-            trades={trades}
-            supply={1_000_000_000}
-          />
-          <Comments token={t.address} author={w.evmAddress ?? w.accountId ?? null} />
+            )}
+            {tab === "holders" && (
+              <div className="p-4">
+                <Holders
+                  tokenId={v2 ? `0.0.${BigInt(t.address)}` : null}
+                  decimals={v2 ? 8 : 18}
+                  creator={t.creator}
+                  contract={t.contract}
+                  trades={trades}
+                  supply={1_000_000_000}
+                />
+              </div>
+            )}
+            {tab === "comments" && (
+              <div className="p-4">
+                <Comments token={t.address} author={w.evmAddress ?? w.accountId ?? null} />
+              </div>
+            )}
+            {tab === "about" && (
+              <div className="space-y-3 p-4 text-sm">
+                <p className="whitespace-pre-wrap text-muted-foreground">
+                  {t.description || "No description yet."}
+                </p>
+                <div className="flex flex-wrap gap-3 text-xs">
+                  {t.twitter && (
+                    <a href={t.twitter} target="_blank" rel="noreferrer" className="text-accent">X / Twitter</a>
+                  )}
+                  {t.telegram && (
+                    <a href={t.telegram} target="_blank" rel="noreferrer" className="text-accent">Telegram</a>
+                  )}
+                  {t.website && (
+                    <a href={t.website} target="_blank" rel="noreferrer" className="text-accent">Website</a>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
+          <FollowButton token={t.address} symbol={t.symbol} />
         </div>
       </div>
     </Shell>
