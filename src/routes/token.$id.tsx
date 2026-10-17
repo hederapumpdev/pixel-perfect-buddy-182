@@ -510,15 +510,25 @@ function TokenPage() {
                   {t.description || "No description yet."}
                 </p>
                 <div className="flex flex-wrap gap-3 text-xs">
-                  {t.twitter && (
-                    <a href={t.twitter} target="_blank" rel="noreferrer" className="text-accent">X / Twitter</a>
-                  )}
-                  {t.telegram && (
-                    <a href={t.telegram} target="_blank" rel="noreferrer" className="text-accent">Telegram</a>
-                  )}
-                  {t.website && (
-                    <a href={t.website} target="_blank" rel="noreferrer" className="text-accent">Website</a>
-                  )}
+                  {(
+                    [
+                      ["X / Twitter", socialUrl("twitter", t.twitter)],
+                      ["Telegram", socialUrl("telegram", t.telegram)],
+                      ["Website", socialUrl("website", t.website)],
+                    ] as const
+                  )
+                    .filter(([, href]) => href)
+                    .map(([label, href]) => (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-accent"
+                      >
+                        {label}
+                      </a>
+                    ))}
                 </div>
               </div>
             )}
