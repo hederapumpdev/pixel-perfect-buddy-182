@@ -4,7 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { WalletHoldings } from "@/components/WalletHoldings";
 
-const ADDR = "0x000000000000000000000000000000000000007b"; // 0.0.123
+// vi.mock factories run before the imports below, so the address lives in vi.hoisted.
+const { ADDR } = vi.hoisted(() => ({ ADDR: "0x000000000000000000000000000000000000007b" })); // 0.0.123
 
 // Link needs a router context the holdings card never has on its own.
 vi.mock("@tanstack/react-router", () => ({

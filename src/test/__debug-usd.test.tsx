@@ -3,7 +3,7 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { WalletHoldings } from "@/components/WalletHoldings";
 
-const ADDR = "0x000000000000000000000000000000000000007b";
+const { ADDR } = vi.hoisted(() => ({ ADDR: "0x000000000000000000000000000000000000007b" }));
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, className }: { children?: any; className?: string }) => (
