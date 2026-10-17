@@ -495,6 +495,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      creator_fee_totals: { Args: { creators: string[] }; Returns: number }
     }
     Enums: {
       [_ in never]: never
