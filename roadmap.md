@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Show existing profile names and avatars beside wallets in coin trades and top holders
 - [x] Daily X app tweets — live, first post sent
 - [x] Include branded images with daily X tweets
 - [x] Coin page: CA + creator with copy/links
