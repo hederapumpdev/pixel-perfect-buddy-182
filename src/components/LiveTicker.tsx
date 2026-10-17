@@ -2,7 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { NETWORK } from "@/lib/hedera-config";
-import { shortAddr, tokensQuery } from "@/lib/queries";
+import { tokensQuery } from "@/lib/queries";
+import { HederaAddress } from "@/components/HederaAddress";
 
 /** Scrolling bar with the latest real trades (from synced on-chain events). */
 export function LiveTicker() {
@@ -30,7 +31,7 @@ export function LiveTicker() {
       <div className="ticker-track flex w-max gap-8 py-1.5 font-mono text-xs">
         {items.map((r, i) => (
           <Link key={`${r.id}-${i}`} to="/token/$id" params={{ id: r.token }} className="whitespace-nowrap">
-            <span className="text-muted-foreground">{shortAddr(r.trader)}</span>{" "}
+            <span className="text-muted-foreground"><HederaAddress address={r.trader} /></span>{" "}
             <span className={r.is_buy ? "text-up" : "text-down"}>{r.is_buy ? "bought" : "sold"}</span>{" "}
             {Number(r.hbar_amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} ℏ of{" "}
             <span className="font-semibold text-primary">${sym.get(r.token) ?? "?"}</span>

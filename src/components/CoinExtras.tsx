@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { listComments, postComment } from "@/lib/comments.functions";
 import { MIRROR_URL } from "@/lib/hedera-config";
-import { fmtAge, shortAddr } from "@/lib/queries";
+import { fmtAge } from "@/lib/queries";
+import { HederaAddress } from "@/components/HederaAddress";
 import { Avatar, useProfiles } from "@/components/ProfileEditor";
 
 type Trade = { trader: string; is_buy: boolean; token_amount: number | string };
@@ -67,7 +68,7 @@ export function Comments({ token, author }: { token: string; author: string | nu
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">
                 <span className="font-semibold text-foreground">
-                  {profs[c.author.toLowerCase()]?.name ?? shortAddr(c.author)}
+                  {profs[c.author.toLowerCase()]?.name ?? <HederaAddress address={c.author} />}
                 </span>{" "}
                 · {fmtAge(c.created_at)} ago
               </p>
@@ -149,7 +150,7 @@ export function Holders({
               <span className="flex min-w-0 items-center gap-2" title={r.who}>
                 <span className="shrink-0">{i + 1}.</span>
                 {profiles[w] && <Avatar hash={profiles[w]?.avatar} size={24} />}
-                <span className="truncate">{profiles[w]?.name ?? (r.who.startsWith("0x") ? shortAddr(r.who) : r.who)}</span>
+                <span className="truncate">{profiles[w]?.name ?? <HederaAddress address={r.who} />}</span>
                 {tag && (
                   <span className="ml-2 rounded bg-secondary px-1.5 py-0.5 text-[10px] text-primary">{tag}</span>
                 )}

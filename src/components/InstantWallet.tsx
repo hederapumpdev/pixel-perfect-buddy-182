@@ -33,7 +33,7 @@ export function InstantWallet() {
   }
 
   if (w.mode === "email") {
-    const addr = w.evmAddress ?? w.accountId ?? "";
+    const addr = w.accountId ?? w.evmAddress ?? "";
     const empty = !(Number(w.balanceHbar) > 0);
     return (
       <div className="mt-6 rounded-lg border border-primary/40 bg-card p-4">
@@ -45,13 +45,13 @@ export function InstantWallet() {
             ? "Top it up to start: in HashPack tap Send, choose HBAR and paste this address."
             : "You buy and sell straight away. Top up any time by sending HBAR to this address."}
         </p>
-        <button
+        <Button variant="outline"
           onClick={() => copy(addr)}
           className="mt-3 flex w-full items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-left font-mono text-xs"
         >
           <span className="min-w-0 flex-1 break-all">{addr}</span>
           <Copy className="h-4 w-4 shrink-0" />
-        </button>
+        </Button>
         {prev && (
           <p className="mt-2 text-xs text-muted-foreground">Your previous wallet: {prev}</p>
         )}
