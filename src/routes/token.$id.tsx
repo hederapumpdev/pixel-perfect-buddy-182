@@ -543,7 +543,6 @@ function TokenPage() {
             )}
           </div>
           <FollowButton token={t.address} symbol={t.symbol} />
-          </div>
         </div>
       </div>
     </Shell>
