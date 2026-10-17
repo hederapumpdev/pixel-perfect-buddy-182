@@ -17,6 +17,7 @@ import {
   FEE_WALLET_EVM,
   FEE_WALLET_ID,
   BOT_BUY_USD,
+  MIRROR_URL,
 } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
 import { fmtAge, fmtHbar } from "@/lib/queries";
@@ -31,6 +32,31 @@ import { Avatar } from "@/components/ProfileEditor";
 const SAUCER_ROUTER_EVM = "0x00000000000000000000000000000000002e7a5d"; // 0.0.3045981
 const SAUCER_FACTORY_EVM = "0x0000000000000000000000000000000000103680"; // 0.0.1062784
 const PLATFORM_SHARE = 0.7;
+
+/** Live HBAR→USD rate from the Hedera mirror node (same source the bot uses). */
+function useHbarUsd() {
+  return useQuery({
+    queryKey: ["hbar-usd"],
+    queryFn: async () => {
+      const r = await fetch(`${MIRROR_URL}/api/v1/network/exchangerate`);
+      if (!r.ok) throw new Error("rate unavailable");
+      const { current_rate: c } = await r.json();
+      return c.cent_equivalent / c.hbar_equivalent / 100 as number;
+    },
+    staleTime: 5 * 60_000,
+    refetchInterval: 10 * 60_000,
+  });
+}
+
+const fmtUsd = (n: number) => {
+  const d = n > 0 && n < 0.01 ? 4 : 2;
+  return "$" + n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+};
+/** HBAR value with its dollar equivalent next to it. */
+function useUsd() {
+  const rate = useHbarUsd().data;
+  return (hbar: number) => (rate ? fmtUsd(hbar * rate) : "…");
+}
 
 export const Route = createFileRoute("/admin")({
   staticData: { sitemap: "exclude-subtree" },
@@ -167,6 +193,7 @@ function FeeOverview() {
       .map(([addr, f]) => ({ addr, f, t: names.get(addr) }));
     return { total, day, week, list };
   }, [q.data]);
+  const usd = useUsd();
 
   return (
     <section>
@@ -176,15 +203,17 @@ function FeeOverview() {
         {FEE_WALLET_ID} immediately; older contracts keep it until claimed.
       </p>
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
-        <Stat label="Today" value={fmtHbar(s.day)} />
-        <Stat label="Last 7 days" value={fmtHbar(s.week)} />
-        <Stat label="All time" value={fmtHbar(s.total)} />
+        <Stat label="Today" value={fmtHbar(s.day)} sub={usd(s.day)} />
+        <Stat label="Last 7 days" value={fmtHbar(s.week)} sub={usd(s.week)} />
+        <Stat label="All time" value={fmtHbar(s.total)} sub={usd(s.total)} />
       </div>
       <div className="mt-3 divide-y divide-border rounded-lg border border-border bg-card text-sm">
         {s.list.map((r) => (
-          <Link key={r.addr} to="/token/$id" params={{ id: r.addr }} className="flex justify-between px-4 py-2 hover:bg-muted/40">
+          <Link key={r.addr} to="/token/$id" params={{ id: r.addr }} className="flex justify-between gap-3 px-4 py-2 hover:bg-muted/40">
             <span>{r.t ? `$${r.t.symbol}` : r.addr.slice(0, 10)}</span>
-            <span className="font-mono">{fmtHbar(r.f)}</span>
+            <span className="font-mono">
+              {fmtHbar(r.f)} <span className="text-muted-foreground">· {usd(r.f)}</span>
+            </span>
           </Link>
         ))}
         {!s.list.length && <p className="px-4 py-3 text-muted-foreground">{q.isLoading ? "Loading…" : "No fees yet."}</p>}
@@ -214,6 +243,7 @@ function TopCoins() {
       .sort((a, b) => b[sort] - a[sort])
       .slice(0, 20);
   }, [q.data, sort]);
+  const usd = useUsd();
 
   return (
     <section>
@@ -238,8 +268,12 @@ function TopCoins() {
           <Link key={r.t.address} to="/token/$id" params={{ id: r.t.address }} className="grid grid-cols-[2rem_1fr_auto_auto_auto] gap-3 px-4 py-2 hover:bg-muted/40">
             <span className="text-muted-foreground">{i + 1}</span>
             <span className="truncate">${r.t.symbol}</span>
-            <span className="font-mono">{fmtHbar(r.mc)}</span>
-            <span className="font-mono text-muted-foreground">{fmtHbar(r.vol)}</span>
+            <span className="font-mono">
+              {fmtHbar(r.mc)} <span className="text-muted-foreground">· {usd(r.mc)}</span>
+            </span>
+            <span className="font-mono text-muted-foreground">
+              {fmtHbar(r.vol)} <span className="opacity-70">· {usd(r.vol)}</span>
+            </span>
             <span className="font-mono">{r.grad.toFixed(1)}%</span>
           </Link>
         ))}
@@ -269,6 +303,7 @@ function BotPanel() {
   const buys = { data: adminData.data?.buys };
   const names = new Map((useAll().data?.tokens ?? []).map((t) => [t.address, t.symbol]));
   const b = bot.data;
+  const usdOf = useUsd();
   const save = useServerFn(saveBotSettings);
   const cfg = { data: adminData.data?.settings };
   const [enabled, setEnabled] = useState(true);
@@ -344,14 +379,14 @@ function BotPanel() {
           ) : (
             "Not funded yet"
           )}{" "}
-          · {fmtHbar(b?.balanceHbar ?? 0)}
+          · {fmtHbar(b?.balanceHbar ?? 0)} <span className="text-muted-foreground">· {usdOf(b?.balanceHbar ?? 0)}</span>
         </p>
       </div>
       <div className="mt-3 divide-y divide-border rounded-lg border border-border bg-card font-mono text-xs">
         {buys.data?.map((r) => (
           <div key={r.token} className="flex justify-between gap-2 px-4 py-2">
             <span>{names.get(r.token) ?? r.token.slice(0, 10)}</span>
-            <span>{fmtHbar(Number(r.hbar_amount))}</span>
+            <span>{fmtHbar(Number(r.hbar_amount))} <span className="text-muted-foreground">{usdOf(Number(r.hbar_amount))}</span></span>
             <span className={r.status === "done" ? "text-up" : r.status === "failed" ? "text-down" : "text-muted-foreground"}>{r.status}</span>
             <span className="text-muted-foreground">{fmtAge(r.created_at)}</span>
           </div>
@@ -518,11 +553,12 @@ function SupportInbox() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 font-mono text-2xl font-semibold">{value}</p>
+      {sub && <p className="mt-0.5 font-mono text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
 }
