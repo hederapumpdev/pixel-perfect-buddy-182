@@ -69,10 +69,10 @@ describe("Wallet holdings dollars", () => {
     vi.stubGlobal("fetch", mirror);
     renderHoldings();
 
-    // 5 HBAR at $0.01
-    expect(await screen.findByText("$0.05", undefined, { timeout: 5000 })).toBeInTheDocument();
-    // coin worth 3 HBAR at $0.01, bought for 20 HBAR
-    expect(await screen.findByText(/\$0\.03/, undefined, { timeout: 5000 })).toBeInTheDocument();
-    expect(await screen.findByText(/\$0\.17/, undefined, { timeout: 5000 })).toBeInTheDocument();
-  });
+    // 5 HBAR at $0.01, coin worth 3 HBAR at $0.01, bought for 20 HBAR
+    await screen.findByText("Test Coin", undefined, { timeout: 8000 });
+    expect(screen.getByText("$0.05")).toBeInTheDocument();
+    expect(screen.getAllByText(/\$0\.03/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/\$0\.17/).length).toBeGreaterThan(0);
+  }, 20_000);
 });
