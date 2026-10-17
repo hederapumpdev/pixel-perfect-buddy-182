@@ -15,7 +15,7 @@ export const PUMP_CONTRACT_V3_ID: string | null = "0.0.10924285";
 // v4: adds on-chain HIP-405 token metadata (SaucerSwap picks up logo/info automatically)
 // and a shared referral pool (10% of the platform fee, split pro-rata by attributed
 // trading volume, self-serve claims). Null until deployed from /admin.
-export const PUMP_CONTRACT_V4_ID: string | null = null;
+export const PUMP_CONTRACT_V4_ID: string | null = "0.0.10924813";
 
 /** Contracts whose coins are native HTS tokens (v2 + v3 share the same ABI). */
 export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID].filter(
