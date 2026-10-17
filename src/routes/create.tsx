@@ -135,9 +135,20 @@ function Create() {
       const hts = isV2(LATEST_CONTRACT_ID);
       // A brand-new HTS token can't be sent to the creator before their wallet
       // associates it, so the launch buy happens as a separate step afterwards.
+      let v4Calldata: string | undefined;
+      if (hts && isV4(LATEST_CONTRACT_ID)) {
+        // HIP-405 metadata URL stored on the token: resolved by creator + creation index.
+        const creator = (w.evmAddress ?? longZero(w.accountId!)).toLowerCase();
+        const { count } = await supabase
+          .from("tokens")
+          .select("address", { count: "exact", head: true })
+          .ilike("creator", creator);
+        const metadataUrl = `https://hederapump.dev/api/public/token-meta/${creator}/${count ?? 0}`;
+        v4Calldata = encodePumpV4("createToken", [f.name.trim(), f.ticker, meta, metadataUrl, 0n]);
+      }
       const { transactionHash } = hts
         ? await w.execute({
-            calldata: encodePumpV2("createToken", [f.name.trim(), f.ticker, meta, 0n]),
+            calldata: v4Calldata ?? encodePumpV2("createToken", [f.name.trim(), f.ticker, meta, 0n]),
             gas: GAS_V2.create,
             payableTinybars: fee + HTS_CREATE_BUDGET,
             contractId: LATEST_CONTRACT_ID!,
