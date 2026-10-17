@@ -12,6 +12,7 @@ const nav = [
   { to: "/", label: "Home" },
   { to: "/explore", label: "Explore" },
   { to: "/create", label: "Create Coin" },
+  { to: "/contest", label: "Contest" },
   { to: "/how-it-works", label: "How It Works" },
   { to: "/profile", label: "Profile" },
   { to: "/support", label: "Support" },

@@ -35,3 +35,4 @@
 - [x] Onderzoeken: Axiom-listing — Axiom supports 8 chains, none is Hedera, so no listing possible
 - [x] Na referral-launch: Engelstalige promo-post met plaatje geplaatst op X (tweet 2111392377906553174) en Telegram (t.me/hederapump/10)
 - [ ] HashPack: wachten op antwoord na ingediende dApp-listing aanvraag (2026-10-17)
+- [x] Official coins label, weekly contest (100 HBAR), 10 free first coins via bot

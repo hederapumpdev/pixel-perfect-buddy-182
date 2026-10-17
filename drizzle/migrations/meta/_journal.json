@@ -113,6 +113,13 @@
       "when": 1792226155540,
       "tag": "0015_creator_fee_totals",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792261292799,
+      "tag": "0016_bot_payouts",
+      "breakpoints": true
     }
   ]
 }
