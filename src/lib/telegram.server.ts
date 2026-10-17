@@ -1,17 +1,24 @@
 import { NETWORK, HTS_CONTRACTS } from './hedera-config';
 import { topCoinsMessage, graduationMessage, type TelegramCoin } from './telegram-content';
 import { telegramAppSlot, telegramAppMessage } from './telegram-app-content';
+import { telegramImage } from './telegram-images.server';
 
 class TelegramError extends Error {
   constructor(public status: number, public body: string) { super(`Telegram [${status}]: ${body}`); }
 }
-async function telegram(method: string, body: Record<string, unknown>) {
+async function telegram(method: string, body: Record<string, unknown>, image?: Blob) {
   const key = process.env['TELEGRAM_API_KEY'];
   const appKey = process.env['LOVABLE_API_KEY'];
   if (!key || !appKey) throw new Error('Telegram connection is not configured');
+  const headers: Record<string, string> = { Authorization: `Bearer ${appKey}`, 'X-Connection-Api-Key': key };
+  const form = new FormData();
+  if (image) {
+    for (const [name, value] of Object.entries(body)) form.append(name, typeof value === 'object' ? JSON.stringify(value) : String(value));
+    form.append('image', image, 'hederapump.jpg');
+  } else headers['Content-Type'] = 'application/json';
   const response = await fetch(`https://connector-gateway.lovable.dev/telegram/${method}`, {
-    method: 'POST', headers: { Authorization: `Bearer ${appKey}`, 'X-Connection-Api-Key': key, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body), signal: AbortSignal.timeout(4000),
+    method: 'POST', headers,
+    body: image ? form : JSON.stringify(body), signal: AbortSignal.timeout(4000),
   });
   const raw = await response.text();
   if (!response.ok) { console.error('Telegram failed', response.status, raw); throw new TelegramError(response.status, raw); }
@@ -31,15 +38,16 @@ export async function refreshTelegramTop(now = new Date()) {
     const coins = await db.from('tokens').select('address,name,symbol,tokens_sold,graduated').eq('network', NETWORK).eq('graduated', false)
       .order('tokens_sold', { ascending: false }).order('address').limit(10);
     if (coins.error) throw coins.error;
-    const payload = { chat_id: state.data.chat_id, text: topCoinsMessage(coins.data as TelegramCoin[], now), parse_mode: 'HTML', link_preview_options: { is_disabled: true } };
+    const caption = topCoinsMessage(coins.data as TelegramCoin[], now);
+    const payload = { chat_id: state.data.chat_id, caption, parse_mode: 'HTML', photo: 'attach://image' };
     if (state.data.message_id) {
-      try { await telegram('editMessageText', { ...payload, message_id: state.data.message_id }); }
+      try { await telegram('editMessageMedia', { chat_id: state.data.chat_id, message_id: state.data.message_id, media: { type: 'photo', media: 'attach://image', caption, parse_mode: 'HTML' } }, telegramImage('top')); }
       catch (e) { if (!(e instanceof TelegramError && e.body.includes('message is not modified'))) throw e; }
     } else {
       const reserved = await db.from('telegram_channel_state').update({ status: 'sending' }).eq('id', 1);
       if (reserved.error) throw reserved.error;
       sendingNew = true;
-      const sent = await telegram('sendMessage', payload);
+      const sent = await telegram('sendPhoto', payload, telegramImage('top'));
       if (!sent?.message_id) throw new Error('No Telegram message confirmation');
       const saved = await db.from('telegram_channel_state').update({ message_id: sent.message_id, status: 'ready' }).eq('id', 1);
       if (saved.error) throw saved.error;
@@ -69,7 +77,7 @@ export async function dispatchTelegramGraduation() {
     let text = graduationMessage(coin.data as TelegramCoin);
     if (!HTS_CONTRACTS.includes(coin.data.contract ?? '')) text = text.replace(' and graduated to SaucerSwap', '');
     attempted = true;
-    const sent = await telegram('sendMessage', { chat_id: '@hederapump', text, parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
+    const sent = await telegram('sendPhoto', { chat_id: '@hederapump', caption: text, parse_mode: 'HTML', photo: 'attach://image' }, telegramImage('graduation'));
     if (!sent?.message_id) throw new Error('No Telegram confirmation');
     const saved = await db.from('telegram_graduation_posts').update({ status: 'sent', message_id: sent.message_id, sent_at: new Date().toISOString(), last_error: null }).eq('token', job.token);
     if (saved.error) throw saved.error;
@@ -96,7 +104,7 @@ export async function postTelegramApp(now = new Date()) {
   if (reserve.error?.code === '23505') return { step: 'already processed' };
   if (reserve.error) throw reserve.error;
   try {
-    const sent = await telegram('sendMessage', { chat_id: '@hederapump', text: telegramAppMessage(count.count ?? 0), link_preview_options: { is_disabled: true } });
+    const sent = await telegram('sendPhoto', { chat_id: '@hederapump', caption: telegramAppMessage(count.count ?? 0), photo: 'attach://image' }, telegramImage('app', count.count ?? 0));
     if (!sent?.message_id) throw new Error('No Telegram confirmation');
     const saved = await db.from('telegram_app_posts').update({ status: 'sent', message_id: sent.message_id }).eq('slot', slot);
     if (saved.error) throw saved.error;
