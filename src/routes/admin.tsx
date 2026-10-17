@@ -390,7 +390,7 @@ function Deploy() {
   const p = w.deployProgress;
 
   useEffect(() => {
-    if (w.accountId && w.mode === "hashpack" && !DEPLOYED_ID) {
+    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_V4_ID) {
       w.checkDeploy(DEPLOY_TARGET.bytecode).then((s) => s.contractId && setDeployed(s.contractId)).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
