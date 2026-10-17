@@ -27,3 +27,4 @@
 - [x] Coin page: tabs (Trades/Holders/Comments/About); duplicate token info removed from the sidebar
 - [x] Coin page: DexScreener chart card removed, its link now sits in About with the other links
 - [x] Profile: dollar values next to HBAR balance, coin worth, PnL, creator fees and trade list
+- [ ] v4 contract: HIP-405 token metadata (auto SaucerSwap info) + shared referral pool (10% of platform fee, split pro-rata by attributed trading volume) — compiled, app wiring in progress, deploy via HashPack pending
