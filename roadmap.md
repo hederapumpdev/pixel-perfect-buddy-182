@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Admin: pre-v4 HTS token selector, copyable SaucerSwap request, token-info JSON and official Davinci Pics links; verified using real HEDERAPUMP token; external submission eligibility remains unconfirmed
 - [x] Telegram: top 10 pinned, first introduction deleted, photo added to the existing message and future posts; 15-minute schedule verified
 - [x] Telegram: introduction posted and verified in @hederapump; app messages scheduled at 10:00, 15:00 and 20:00 Amsterdam time
 - [x] Telegram: same top 10 photo message edited successfully; 15-minute updates scheduled; graduation alerts queued from real chain transitions
