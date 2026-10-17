@@ -1,6 +1,7 @@
 # Roadmap
-- [ ] Telegram: post app introduction now and recurring app messages
-- [ ] Telegram: hourly edit of one bonding-progress top 10 post and separate graduation alerts in @hederapump
+- [x] Telegram: introduction posted and verified in @hederapump; app messages scheduled at 10:00, 15:00 and 20:00 Amsterdam time
+- [x] Telegram: same top 10 message sent and edited successfully; hourly updates scheduled; graduation alerts queued from real chain transitions
+- [ ] Telegram: verify a real graduation alert — waits for a coin to graduate
 - [x] Write an English Reddit introduction for HederaPump with official website and social links
 - [x] SEO: sitemap added and verified with public pages and real tokens; robots.txt references it
 - [x] Show existing profile names and avatars beside wallets in coin trades and top holders
