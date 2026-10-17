@@ -516,6 +516,7 @@ function TokenPage() {
                       ["X / Twitter", socialUrl("twitter", t.twitter) ?? undefined],
                       ["Telegram", socialUrl("telegram", t.telegram) ?? undefined],
                       ["Website", socialUrl("website", t.website) ?? undefined],
+                      ["DexScreener", `https://dexscreener.com/hedera/${t.address}`],
                     ] as const
                   )
                     .filter(([, href]) => href)
