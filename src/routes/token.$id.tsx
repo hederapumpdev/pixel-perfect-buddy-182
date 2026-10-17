@@ -11,6 +11,7 @@ import { Progress, TokenImage } from "@/components/TokenCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
+import { socialUrl } from "@/lib/social-links";
 import { useChainSync } from "@/hooks/use-sync";
 import {
   tokenQuery,
