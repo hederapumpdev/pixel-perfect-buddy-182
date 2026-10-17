@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ContestRouteImport } from './routes/contest'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
@@ -26,6 +27,7 @@ import { Route as ApiPublicDexscreenerPairRouteImport } from './routes/api/publi
 import { Route as ApiPublicImgHashRouteImport } from './routes/api/public/img.$hash'
 import { Route as ApiPublicJobsAutobuyRouteImport } from './routes/api/public/jobs/autobuy'
 import { Route as ApiPublicJobsDailyXRouteImport } from './routes/api/public/jobs/daily-x'
+import { Route as ApiPublicJobsPayoutsRouteImport } from './routes/api/public/jobs/payouts'
 import { Route as ApiPublicJobsTelegramAppRouteImport } from './routes/api/public/jobs/telegram-app'
 import { Route as ApiPublicJobsTelegramTopRouteImport } from './routes/api/public/jobs/telegram-top'
 import { Route as ApiPublicTokenMetaCreatorIndexRouteImport } from './routes/api/public/token-meta.$creator.$index'
@@ -38,6 +40,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContestRoute = ContestRouteImport.update({
+  id: '/contest',
+  path: '/contest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreateRoute = CreateRouteImport.update({
@@ -119,6 +126,11 @@ const ApiPublicJobsDailyXRoute = ApiPublicJobsDailyXRouteImport.update({
   path: '/api/public/jobs/daily-x',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsPayoutsRoute = ApiPublicJobsPayoutsRouteImport.update({
+  id: '/api/public/jobs/payouts',
+  path: '/api/public/jobs/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicJobsTelegramAppRoute =
   ApiPublicJobsTelegramAppRouteImport.update({
     id: '/api/public/jobs/telegram-app',
@@ -141,6 +153,7 @@ const ApiPublicTokenMetaCreatorIndexRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/contest': typeof ContestRoute
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -156,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
+  '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
   '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
@@ -163,6 +177,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/contest': typeof ContestRoute
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -178,6 +193,7 @@ export interface FileRoutesByTo {
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
+  '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
   '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
@@ -186,6 +202,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/contest': typeof ContestRoute
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -201,6 +218,7 @@ export interface FileRoutesById {
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
+  '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
   '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
@@ -210,6 +228,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/contest'
     | '/create'
     | '/explore'
     | '/how-it-works'
@@ -225,6 +244,7 @@ export interface FileRouteTypes {
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
     | '/api/public/jobs/daily-x'
+    | '/api/public/jobs/payouts'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
     | '/api/public/token-meta/$creator/$index'
@@ -232,6 +252,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/contest'
     | '/create'
     | '/explore'
     | '/how-it-works'
@@ -247,6 +268,7 @@ export interface FileRouteTypes {
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
     | '/api/public/jobs/daily-x'
+    | '/api/public/jobs/payouts'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
     | '/api/public/token-meta/$creator/$index'
@@ -254,6 +276,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/contest'
     | '/create'
     | '/explore'
     | '/how-it-works'
@@ -269,6 +292,7 @@ export interface FileRouteTypes {
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
     | '/api/public/jobs/daily-x'
+    | '/api/public/jobs/payouts'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
     | '/api/public/token-meta/$creator/$index'
@@ -277,6 +301,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  ContestRoute: typeof ContestRoute
   CreateRoute: typeof CreateRoute
   ExploreRoute: typeof ExploreRoute
   HowItWorksRoute: typeof HowItWorksRoute
@@ -292,6 +317,7 @@ export interface RootRouteChildren {
   ApiPublicImgHashRoute: typeof ApiPublicImgHashRoute
   ApiPublicJobsAutobuyRoute: typeof ApiPublicJobsAutobuyRoute
   ApiPublicJobsDailyXRoute: typeof ApiPublicJobsDailyXRoute
+  ApiPublicJobsPayoutsRoute: typeof ApiPublicJobsPayoutsRoute
   ApiPublicJobsTelegramAppRoute: typeof ApiPublicJobsTelegramAppRoute
   ApiPublicJobsTelegramTopRoute: typeof ApiPublicJobsTelegramTopRoute
   ApiPublicTokenMetaCreatorIndexRoute: typeof ApiPublicTokenMetaCreatorIndexRoute
@@ -311,6 +337,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contest': {
+      id: '/contest'
+      path: '/contest'
+      fullPath: '/contest'
+      preLoaderRoute: typeof ContestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/create': {
@@ -418,6 +451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsDailyXRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/payouts': {
+      id: '/api/public/jobs/payouts'
+      path: '/api/public/jobs/payouts'
+      fullPath: '/api/public/jobs/payouts'
+      preLoaderRoute: typeof ApiPublicJobsPayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/telegram-app': {
       id: '/api/public/jobs/telegram-app'
       path: '/api/public/jobs/telegram-app'
@@ -445,6 +485,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  ContestRoute: ContestRoute,
   CreateRoute: CreateRoute,
   ExploreRoute: ExploreRoute,
   HowItWorksRoute: HowItWorksRoute,
@@ -460,6 +501,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicImgHashRoute: ApiPublicImgHashRoute,
   ApiPublicJobsAutobuyRoute: ApiPublicJobsAutobuyRoute,
   ApiPublicJobsDailyXRoute: ApiPublicJobsDailyXRoute,
+  ApiPublicJobsPayoutsRoute: ApiPublicJobsPayoutsRoute,
   ApiPublicJobsTelegramAppRoute: ApiPublicJobsTelegramAppRoute,
   ApiPublicJobsTelegramTopRoute: ApiPublicJobsTelegramTopRoute,
   ApiPublicTokenMetaCreatorIndexRoute: ApiPublicTokenMetaCreatorIndexRoute,

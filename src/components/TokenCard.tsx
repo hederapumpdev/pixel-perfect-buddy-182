@@ -8,6 +8,7 @@ import {
   progressPct,
 } from "@/lib/queries";
 import { HederaAddress } from "@/components/HederaAddress";
+import { OfficialBadge } from "@/components/OfficialBadge";
 
 export function Progress({ v }: { v: number }) {
   return (
@@ -46,7 +47,7 @@ export function TokenCard({ t }: { t: TokenRow }) {
       <div className="flex gap-3">
         <TokenImage t={t} />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold">{t.name}</p>
+          <p className="flex items-center gap-1.5 font-semibold"><span className="truncate">{t.name}</span><OfficialBadge creator={t.creator} /></p>
           <p className="font-mono text-xs text-muted-foreground">
             ${t.symbol} · {fmtAge(t.created_at)} · by <HederaAddress address={t.creator} />
           </p>
