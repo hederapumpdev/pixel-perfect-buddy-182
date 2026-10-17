@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { WalletHoldings } from "@/components/WalletHoldings";
@@ -62,7 +62,13 @@ describe("debug", () => {
     console.log("BAL:", acc?.balance?.balance, "HTS:", [...hts], "CAND:", cand, "COINS:", coins?.data);
     const c: any = coins?.data?.[0];
     console.log("ISV2:", c && isV2(c.contract), "AMT:", c && hts.get(c.address.toLowerCase()), "PRICE:", c && priceOf(c));
-    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+      queryCache: new QueryCache({
+        onError: (e: any, q: any) => console.log("QERR", JSON.stringify(q.queryKey), e?.message ?? e),
+        onSuccess: (d: any, q: any) => console.log("QOK", q.queryKey[0], JSON.stringify(d)?.slice(0, 200)),
+      }),
+    });
     render(
       <QueryClientProvider client={client}>
         <WalletHoldings accountId="0.0.500" addrs={[ADDR]} balanceHbar={5} />
