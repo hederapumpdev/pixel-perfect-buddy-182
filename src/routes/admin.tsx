@@ -243,6 +243,7 @@ function TopCoins() {
       .sort((a, b) => b[sort] - a[sort])
       .slice(0, 20);
   }, [q.data, sort]);
+  const usd = useUsd();
 
   return (
     <section>
@@ -267,8 +268,12 @@ function TopCoins() {
           <Link key={r.t.address} to="/token/$id" params={{ id: r.t.address }} className="grid grid-cols-[2rem_1fr_auto_auto_auto] gap-3 px-4 py-2 hover:bg-muted/40">
             <span className="text-muted-foreground">{i + 1}</span>
             <span className="truncate">${r.t.symbol}</span>
-            <span className="font-mono">{fmtHbar(r.mc)}</span>
-            <span className="font-mono text-muted-foreground">{fmtHbar(r.vol)}</span>
+            <span className="font-mono">
+              {fmtHbar(r.mc)} <span className="text-muted-foreground">· {usd(r.mc)}</span>
+            </span>
+            <span className="font-mono text-muted-foreground">
+              {fmtHbar(r.vol)} <span className="opacity-70">· {usd(r.vol)}</span>
+            </span>
             <span className="font-mono">{r.grad.toFixed(1)}%</span>
           </Link>
         ))}
