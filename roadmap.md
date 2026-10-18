@@ -33,7 +33,7 @@
 - [ ] DexScreener listing request (user submits)
 - [x] Admin page only behind PIN
 - [ ] Daily X tweets link to hederapump.dev instead of the lovable.app URL
-- [ ] Fix daily X image fetching in production (serve tweet images from storage so scheduled posts resume)
+- [x] Fix daily X image fetching in production (tweet images now served from the app database so scheduled posts resume)
 - [x] One branded image per tweet topic (49 images, text and image matched)
 - [x] Delete the first X tweet and post a fresh one on hederapump.dev
 - [x] 40 extra tweet images, each matched to its own tweet text (49 topics total)
