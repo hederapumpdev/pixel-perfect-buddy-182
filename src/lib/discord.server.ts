@@ -23,7 +23,7 @@ export async function dispatchDiscordCoin() {
     if (savedMemo.error) throw savedMemo.error;
     const coin = await db.from('tokens').select('image_url').eq('address', job.token_address).maybeSingle();
     if (coin.error) throw coin.error;
-    const payload = discordCoinMessage({ address: job.token_address, name: job.coin_name, symbol: job.coin_symbol, image_url: coin.data?.image_url }, token.memo);
+    const payload = discordCoinMessage({ address: job.token_address, name: job.coin_name, symbol: job.coin_symbol, image_url: coin.data?.image_url ?? null }, token.memo);
     attempted = true;
     definite = false;
     const response = await fetch(`https://connector-gateway.lovable.dev/discord/channels/${job.channel}/messages`, {
