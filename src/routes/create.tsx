@@ -20,6 +20,7 @@ import {
 } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
 import { encodePump, encodePumpV2, encodePumpV4, isV2, isV4 } from "@/lib/curve";
+import { getReferrer } from "@/lib/referral";
 
 /** Hedera account id (0.0.x) → long-zero EVM address. */
 const longZero = (id: string) =>
@@ -186,7 +187,7 @@ function Create() {
               setBusy("Confirm your launch buy…");
               await w.execute({
                 calldata: isV4(contractId)
-                  ? encodePumpV4("buy", [data.address, 0n, getReferrer(accountId, w.evmAddress)])
+                  ? encodePumpV4("buy", [data.address, 0n, getReferrer() ?? "0x0000000000000000000000000000000000000000"])
                   : encodePumpV2("buy", [data.address, 0n]),
                 gas: GAS_V2.buy,
                 payableTinybars: firstBuy,
