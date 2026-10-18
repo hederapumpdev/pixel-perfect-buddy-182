@@ -31,8 +31,7 @@ type WalletCtx = {
   connecting: boolean;
   connect: () => Promise<void>;
   connectEmail: () => Promise<void>;
-  connectMetaMask: () => Promise<void>;
-  mode: "hashpack" | "email" | "metamask" | null;
+  mode: "hashpack" | "email" | null;
   disconnect: () => Promise<void>;
   /** Calls the launchpad contract. calldata = full ABI-encoded call (selector + args). */
   execute: (opts: {
@@ -133,7 +132,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [balanceHbar, setBal] = useState<number | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [tick, setTick] = useState(0);
-  const [mode, setMode] = useState<"hashpack" | "email" | "metamask" | null>(null);
+  const [mode, setMode] = useState<"hashpack" | "email" | null>(null);
   const evmSigner = useRef<EvmSigner | null>(null);
   const [deployProgress, setDeployProgress] = useState<DeployProgress | null>(null);
 
