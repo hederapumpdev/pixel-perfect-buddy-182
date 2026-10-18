@@ -15,6 +15,7 @@ import {
   PUMP_CONTRACT_V3_ID,
   PUMP_CONTRACT_V4_ID,
   PUMP_CONTRACT_V4_FIXED_ID,
+  PUMP_CONTRACT_V4_LEGACY_ID,
   HASHSCAN_URL,
   FEE_WALLET_EVM,
   FEE_WALLET_ID,
@@ -25,11 +26,11 @@ import { toTinybars } from "@/lib/curve";
 import { fmtAge, fmtHbar } from "@/lib/queries";
 import { useUsd } from "@/lib/usd";
 import artifact from "@/lib/contract-artifact-v3.json";
-import artifactV4 from "@/lib/contract-artifact-v4.json";
+import artifactV4 from "@/lib/contract-artifact-v4-legacy.json";
 
-// Deploy targets the newest contract not yet on mainnet (v4 once v3 is live).
-const DEPLOY_TARGET = PUMP_CONTRACT_V3_ID && !PUMP_CONTRACT_V4_FIXED_ID ? artifactV4 : artifact;
-const DEPLOYED_ID = PUMP_CONTRACT_V4_FIXED_ID ?? PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID;
+// Always target the pending legacy-service replacement, never the failed metadata deployments.
+const DEPLOY_TARGET = PUMP_CONTRACT_V3_ID ? artifactV4 : artifact;
+const DEPLOYED_ID = PUMP_CONTRACT_V4_LEGACY_ID ?? PUMP_CONTRACT_V4_FIXED_ID ?? PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID;
 import { listSupport, setSupportStatus } from "@/lib/support.functions";
 import { XPostingPanel } from "@/components/XPostingPanel";
 import { getUserStats } from "@/lib/users.functions";
@@ -398,7 +399,7 @@ function Deploy() {
   const p = w.deployProgress;
 
   useEffect(() => {
-    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_V4_FIXED_ID) {
+    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_V4_LEGACY_ID) {
       w.checkDeploy(DEPLOY_TARGET.bytecode).then((s) => s.contractId && setDeployed(s.contractId)).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -443,16 +444,16 @@ function Deploy() {
       <h2 className="text-xl font-semibold">Launchpad contract</h2>
       {DEPLOYED_ID && (
         <p className="rounded-md border border-border bg-card p-4 text-sm">
-          Live contract:{" "}
+          {PUMP_CONTRACT_V4_LEGACY_ID ? "Verified replacement:" : "Previous deployment (coin creation paused):"}{" "}
           <a className="font-mono text-accent" href={`${HASHSCAN_URL}/contract/${DEPLOYED_ID}`} target="_blank" rel="noreferrer">
             {DEPLOYED_ID}
           </a>
         </p>
       )}
-      {!PUMP_CONTRACT_V4_FIXED_ID && (
+      {!PUMP_CONTRACT_V4_LEGACY_ID && (
         <>
           <p className="text-sm text-muted-foreground">
-            Deploys the <b>repaired v4</b> contract to Hedera {NETWORK}. The original v4 cannot create coins because it uses the wrong Hedera token service for metadata. This replacement keeps referrals + automatic SaucerSwap token info:
+            Deploys <b>v4 — legacy token service</b> to Hedera {NETWORK}. Both previous v4 deployments cannot create coins. This replacement uses the supported token service and keeps referrals. The information link is stored in the token memo, not HIP-405 metadata; automatic SaucerSwap token-info pickup is unconfirmed. Coin creation stays paused until the new deployment passes a mainnet check:
             platform fee goes straight to {FEE_WALLET_ID}, creators claim their share on their profile.{" "}
             <b>About 6 approvals</b>, one per tap. Roughly 20–30 HBAR.
           </p>

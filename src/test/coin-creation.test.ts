@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import solc from "solc";
 import { decodeFunctionData, getAddress, type Abi } from "viem";
-import { COIN_CREATION_ENABLED, LATEST_CONTRACT_ID, PUMP_CONTRACTS, V4_CONTRACTS } from "@/lib/hedera-config";
+import { COIN_CREATION_ENABLED, LATEST_CONTRACT_ID, PUMP_CONTRACTS, V4_CONTRACTS, PUMP_CONTRACT_V4_LEGACY_ID } from "@/lib/hedera-config";
 import { encodePumpV4 } from "@/lib/curve";
 import artifact from "@/lib/contract-artifact-v4.json";
 
@@ -14,7 +14,7 @@ function nodes(value: unknown): Ast[] {
 }
 
 describe("coin creation repair", () => {
-  it("routes metadata creation to 0x16c and keeps legacy transfers at 0x167", () => {
+  it("creates with the legacy 0x167 service and tuple, never unsupported 0x16c", () => {
     const source = readFileSync("contracts/HederaPumpV4.sol", "utf8");
     const output = JSON.parse(solc.compile(JSON.stringify({
       language: "Solidity", sources: { "Pump.sol": { content: source } },
@@ -22,16 +22,18 @@ describe("coin creation repair", () => {
     })));
     expect((output.errors ?? []).filter((e: { severity: string }) => e.severity === "error")).toEqual([]);
     const ast = nodes(output.sources["Pump.sol"].ast);
-    const createService = ast.find(n => n.nodeType === "VariableDeclaration" && n.name === "HTS_CREATE");
     const legacyService = ast.find(n => n.nodeType === "VariableDeclaration" && n.name === "HTS");
-    expect(nodes(createService).filter(n => n.nodeType === "Literal").map(n => n.value)).toContain("0x16c");
     expect(nodes(legacyService).filter(n => n.nodeType === "Literal").map(n => n.value)).toContain("0x167");
+    expect(ast.filter(n => n.nodeType === "Literal").map(n => n.value)).not.toContain("0x16c");
+    const tuple = ast.find(n => n.nodeType === "StructDefinition" && n.name === "HederaToken");
+    expect(nodes(tuple).filter(n => n.nodeType === "VariableDeclaration").map(n => n.name)).not.toContain("metadata");
     const creationCall = ast.find(n => n.nodeType === "MemberAccess" && n.memberName === "createFungibleToken");
-    expect(nodes(creationCall).find(n => n.nodeType === "Identifier")?.referencedDeclaration).toBe(createService?.id);
+    expect(nodes(creationCall).find(n => n.nodeType === "Identifier")?.referencedDeclaration).toBe(legacyService?.id);
   });
 
   it("prevents paid creation retries while retaining original v4 for existing coins", () => {
     expect(COIN_CREATION_ENABLED).toBe(false);
+    expect(PUMP_CONTRACT_V4_LEGACY_ID).toBeNull();
     expect(LATEST_CONTRACT_ID).toBe("0.0.10925851");
     expect(V4_CONTRACTS).toContain("0.0.10925851");
     expect(PUMP_CONTRACTS).toContain("0.0.10924813");
