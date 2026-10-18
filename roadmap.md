@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Fix wallet connection hanging without a popup: bound setup/opening, handle dismissal, verify picker on phone-sized view; actual HashPack approval requires user's device.
 - [x] Add manifest-only phone home-screen support with HederaPump icons and Apple head tags; App Store/Google Play packaging is handled separately by the user.
 - [x] Include each coin's own uploaded logo in automatic Discord announcements and update the existing new-coins messages.
 - [x] Move Discord coin announcements exclusively to #new-coins and remove the previous coin posts from #rules and #official-links after confirming replacement delivery; rules read back with only the original rules message.
