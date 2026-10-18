@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Add estimated USD trading profit/loss per recent wallet in Admin → Users, including trading fees and current curve valuation; verify real admin results.
 - [x] Prevent wallet connection hanging without a popup: bounded setup/opening and dismissal cleanup; five tests passed; fresh browser with no saved session showed the picker on phone-sized view, closing and reopening succeeded. Actual HashPack approval and the reported phone's first connection still require user's device.
 - [x] Add manifest-only phone home-screen support with HederaPump icons and Apple head tags; App Store/Google Play packaging is handled separately by the user.
 - [x] Include each coin's own uploaded logo in automatic Discord announcements and update the existing new-coins messages.

@@ -563,6 +563,7 @@ const num = (n: number | undefined) => (n === undefined ? "…" : String(n));
 
 function UsersOverview() {
   const stats = useServerFn(getUserStats);
+  const usd = useUsd();
   const pin = (() => {
     try {
       return sessionStorage.getItem(PIN_KEY) ?? "";
@@ -591,14 +592,22 @@ function UsersOverview() {
         <Stat label="Commenters" value={num(q.data?.comment_authors)} />
       </div>
       <div className="mt-3 divide-y divide-border rounded-lg border border-border bg-card text-sm">
+        <div className="flex items-center justify-between px-4 py-2 text-xs text-muted-foreground">
+          <span>Recent wallets</span>
+          <span title="Estimated from site buys, sells and remaining coins at the current curve price. Includes trading fees; excludes network fees and external transfers. Dollars use the current HBAR rate. Open graduated positions have no estimate.">Est. P&amp;L (USD)</span>
+        </div>
         {rows.map((r) => (
           <div key={r.wallet} className="flex items-center justify-between gap-3 px-4 py-2">
-            <span className="flex min-w-0 items-center gap-2">
+            <span className="flex min-w-0 flex-1 items-center gap-2">
               <Avatar hash={r.avatar} size={24} />
-              <span className="truncate font-medium">{r.label}</span>
+              <span className="min-w-0">
+                <span className="block truncate font-medium">{r.label}</span>
+                <span className="font-mono text-xs text-muted-foreground">{r.trades} {r.trades === 1 ? "trade" : "trades"} · {fmtAge(r.last_at)}</span>
+              </span>
             </span>
-            <span className="font-mono text-muted-foreground">{r.trades} {r.trades === 1 ? "trade" : "trades"}</span>
-            <span className="w-20 text-right text-xs text-muted-foreground">{fmtAge(r.last_at)}</span>
+            <span className={`shrink-0 text-right font-mono ${r.pnl_hbar === null || r.pnl_hbar === 0 ? "text-muted-foreground" : r.pnl_hbar > 0 ? "text-up" : "text-down"}`}>
+              {r.pnl_hbar === null ? "—" : `${r.pnl_hbar > 0 ? "+" : r.pnl_hbar < 0 ? "−" : ""}${usd(Math.abs(r.pnl_hbar))}`}
+            </span>
           </div>
         ))}
         {!rows.length && <p className="px-4 py-3 text-muted-foreground">{q.isLoading ? "Loading…" : "No users yet."}</p>}
