@@ -50,4 +50,4 @@
 - [ ] HashPack: wachten op antwoord na ingediende dApp-listing aanvraag (2026-10-17)
 - [x] Official coins label, weekly contest (100 HBAR), 10 free first coins via bot
 
-- [ ] Staff payouts from fee wallet via HBAR allowance (waiting on user choice)
+- [x] Staff payouts: user chose bot wallet top-ups (no fee-wallet access)
