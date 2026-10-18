@@ -1,0 +1,16 @@
+{
+  "id": "/",
+  "name": "HederaPump",
+  "short_name": "HederaPump",
+  "description": "Launch, discover and trade meme coins on Hedera.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#070807",
+  "background_color": "#070807",
+  "icons": [
+    { "src": "/icons/app-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/app-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/app-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
