@@ -127,6 +127,13 @@
       "when": 1792323703662,
       "tag": "0017_discord_coin_announcements",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792323894937,
+      "tag": "0018_discord_new_coins_channel",
+      "breakpoints": true
     }
   ]
 }
