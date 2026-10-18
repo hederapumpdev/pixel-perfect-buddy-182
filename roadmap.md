@@ -1,5 +1,6 @@
 # Roadmap
-- [ ] Fix coin creation revert: inspect real failed v4 transaction, validate correction with mirror-node simulation, and keep existing coins tradable
+- [x] Diagnose real coin creation revert: metadata selector called legacy 0x167 and received empty data; prepare corrected 0x16c bytecode, restore admin deploy form, block paid retries, retain existing contracts, and test v4 launch-buy encoding
+- [ ] Deploy repaired v4 and verify real coin creation + on-token metadata — waits for owner's HashPack approvals; full successful creation remains unverified
 - [ ] Discord: footer link (https://discord.gg/bYPD27QtZ), automatische top-10 en graduation-posts via connector, en deremaining kanalen/onderwerpen invullen
 - [ ] Discord: serverstructuur en kanaalonderwerpen invullen — wacht op gekoppelde connector zodat de kanalen zichtbaar zijn
 - [x] Clarify wallet options: WalletConnect, separate MetaMask, social-only Sign in; native token/creator/trader IDs verified on real coin, nine tests passed; completed connection still requires user's wallet/social approval

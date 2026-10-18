@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import solc from "solc";
-import { decodeFunctionData, type Abi } from "viem";
+import { decodeFunctionData, getAddress, type Abi } from "viem";
 import { COIN_CREATION_ENABLED, PUMP_CONTRACTS, V4_CONTRACTS } from "@/lib/hedera-config";
 import { encodePumpV4 } from "@/lib/curve";
 import artifact from "@/lib/contract-artifact-v4.json";
@@ -41,6 +41,6 @@ describe("coin creation repair", () => {
     const referrer = "0x0000000000000000000000000000000000000000";
     const decoded = decodeFunctionData({ abi: artifact.pumpAbi as Abi, data: encodePumpV4("buy", [token, 0n, referrer]) });
     expect(decoded.functionName).toBe("buy");
-    expect(decoded.args).toEqual([token, 0n, referrer]);
+    expect(decoded.args).toEqual([getAddress(token), 0n, referrer]);
   });
 });
