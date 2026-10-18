@@ -18,7 +18,9 @@ describe('Discord dispatch safety', () => {
     await dispatchDiscordCoin();
     expect(update).toHaveBeenCalledWith({ memo: 'Exact ℏ memo' });
     expect(update).toHaveBeenCalledWith(expect.objectContaining({ status: 'sent', message_id: 'discord-message' }));
-    const payload = JSON.parse(fetchMock.mock.calls[1][1].body);
+    const sendCall = fetchMock.mock.calls[1];
+    if (!sendCall) throw new Error('Discord send was not called');
+    const payload = JSON.parse(sendCall[1].body);
     expect(payload.nonce).toBe('1');
     expect(payload.enforce_nonce).toBe(true);
   });
