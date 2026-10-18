@@ -17,10 +17,10 @@ export const PUMP_CONTRACT_V3_ID: string | null = "0.0.10924285";
 // trading volume, self-serve claims). Null until deployed from /admin.
 export const PUMP_CONTRACT_V4_ID: string | null = "0.0.10924813";
 
-// Replacement v4 uses the HIP-405 creation service at 0x16c. Set only after
-// deployment and a successful real token creation; the original remains readable.
-export const PUMP_CONTRACT_V4_FIXED_ID: string | null = null;
-export const COIN_CREATION_ENABLED = PUMP_CONTRACT_V4_FIXED_ID !== null;
+// Replacement v4 uses the HIP-405 creation service at 0x16c. Deployment is
+// recorded separately from activation: the mainnet creation simulation still reverts.
+export const PUMP_CONTRACT_V4_FIXED_ID: string | null = "0.0.10925851";
+export const COIN_CREATION_ENABLED = false;
 
 /** Contracts whose coins are native HTS tokens (v2 + v3 share the same ABI). */
 export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID].filter(

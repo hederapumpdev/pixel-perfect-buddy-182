@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import solc from "solc";
 import { decodeFunctionData, getAddress, type Abi } from "viem";
-import { COIN_CREATION_ENABLED, PUMP_CONTRACTS, V4_CONTRACTS } from "@/lib/hedera-config";
+import { COIN_CREATION_ENABLED, LATEST_CONTRACT_ID, PUMP_CONTRACTS, V4_CONTRACTS } from "@/lib/hedera-config";
 import { encodePumpV4 } from "@/lib/curve";
 import artifact from "@/lib/contract-artifact-v4.json";
 
@@ -32,6 +32,8 @@ describe("coin creation repair", () => {
 
   it("prevents paid creation retries while retaining original v4 for existing coins", () => {
     expect(COIN_CREATION_ENABLED).toBe(false);
+    expect(LATEST_CONTRACT_ID).toBe("0.0.10925851");
+    expect(V4_CONTRACTS).toContain("0.0.10925851");
     expect(PUMP_CONTRACTS).toContain("0.0.10924813");
     expect(V4_CONTRACTS).toContain("0.0.10924813");
   });
