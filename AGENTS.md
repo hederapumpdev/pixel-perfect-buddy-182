@@ -30,9 +30,7 @@
 - Profiles use useProfiles for alias identity; HederaAddress resolves display IDs only, preserving chain/database addresses.
 - The sitemap uses required route-level staticData.sitemap decisions and paginated public-key token reads; exclude private surfaces and omit non-authoritative lastmod dates so search discovery stays safe and complete.
 - Referral links: ?ref=<wallet> captured once into localStorage (src/lib/referral.ts, first referrer wins) and sent with every v4 trade; profile shows the Referrals block only when PUMP_CONTRACT_V4_ID is set.
-- Legacy v4 referral accounting preserves pending rewards before increasing volume, checkpoints debt before each new pool top-up, and tracks accrued rewards separately so repeated referred trades cannot erase earnings; validate with local EVM tests.
 - Legacy SaucerSwap assistance exports synced pre-v4 HTS information client-side with Davinci Pics guidance; never imply submission success or attempt metadata updates because those tokens lack update keys.
 - BondingProgress uses synced reserves for a display-only HBAR/USD graduation estimate, including the existing fee; never use it to execute trades.
-- Promotions: rules in `src/lib/promotions.ts`; bot payouts (`payouts.server.ts`, `/api/public/jobs/payouts`) send one tx per call, keyed uniquely in `bot_payouts` and never resent when uncertain — nothing may be paid twice.
 - Discord coin announcements use a managed authenticated schedule and one atomic token/channel claim per call; read the exact HTS memo from Hedera, disable mentions, persist confirmations, and never retry uncertain sends to avoid duplicate announcements.
-- Staff payouts are computed off-chain from synced trade fees and paid by the bot wallet to the staff wallet itself via unique `bot_payouts` rows (kind staff) — claims need no signature because funds can only go to the registered wallet, and nothing is paid twice.
+- Bot payouts (contest/refunds in `promotions.ts`, staff in `staff.ts`) go through `pay()` in `payouts.server.ts`: one tx per call, unique `bot_payouts` id, never resent when uncertain. Staff claims need no signature since funds only go to the registered wallet.
