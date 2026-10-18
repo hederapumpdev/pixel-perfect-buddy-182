@@ -97,7 +97,7 @@ export async function runPayouts() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function pay(db: any, w: ReturnType<typeof botWallet>, row: { id: string; kind: string; recipient: string; token: string }, tinybars: bigint) {
+export async function pay(db: any, w: ReturnType<typeof botWallet>, row: { id: string; kind: string; recipient: string; token: string }, tinybars: bigint) {
   const bal = (await w.provider!.getBalance(w.address)) / WEI;
   if (bal < tinybars + RESERVE) return { step: "low balance", id: row.id };
   const { error } = await db.from("bot_payouts").insert({ ...row, hbar_amount: Number(tinybars) / 1e8, status: "pending" });
