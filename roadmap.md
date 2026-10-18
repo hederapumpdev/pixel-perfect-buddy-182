@@ -2,7 +2,7 @@
 - [x] Diagnose real coin creation revert: metadata selector called legacy 0x167 and received empty data; prepare corrected 0x16c bytecode, restore admin deploy form, block paid retries, retain existing contracts, and test v4 launch-buy encoding
 - [x] Record replacement v4 deployment 0.0.10925851 and test its mainnet creation without payment
 - [x] Prepare separate legacy-service v4 artifact and admin deployment with information URL in tokenmemo; local EVM creation/refund/100-byte boundary and referral accounting tests. Automatic SaucerSwap metadata ingestion remains unconfirmed.
-- [ ] Activate legacy v4 replacement — waits for user-funded wallet deployment and successful mainnet creation verification; creation stays paused and both previous v4 IDs stay indexed.
+- [x] Activate legacy v4 replacement 0.0.10925881 — deployed creation bytecode matches the tested artifact; mainnet mirror-node creation simulation succeeds with website gas/budget, fee wallet and settings verified. Creation enabled; both previous v4 IDs stay indexed. Real paid coin launch remains subject to user's wallet approval.
 - [ ] Discord: footer link (https://discord.gg/bYPD27QtZ), automatische top-10 en graduation-posts via connector, en deremaining kanalen/onderwerpen invullen
 - [ ] Discord: serverstructuur en kanaalonderwerpen invullen — wacht op gekoppelde connector zodat de kanalen zichtbaar zijn
 - [x] Clarify wallet options: WalletConnect, separate MetaMask, social-only Sign in; native token/creator/trader IDs verified on real coin, nine tests passed; completed connection still requires user's wallet/social approval

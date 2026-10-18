@@ -31,10 +31,12 @@ describe("coin creation repair", () => {
     expect(nodes(creationCall).find(n => n.nodeType === "Identifier")?.referencedDeclaration).toBe(legacyService?.id);
   });
 
-  it("prevents paid creation retries while retaining original v4 for existing coins", () => {
-    expect(COIN_CREATION_ENABLED).toBe(false);
-    expect(PUMP_CONTRACT_V4_LEGACY_ID).toBeNull();
-    expect(LATEST_CONTRACT_ID).toBe("0.0.10925851");
+  it("enables creation only on the verified legacy replacement while retaining previous v4 coins", () => {
+    expect(COIN_CREATION_ENABLED).toBe(true);
+    expect(PUMP_CONTRACT_V4_LEGACY_ID).toBe("0.0.10925881");
+    expect(LATEST_CONTRACT_ID).toBe("0.0.10925881");
+    expect(V4_CONTRACTS).toContain("0.0.10925881");
+    expect(PUMP_CONTRACTS).toContain("0.0.10925881");
     expect(V4_CONTRACTS).toContain("0.0.10925851");
     expect(PUMP_CONTRACTS).toContain("0.0.10924813");
     expect(V4_CONTRACTS).toContain("0.0.10924813");

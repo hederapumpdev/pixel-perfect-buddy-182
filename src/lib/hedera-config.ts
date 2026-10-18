@@ -22,8 +22,8 @@ export const PUMP_CONTRACT_V4_ID: string | null = "0.0.10924813";
 export const PUMP_CONTRACT_V4_FIXED_ID: string | null = "0.0.10925851";
 // Legacy 0x167 replacement: memo URL + referrals, no HIP-405 metadata.
 // Set only after deployment and a successful mainnet creation simulation.
-export const PUMP_CONTRACT_V4_LEGACY_ID: string | null = null;
-export const COIN_CREATION_ENABLED = false;
+export const PUMP_CONTRACT_V4_LEGACY_ID: string | null = "0.0.10925881";
+export const COIN_CREATION_ENABLED = true;
 
 /** Contracts whose coins are native HTS tokens (v2 + v3 share the same ABI). */
 export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID, PUMP_CONTRACT_V4_LEGACY_ID].filter(
