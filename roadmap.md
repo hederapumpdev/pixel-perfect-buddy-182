@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Move Discord coin announcements exclusively to #new-coins and remove the previous coin posts from #rules and #official-links after confirming replacement delivery.
 - [x] Verify Discord footer visibility on narrow screens and restore it if clipped.
 - [x] Post Pepe and HashCat with exact Hedera memos to #official-links and #rules; all four messages read back from Discord, duplicate invocation sent nothing, unsigned endpoint rejected.
 - [ ] Activate the prepared per-minute Discord coin announcement schedule on the public site — waits for user publishing the new endpoint (currently public URL returns 404).
