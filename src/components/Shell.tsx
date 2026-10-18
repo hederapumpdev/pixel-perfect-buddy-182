@@ -102,7 +102,7 @@ export function Shell({ children }: { children: ReactNode }) {
       </header>
       <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
       <footer className="mx-auto max-w-7xl px-4 pb-24 pt-10 text-xs text-muted-foreground md:pb-10">
-        <div className="mb-4 flex gap-3">
+        <div className="mb-4 flex flex-wrap gap-3">
           <a
             href="https://x.com/hederapumpdev"
             target="_blank"
