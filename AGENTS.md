@@ -16,6 +16,7 @@
 - Coin/trade tables are filled only by `syncChain` from Hedera mirror-node events — the chain is the source of truth, never write them from user input.
 - Browser Node polyfills in Vite must resolve directly to absolute npm package files, only in the client environment; re-resolving bare built-ins can recurse through aliases and exhaust the build.
 - Wallet SDKs are stubbed server-side in `vite.config.ts`; dynamically import in browsers only to avoid Worker crashes.
+- Wallet connection setup and picker opening have separate deadlines and modal-dismissal cleanup; verify the SDK client exists after init because it swallows failures. Never apply connection retries to transactions.
 - TradeStatistics paginates full synced windows; distinct buyers/sellers are per side, not holder arrivals/exits; USD uses the current HBAR rate.
 - HashPack deployment uses explicit file-create, file-append, and contract-create transactions with a public mirror-node account key; ContractCreateFlow calls an unimplemented WalletConnect signer method.
 - Deploy sends one wallet request per user tap, tags each tx memo `hpump:<fp>:<offset>:<len>`, and rebuilds progress from mirror-node history — mobile wallets miss requests sent while the browser is backgrounded, and nothing may be paid twice.
