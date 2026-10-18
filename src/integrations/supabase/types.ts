@@ -171,27 +171,36 @@ export type Database = {
           account_id: string | null
           avatar: string | null
           created_at: string
+          earned_before: number
           joined_at: string
           left_at: string | null
           name: string
+          rate_since: string | null
+          share_pct: number
           wallet: string
         }
         Insert: {
           account_id?: string | null
           avatar?: string | null
           created_at?: string
+          earned_before?: number
           joined_at?: string
           left_at?: string | null
           name: string
+          rate_since?: string | null
+          share_pct?: number
           wallet: string
         }
         Update: {
           account_id?: string | null
           avatar?: string | null
           created_at?: string
+          earned_before?: number
           joined_at?: string
           left_at?: string | null
           name?: string
+          rate_since?: string | null
+          share_pct?: number
           wallet?: string
         }
         Relationships: []
