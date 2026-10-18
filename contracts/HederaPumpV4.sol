@@ -37,6 +37,8 @@ interface ISaucerRouter {
 /// treasury; tokens have no admin/supply/freeze keys, so supply is fixed forever.
 /// Deploy with unlimited max auto-associations so the contract can receive the SaucerSwap LP token.
 contract HederaPumpV4 {
+    // HIP-405 metadata creation is exposed at 0x16c, not the legacy 0x167.
+    IHTS constant HTS_CREATE = IHTS(address(0x16c));
     IHTS constant HTS = IHTS(address(0x167));
     IExchangeRate constant RATES = IExchangeRate(address(0x168));
     int64 constant OK = 22;
@@ -129,7 +131,7 @@ contract HederaPumpV4 {
         t.metadata = bytes(metadataUrl);
 
         uint256 b0 = address(this).balance;
-        (int64 rc, address tok) = HTS.createFungibleToken{value: htsBudget}(t, int64(int256(TOTAL_SUPPLY)), 8);
+        (int64 rc, address tok) = HTS_CREATE.createFungibleToken{value: htsBudget}(t, int64(int256(TOTAL_SUPPLY)), 8);
         require(rc == OK, "hts create");
         uint256 unspent = htsBudget - (b0 - address(this).balance);
         token = tok;
@@ -296,5 +298,5 @@ contract HederaPumpV4 {
     }
 
     /// Accepts refunds from the token service / router only.
-    receive() external payable { require(msg.sender == router || msg.sender == address(0x167), "direct"); }
+    receive() external payable { require(msg.sender == router || msg.sender == address(0x167) || msg.sender == address(0x16c), "direct"); }
 }

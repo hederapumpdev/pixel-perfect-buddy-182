@@ -16,9 +16,11 @@ import {
   NETWORK,
   PUMP_CONTRACT_ID,
   LATEST_CONTRACT_ID,
+  COIN_CREATION_ENABLED,
 } from "@/lib/hedera-config";
 import { toTinybars } from "@/lib/curve";
 import { encodePump, encodePumpV2, encodePumpV4, isV2, isV4 } from "@/lib/curve";
+import { getReferrer } from "@/lib/referral";
 
 /** Hedera account id (0.0.x) → long-zero EVM address. */
 const longZero = (id: string) =>
@@ -68,7 +70,9 @@ async function squareImage(f: File): Promise<File> {
   const side = Math.min(bmp.width, bmp.height);
   const c = document.createElement("canvas");
   c.width = c.height = 512;
-  c.getContext("2d")!.drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 512, 512);
+  const ctx = c.getContext("2d");
+  if (!ctx) throw new Error("Couldn't prepare this image");
+  ctx.drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 512, 512);
   for (const q of [0.9, 0.8, 0.7, 0.6]) {
     const b = await new Promise<Blob | null>((r) => c.toBlob(r, "image/jpeg", q));
     if (b && b.size < 400_000) return new File([b], "coin.jpg", { type: "image/jpeg" });
@@ -107,8 +111,10 @@ function Create() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!PUMP_CONTRACT_ID) return toast.error("The launchpad contract isn't deployed yet.");
-    if (!w.accountId) return w.connect();
+    if (!COIN_CREATION_ENABLED || !LATEST_CONTRACT_ID) return toast.error("Coin creation is temporarily paused while the launch contract is repaired. No wallet payment is needed.");
+    const contractId = LATEST_CONTRACT_ID;
+    const accountId = w.accountId;
+    if (!accountId) return w.connect();
     try {
       let image: string | undefined;
       if (file) {
@@ -142,7 +148,7 @@ function Create() {
       let v4Calldata: `0x${string}` | undefined;
       if (hts && isV4(LATEST_CONTRACT_ID)) {
         // HIP-405 metadata URL stored on the token: resolved by creator + creation index.
-        const creator = (w.evmAddress ?? longZero(w.accountId!)).toLowerCase();
+        const creator = (w.evmAddress ?? longZero(accountId)).toLowerCase();
         const { count } = await supabase
           .from("tokens")
           .select("address", { count: "exact", head: true })
@@ -155,7 +161,7 @@ function Create() {
             calldata: v4Calldata ?? encodePumpV2("createToken", [f.name.trim(), f.ticker, meta, 0n]),
             gas: GAS_V2.create,
             payableTinybars: fee + HTS_CREATE_BUDGET,
-            contractId: LATEST_CONTRACT_ID!,
+            contractId,
           })
         : await w.execute({
             calldata: encodePump("createToken", [f.name.trim(), f.ticker, meta]),
@@ -180,10 +186,12 @@ function Create() {
               await w.associateToken(tokenId);
               setBusy("Confirm your launch buy…");
               await w.execute({
-                calldata: encodePumpV2("buy", [data.address, 0n]),
+                calldata: isV4(contractId)
+                  ? encodePumpV4("buy", [data.address, 0n, getReferrer() ?? "0x0000000000000000000000000000000000000000"])
+                  : encodePumpV2("buy", [data.address, 0n]),
                 gas: GAS_V2.buy,
                 payableTinybars: firstBuy,
-                contractId: LATEST_CONTRACT_ID!,
+                contractId,
               });
               toast.success("Launch buy done!");
             } catch (e) {
@@ -291,8 +299,13 @@ function Create() {
               </span>
             </div>
           </div>
-          <Button type="submit" size="lg" className="w-full" disabled={!ok || !!busy}>
-            {busy ?? (w.accountId ? "Launch coin" : "Connect wallet to launch")}
+          {!COIN_CREATION_ENABLED && (
+            <p role="status" className="rounded-md border border-warn/40 bg-warn/10 p-3 text-sm text-warn">
+              Coin creation is temporarily paused while the launch contract is repaired. Please don't retry in your wallet. Existing coins can still be traded.
+            </p>
+          )}
+          <Button type="submit" size="lg" className="w-full" disabled={!COIN_CREATION_ENABLED || !ok || !!busy}>
+            {!COIN_CREATION_ENABLED ? "Creation temporarily paused" : busy ?? (w.accountId ? "Launch coin" : "Connect wallet to launch")}
           </Button>
         </form>
       </div>
