@@ -10,7 +10,7 @@ describe('Discord dispatch safety', () => {
     vi.clearAllMocks();
     update.mockReturnValue({ eq });
     eq.mockResolvedValue({ error: null });
-    rpc.mockResolvedValue({ data: [{ post_id: 1, token_address: '0x0000000000000000000000000000000000a6b752', channel: '1561015894983839805', coin_name: 'Pepe', coin_symbol: 'PEPE' }], error: null });
+    rpc.mockResolvedValue({ data: [{ post_id: 1, token_address: '0x0000000000000000000000000000000000a6b752', channel: '1561344278591045693', coin_name: 'Pepe', coin_symbol: 'PEPE' }], error: null });
   });
   it('saves the exact mirror memo and confirmed message ID', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(Response.json({ token_id: '0.0.10925906', memo: 'Exact ℏ memo', deleted: false })).mockResolvedValueOnce(Response.json({ id: 'discord-message' }));
@@ -20,6 +20,7 @@ describe('Discord dispatch safety', () => {
     expect(update).toHaveBeenCalledWith(expect.objectContaining({ status: 'sent', message_id: 'discord-message' }));
     const sendCall = fetchMock.mock.calls[1];
     if (!sendCall) throw new Error('Discord send was not called');
+    expect(sendCall[0]).toBe('https://connector-gateway.lovable.dev/discord/channels/1561344278591045693/messages');
     const payload = JSON.parse(sendCall[1].body);
     expect(payload.nonce).toBe('1');
     expect(payload.enforce_nonce).toBe(true);
