@@ -31,7 +31,7 @@ export async function runDailyX(origin: string, now = new Date()) {
     // One external transaction per scheduled invocation to keep callbacks short.
     if (!mediaId) {
     const selectedImage = topicImageUrls[(count ?? 0) % topicImageUrls.length] ?? topicImageUrls[0] ?? "";
-    const image = await fetch(selectedImage, { signal: AbortSignal.timeout(4_000) });
+    const image = await fetch(new URL(selectedImage, origin), { signal: AbortSignal.timeout(4_000) });
     if (!image.ok) throw new Error("Tweet image is unavailable");
     const mediaUrl = "https://api.x.com/2/media/upload";
     const form = new FormData();
