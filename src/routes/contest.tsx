@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { NETWORK } from "@/lib/hedera-config";
 import { tokensQuery } from "@/lib/queries";
 import { useUsd } from "@/lib/usd";
+import { getContestPayouts } from "@/lib/contest.functions";
 import {
   CONTEST_MIN_VOLUME_HBAR,
   CONTEST_PRIZE_HBAR,
@@ -54,16 +55,12 @@ function Contest() {
     refetchInterval: 30_000,
   });
   const payouts = useQuery({
-    queryKey: ["payouts"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("bot_payouts").select("*").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
+    queryKey: ["contest-payouts"],
+    queryFn: () => getContestPayouts(),
   });
   const ranked = contestLeaderboard(board.data ?? [], (a) => byAddr.get(a)?.creator, start, end).slice(0, 10);
-  const winners = (payouts.data ?? []).filter((p) => p.kind === "prize" && p.status === "done");
-  const refunds = (payouts.data ?? []).filter((p) => p.kind === "refund").length;
+  const winners = payouts.data?.winners ?? [];
+  const refunds = payouts.data?.refunds ?? 0;
   const left = Math.max(0, FREE_COIN_LIMIT - refunds);
   const days = Math.ceil((end.getTime() - Date.now()) / 86_400_000);
 

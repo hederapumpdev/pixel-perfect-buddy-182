@@ -148,6 +148,13 @@
       "when": 1792341149730,
       "tag": "0020_staff_share_pct",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792354492904,
+      "tag": "0021_lock_staff_and_payouts",
+      "breakpoints": true
     }
   ]
 }
