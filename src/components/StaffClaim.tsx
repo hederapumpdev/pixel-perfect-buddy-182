@@ -20,7 +20,7 @@ export function StaffClaim({ wallets }: { wallets: string[] }) {
   return (
     <div className="mt-6 rounded-lg border border-primary/40 bg-card p-4">
       <h2 className="text-xl font-semibold">Team earnings</h2>
-      <p className="text-sm text-muted-foreground">5% of the platform fee share on all trading since {new Date(s.joined_at).toLocaleDateString()}.</p>
+      <p className="text-sm text-muted-foreground">{s.share_pct}% of the platform fee share on all trading since {new Date(s.joined_at).toLocaleDateString()}.</p>
       <div className="mt-3 grid grid-cols-3 gap-3 font-mono">
         <div><p className="text-xs text-muted-foreground">Earned</p><p className="font-semibold">{fmtHbar(s.earned)}</p><p className="text-xs text-muted-foreground">{usd(s.earned)}</p></div>
         <div><p className="text-xs text-muted-foreground">Claimed</p><p className="font-semibold">{fmtHbar(s.paid)}</p></div>

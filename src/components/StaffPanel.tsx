@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, squareImage, toB64 } from "@/components/ProfileEditor";
 import { uploadImage } from "@/lib/chain.functions";
-import { adminAddStaff, adminListStaff, adminRemoveStaff, adminUpdateStaff } from "@/lib/staff.functions";
-import { STAFF_MAX } from "@/lib/staff";
+import { adminAddStaff, adminListStaff, adminRemoveStaff, adminSetStaffPct, adminUpdateStaff } from "@/lib/staff.functions";
+import { STAFF_MAX, STAFF_MAX_PCT } from "@/lib/staff";
 import { fmtHbar } from "@/lib/queries";
 import { useUsd } from "@/lib/usd";
 
@@ -24,6 +24,7 @@ export function StaffPanel({ pin }: { pin: string }) {
   const add = useServerFn(adminAddStaff);
   const update = useServerFn(adminUpdateStaff);
   const remove = useServerFn(adminRemoveStaff);
+  const setPct = useServerFn(adminSetStaffPct);
   const photo = usePhoto();
   const usd = useUsd();
   const qc = useQueryClient();
@@ -33,6 +34,7 @@ export function StaffPanel({ pin }: { pin: string }) {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const active = (q.data ?? []).filter((s) => !s.left_at).length;
+  const totalPct = (q.data ?? []).filter((s) => !s.left_at).reduce((a, s) => a + Number(s.share_pct), 0);
 
   async function run(fn: () => Promise<unknown>, ok: string) {
     setBusy(true);
@@ -52,7 +54,7 @@ export function StaffPanel({ pin }: { pin: string }) {
       <div>
         <h2 className="text-xl font-semibold">Team</h2>
         <p className="text-sm text-muted-foreground">
-          Each member earns 5% of the platform fee share on all trading since they joined, and claims it from their profile. Payouts come from the bot wallet — keep it topped up.
+          Each member earns their own % of the platform fee share on all trading. Changing a % only counts from that moment. Total now: {totalPct}%, and claims it from their profile. Payouts come from the bot wallet — keep it topped up.
         </p>
       </div>
       <div className="space-y-2">
@@ -67,6 +69,7 @@ export function StaffPanel({ pin }: { pin: string }) {
             </label>
             <div className="min-w-0 flex-1">
               <p className="font-semibold">{s.name} {s.left_at && <span className="text-xs text-muted-foreground">(stopped)</span>}</p>
+              <p className="text-xs text-primary">{Number(s.share_pct)}% of platform share</p>
               <p className="truncate font-mono text-xs text-muted-foreground">{s.account_id ?? s.wallet} · since {new Date(s.joined_at).toLocaleDateString()}</p>
             </div>
             <div className="text-right font-mono text-xs">
@@ -78,6 +81,12 @@ export function StaffPanel({ pin }: { pin: string }) {
                 const n = prompt("New name", s.name);
                 if (n) run(() => update({ data: { pin, wallet: s.wallet, name: n, avatar: s.avatar } }), "Name updated");
               }}>Rename</Button>
+              {!s.left_at && (
+                <Button size="sm" variant="outline" disabled={busy} onClick={() => {
+                  const v = prompt(`New % of the platform share (0–${STAFF_MAX_PCT})`, String(s.share_pct));
+                  if (v !== null) run(() => setPct({ data: { pin, wallet: s.wallet, pct: Number(v.replace(",", ".")) } }), "Percentage updated");
+                }}>Change %</Button>
+              )}
               {!s.left_at && (
                 <Button size="sm" variant="destructive" disabled={busy} onClick={() => {
                   if (confirm(`Stop earnings for ${s.name}? What they earned stays claimable.`))
