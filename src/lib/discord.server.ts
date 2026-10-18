@@ -21,7 +21,9 @@ export async function dispatchDiscordCoin() {
     if (token.token_id !== tokenId || token.deleted || typeof token.memo !== 'string') throw new Error('Hedera token or memo not confirmed');
     const savedMemo = await db.from('discord_coin_posts').update({ memo: token.memo }).eq('id', job.post_id);
     if (savedMemo.error) throw savedMemo.error;
-    const payload = discordCoinMessage({ address: job.token_address, name: job.coin_name, symbol: job.coin_symbol }, token.memo);
+    const coin = await db.from('tokens').select('image_url').eq('address', job.token_address).maybeSingle();
+    if (coin.error) throw coin.error;
+    const payload = discordCoinMessage({ address: job.token_address, name: job.coin_name, symbol: job.coin_symbol, image_url: coin.data?.image_url }, token.memo);
     attempted = true;
     definite = false;
     const response = await fetch(`https://connector-gateway.lovable.dev/discord/channels/${job.channel}/messages`, {

@@ -17,4 +17,9 @@ describe('Discord coin announcements', () => {
   it('rejects invalid addresses instead of claiming a coin exists', () => {
     expect(() => discordCoinMessage({ ...coin, address: 'fake' }, '')).toThrow('Invalid token address');
   });
+  it("shows the coin's own uploaded logo and no substitute when absent", () => {
+    const hash = '3cc73f8660654e54887984e061645846b4e4e822aab3ebfbfb74d4fd80f03086';
+    expect(discordCoinMessage({ ...coin, image_url: hash }, '').embeds[0]?.thumbnail.url).toBe(`https://hederapump.dev/api/public/img/${hash}`);
+    expect(discordCoinMessage(coin, '').embeds).toEqual([]);
+  });
 });

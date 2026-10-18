@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { rpc, update, eq } = vi.hoisted(() => ({ rpc: vi.fn(), update: vi.fn(), eq: vi.fn() }));
-vi.mock('@/integrations/supabase/client.server', () => ({ supabaseAdmin: { rpc, from: () => ({ update }) } }));
+vi.mock('@/integrations/supabase/client.server', () => ({ supabaseAdmin: { rpc, from: () => ({ update, select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { image_url: null }, error: null }) }) }) }) } }));
 import { dispatchDiscordCoin } from '../lib/discord.server';
 
 describe('Discord dispatch safety', () => {
