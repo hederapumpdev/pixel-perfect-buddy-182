@@ -14,6 +14,7 @@ import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
   PUMP_CONTRACT_V4_ID,
+  PUMP_CONTRACT_V4_FIXED_ID,
   HASHSCAN_URL,
   FEE_WALLET_EVM,
   FEE_WALLET_ID,
@@ -27,8 +28,8 @@ import artifact from "@/lib/contract-artifact-v3.json";
 import artifactV4 from "@/lib/contract-artifact-v4.json";
 
 // Deploy targets the newest contract not yet on mainnet (v4 once v3 is live).
-const DEPLOY_TARGET = PUMP_CONTRACT_V3_ID && !PUMP_CONTRACT_V4_ID ? artifactV4 : artifact;
-const DEPLOYED_ID = PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID;
+const DEPLOY_TARGET = PUMP_CONTRACT_V3_ID && !PUMP_CONTRACT_V4_FIXED_ID ? artifactV4 : artifact;
+const DEPLOYED_ID = PUMP_CONTRACT_V4_FIXED_ID ?? PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID;
 import { listSupport, setSupportStatus } from "@/lib/support.functions";
 import { XPostingPanel } from "@/components/XPostingPanel";
 import { getUserStats } from "@/lib/users.functions";
@@ -397,7 +398,7 @@ function Deploy() {
   const p = w.deployProgress;
 
   useEffect(() => {
-    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_V4_ID) {
+    if (w.accountId && w.mode === "hashpack" && !PUMP_CONTRACT_V4_FIXED_ID) {
       w.checkDeploy(DEPLOY_TARGET.bytecode).then((s) => s.contractId && setDeployed(s.contractId)).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -448,10 +449,10 @@ function Deploy() {
           </a>
         </p>
       )}
-      {!PUMP_CONTRACT_V4_ID && (
+      {!PUMP_CONTRACT_V4_FIXED_ID && (
         <>
           <p className="text-sm text-muted-foreground">
-            Deploys the <b>v4</b> contract to Hedera {NETWORK} (referrals + automatic SaucerSwap token info):
+            Deploys the <b>repaired v4</b> contract to Hedera {NETWORK}. The original v4 cannot create coins because it uses the wrong Hedera token service for metadata. This replacement keeps referrals + automatic SaucerSwap token info:
             platform fee goes straight to {FEE_WALLET_ID}, creators claim their share on their profile.{" "}
             <b>About 6 approvals</b>, one per tap. Roughly 20–30 HBAR.
           </p>

@@ -17,22 +17,27 @@ export const PUMP_CONTRACT_V3_ID: string | null = "0.0.10924285";
 // trading volume, self-serve claims). Null until deployed from /admin.
 export const PUMP_CONTRACT_V4_ID: string | null = "0.0.10924813";
 
+// Replacement v4 uses the HIP-405 creation service at 0x16c. Set only after
+// deployment and a successful real token creation; the original remains readable.
+export const PUMP_CONTRACT_V4_FIXED_ID: string | null = null;
+export const COIN_CREATION_ENABLED = PUMP_CONTRACT_V4_FIXED_ID !== null;
+
 /** Contracts whose coins are native HTS tokens (v2 + v3 share the same ABI). */
-export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID].filter(
+export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID].filter(
   (c): c is string => !!c,
 );
 
 /** Contracts with the v4 ABI (referral args on buy/sell, metadataUrl on createToken). */
-export const V4_CONTRACTS: string[] = ([PUMP_CONTRACT_V4_ID] as (string | null)[]).filter(
+export const V4_CONTRACTS: string[] = ([PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID] as (string | null)[]).filter(
   (c): c is string => typeof c === "string",
 );
 
 /** Contract new coins are created on. */
 export const LATEST_CONTRACT_ID: string | null =
-  PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID ?? PUMP_CONTRACT_V2_ID ?? PUMP_CONTRACT_ID;
+  PUMP_CONTRACT_V4_FIXED_ID ?? PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID ?? PUMP_CONTRACT_V2_ID ?? PUMP_CONTRACT_ID;
 
 /** Every launchpad contract the app reads and trades on, oldest first. */
-export const PUMP_CONTRACTS: string[] = [PUMP_CONTRACT_ID, PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID].filter(
+export const PUMP_CONTRACTS: string[] = [PUMP_CONTRACT_ID, PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID].filter(
   (c): c is string => !!c,
 );
 
