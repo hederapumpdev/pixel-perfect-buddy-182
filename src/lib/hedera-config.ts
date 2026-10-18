@@ -20,24 +20,27 @@ export const PUMP_CONTRACT_V4_ID: string | null = "0.0.10924813";
 // Replacement v4 uses the HIP-405 creation service at 0x16c. Deployment is
 // recorded separately from activation: the mainnet creation simulation still reverts.
 export const PUMP_CONTRACT_V4_FIXED_ID: string | null = "0.0.10925851";
+// Legacy 0x167 replacement: memo URL + referrals, no HIP-405 metadata.
+// Set only after deployment and a successful mainnet creation simulation.
+export const PUMP_CONTRACT_V4_LEGACY_ID: string | null = null;
 export const COIN_CREATION_ENABLED = false;
 
 /** Contracts whose coins are native HTS tokens (v2 + v3 share the same ABI). */
-export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID].filter(
+export const HTS_CONTRACTS: string[] = [PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID, PUMP_CONTRACT_V4_LEGACY_ID].filter(
   (c): c is string => !!c,
 );
 
 /** Contracts with the v4 ABI (referral args on buy/sell, metadataUrl on createToken). */
-export const V4_CONTRACTS: string[] = ([PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID] as (string | null)[]).filter(
+export const V4_CONTRACTS: string[] = ([PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID, PUMP_CONTRACT_V4_LEGACY_ID] as (string | null)[]).filter(
   (c): c is string => typeof c === "string",
 );
 
 /** Contract new coins are created on. */
 export const LATEST_CONTRACT_ID: string | null =
-  PUMP_CONTRACT_V4_FIXED_ID ?? PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID ?? PUMP_CONTRACT_V2_ID ?? PUMP_CONTRACT_ID;
+  PUMP_CONTRACT_V4_LEGACY_ID ?? PUMP_CONTRACT_V4_FIXED_ID ?? PUMP_CONTRACT_V4_ID ?? PUMP_CONTRACT_V3_ID ?? PUMP_CONTRACT_V2_ID ?? PUMP_CONTRACT_ID;
 
 /** Every launchpad contract the app reads and trades on, oldest first. */
-export const PUMP_CONTRACTS: string[] = [PUMP_CONTRACT_ID, PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID].filter(
+export const PUMP_CONTRACTS: string[] = [PUMP_CONTRACT_ID, PUMP_CONTRACT_V2_ID, PUMP_CONTRACT_V3_ID, PUMP_CONTRACT_V4_ID, PUMP_CONTRACT_V4_FIXED_ID, PUMP_CONTRACT_V4_LEGACY_ID].filter(
   (c): c is string => !!c,
 );
 

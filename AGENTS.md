@@ -11,7 +11,7 @@
 
 - Subdirectories have their own `AGENTS.md` (e.g. `contracts/`); read it before changing files there.
 - Network, contract IDs and WalletConnect ID live in `src/lib/hedera-config.ts` for centralized configuration.
-- Original v4 stays indexed/tradable; repaired v4 has a separate ID, and creation stays disabled until replacement deployment is verified to prevent paid retries against the broken contract.
+- Both failed v4 deployments stay indexed/tradable; the legacy-service replacement has a separate ID/artifact, and creation stays disabled until its deployed mainnet creation is verified to prevent paid retries. Admin must target the pending legacy artifact, not a previously deployed version.
 - Coin/trade tables are filled only by `syncChain` from Hedera mirror-node events — the chain is the source of truth, never write them from user input.
 - Browser Node polyfills in Vite must resolve directly to absolute npm package files, only in the client environment; re-resolving bare built-ins can recurse through aliases and exhaust the build.
 - Wallet SDKs are stubbed server-side in `vite.config.ts`; dynamically import in browsers only to avoid Worker crashes.
