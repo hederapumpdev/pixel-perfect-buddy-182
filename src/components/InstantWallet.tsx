@@ -6,7 +6,7 @@ import { useWallet } from "@/lib/wallet";
 
 const PREV = "hederaPump.prevWallet";
 
-/** Lets HashPack/MetaMask users switch to an email/Google wallet that trades without approval popups. */
+/** Lets HashPack users switch to an email/Google wallet that trades without approval popups. */
 export function InstantWallet() {
   const w = useWallet();
   const [prev, setPrev] = useState<string | null>(null);
