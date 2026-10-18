@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { MIRROR_URL, NETWORK } from "./hedera-config";
-import { STAFF_MAX, STAFF_MIN_CLAIM_HBAR, staffClaimable, staffEarned } from "./staff";
+import { STAFF_MAX, STAFF_MAX_PCT, STAFF_MIN_CLAIM_HBAR, staffClaimable, staffEarned } from "./staff";
 
 const norm = (w: unknown) => String(w ?? "").toLowerCase().trim();
 const checkPin = (p: string) => {
@@ -9,13 +9,19 @@ const checkPin = (p: string) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function balanceOf(db: any, s: { wallet: string; joined_at: string; left_at: string | null }) {
-  const { data: fees } = await db.rpc("fee_total_between", {
-    p_network: NETWORK,
-    p_from: s.joined_at,
-    p_to: s.left_at ?? new Date().toISOString(),
-  });
-  const earned = staffEarned(Number(fees ?? 0));
+type StaffRow = { wallet: string; joined_at: string; left_at: string | null; share_pct: number; rate_since: string | null; earned_before: number };
+
+/** Earned at the current % since the last % change (stops when the member leaves). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function earnedSinceRate(db: any, s: StaffRow, until?: string) {
+  const end = s.left_at ?? until ?? new Date().toISOString();
+  const { data: fees } = await db.rpc("fee_total_between", { p_network: NETWORK, p_from: s.rate_since ?? s.joined_at, p_to: end });
+  return staffEarned(Number(fees ?? 0), Number(s.share_pct));
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function balanceOf(db: any, s: StaffRow) {
+  const earned = Number(s.earned_before) + (await earnedSinceRate(db, s));
   const { data: rows } = await db
     .from("bot_payouts")
     .select("hbar_amount,status")
@@ -47,7 +53,7 @@ export const getStaffBalance = createServerFn({ method: "POST" })
     const { data: s } = await db.from("staff_members").select("*").in("wallet", data.wallets).limit(1).maybeSingle();
     if (!s) return null;
     const b = await balanceOf(db, s);
-    return { wallet: s.wallet, name: s.name, joined_at: s.joined_at, left_at: s.left_at, ...b };
+    return { wallet: s.wallet, name: s.name, share_pct: Number(s.share_pct), joined_at: s.joined_at, left_at: s.left_at, ...b };
   });
 
 /** Bot wallet pays the claimable amount to the staff wallet itself (anyone may trigger it safely). */
@@ -102,7 +108,7 @@ export const adminAddStaff = createServerFn({ method: "POST" })
     const { data: existing } = await db.from("staff_members").select("wallet").eq("wallet", wallet).maybeSingle();
     if (existing) throw new Error("Already added");
     if ((count ?? 0) >= STAFF_MAX) throw new Error(`Maximum ${STAFF_MAX} team members`);
-    const { error } = await db.from("staff_members").insert({ wallet, account_id: accountId, name: data.name, avatar: data.avatar });
+    const { error } = await db.from("staff_members").insert({ wallet, account_id: accountId, name: data.name, avatar: data.avatar, rate_since: new Date().toISOString() });
     if (error) throw new Error("Saving failed");
     return { ok: true };
   });
@@ -119,6 +125,27 @@ export const adminUpdateStaff = createServerFn({ method: "POST" })
     checkPin(data.pin);
     const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
     await db.from("staff_members").update({ name: data.name, avatar: data.avatar }).eq("wallet", data.wallet);
+    return { ok: true };
+  });
+
+/** Admin: change a member's % from now on; earnings so far stay at the old %. */
+export const adminSetStaffPct = createServerFn({ method: "POST" })
+  .inputValidator((d: { pin: string; wallet: string; pct: number }) => {
+    if (!(typeof d.pct === "number" && d.pct >= 0 && d.pct <= STAFF_MAX_PCT)) throw new Error(`Percentage must be 0–${STAFF_MAX_PCT}%`);
+    return { pin: String(d.pin ?? ""), wallet: norm(d.wallet), pct: Math.round(d.pct * 100) / 100 };
+  })
+  .handler(async ({ data }) => {
+    checkPin(data.pin);
+    const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+    const { data: s } = await db.from("staff_members").select("*").eq("wallet", data.wallet).maybeSingle();
+    if (!s) throw new Error("Not found");
+    if (s.left_at) throw new Error("This member has stopped");
+    const now = new Date().toISOString();
+    const frozen = Number(s.earned_before) + (await earnedSinceRate(db, s, now));
+    const { error } = await db.from("staff_members")
+      .update({ earned_before: frozen, rate_since: now, share_pct: data.pct })
+      .eq("wallet", data.wallet).eq("rate_since", s.rate_since ?? s.joined_at);
+    if (error) throw new Error("Saving failed");
     return { ok: true };
   });
 
