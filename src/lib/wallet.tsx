@@ -227,8 +227,26 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const connect = useCallback(async () => {
     setConnecting(true);
     try {
-      const c = await init();
-      await c.openModal();
+      try {
+        const c = await init();
+        await c.openModal();
+      } catch (e) {
+        // A stale WalletConnect pairing makes the relay reject messages
+        // ("Failed to publish custom payload"). Clear it and retry once.
+        const msg = e instanceof Error ? e.message : String(e);
+        if (!/publish|relay|pairing|session|expired|no matching key/i.test(msg)) throw e;
+        await connector.current?.disconnectAll().catch(() => {});
+        try {
+          Object.keys(localStorage)
+            .filter((k) => k.startsWith("wc@2") || k.startsWith("walletconnect"))
+            .forEach((k) => localStorage.removeItem(k));
+        } catch { /* storage unavailable */ }
+        connector.current = null;
+        initPromise.current = null;
+        toast.message("Resetting the wallet connection, trying again…");
+        const c = await init();
+        await c.openModal();
+      }
       syncAccount();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't connect wallet");
