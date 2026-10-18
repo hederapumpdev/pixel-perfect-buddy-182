@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Verify Discord footer visibility on narrow screens and restore it if clipped.
+- [ ] Confirm the user's new mainnet coin and post its link and exact on-chain token memo to Discord #official-links and #rules; wait for the coin link if identity cannot be established.
 - [x] Diagnose real coin creation revert: metadata selector called legacy 0x167 and received empty data; prepare corrected 0x16c bytecode, restore admin deploy form, block paid retries, retain existing contracts, and test v4 launch-buy encoding
 - [x] Record replacement v4 deployment 0.0.10925851 and test its mainnet creation without payment
 - [x] Prepare separate legacy-service v4 artifact and admin deployment with information URL in tokenmemo; local EVM creation/refund/100-byte boundary and referral accounting tests. Automatic SaucerSwap metadata ingestion remains unconfirmed.
