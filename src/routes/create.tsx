@@ -147,7 +147,7 @@ function Create() {
       // associates it, so the launch buy happens as a separate step afterwards.
       let v4Calldata: `0x${string}` | undefined;
       if (hts && isV4(LATEST_CONTRACT_ID)) {
-        // HIP-405 metadata URL stored on the token: resolved by creator + creation index.
+        // Information URL resolved by creator + creation index; the legacy replacement stores it in the memo.
         const creator = (w.evmAddress ?? longZero(accountId)).toLowerCase();
         const { count } = await supabase
           .from("tokens")
