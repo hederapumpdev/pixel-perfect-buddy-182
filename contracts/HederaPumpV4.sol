@@ -78,6 +78,7 @@ contract HederaPumpV4 {
     uint256 public totalReferralVolume;
     mapping(address => uint256) public referralVolume;
     mapping(address => uint256) public referralRewardDebt;
+    mapping(address => uint256) public referralAccrued;
     mapping(address => Curve) public curves;
     address[] public allTokens;
     uint256 private locked = 1;
@@ -242,12 +243,13 @@ contract HederaPumpV4 {
         uint256 pf = fee - cf;
         if (referrer != address(0)) {
             uint256 rf = (fee * REFERRER_SHARE_BPS) / 10_000;
-            // Credit the volume first so the pool top-up below divides over all volume
-            // including this trade (and never by zero).
+            // Preserve previous earnings before changing this referrer's weight.
+            referralAccrued[referrer] = pendingReferralFees(referrer);
             referralVolume[referrer] += volume;
             totalReferralVolume += volume;
-            accReferralPerVolume += (rf * SCALE) / totalReferralVolume;
+            // New volume must not earn historical top-ups; it does earn this one.
             referralRewardDebt[referrer] = (referralVolume[referrer] * accReferralPerVolume) / SCALE;
+            accReferralPerVolume += (rf * SCALE) / totalReferralVolume;
             pf -= rf;
             emit ReferralFee(token, referrer, rf);
         }
@@ -261,7 +263,7 @@ contract HederaPumpV4 {
     function pendingReferralFees(address referrer) public view returns (uint256) {
         uint256 earned = (referralVolume[referrer] * accReferralPerVolume) / SCALE;
         uint256 debt = referralRewardDebt[referrer];
-        return earned > debt ? earned - debt : 0;
+        return referralAccrued[referrer] + (earned > debt ? earned - debt : 0);
     }
 
     function claimCreatorFees() external nonReentrant {
@@ -274,7 +276,8 @@ contract HederaPumpV4 {
     function claimReferralFees() external nonReentrant {
         uint256 a = pendingReferralFees(msg.sender);
         require(a > 0, "none");
-        referralRewardDebt[msg.sender] += a;
+        referralAccrued[msg.sender] = 0;
+        referralRewardDebt[msg.sender] = (referralVolume[msg.sender] * accReferralPerVolume) / SCALE;
         _send(msg.sender, a);
     }
 

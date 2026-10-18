@@ -86,6 +86,33 @@ describe("legacy v4 creation in a local EVM", () => {
     expect(result.execResult.exceptionError).toBeUndefined();
   });
 
+  it("reserves 10% of the platform fee and shares new top-ups by attributed volume without erasing earnings", async () => {
+    const { call } = await setup();
+    await call("createToken", ["Referral", "REF", "{}", "", 0n], 1_500_000_000n);
+    const token = "0x0000000000000000000000000000000000123456";
+    const a = "0x0000000000000000000000000000000000300000";
+    const b = "0x0000000000000000000000000000000000400000";
+    const pending = async (referrer: string) => {
+      const result = await call("pendingReferralFees", [referrer]);
+      return decodeFunctionResult({ abi: pump.abi, functionName: "pendingReferralFees", data: bytesToHex(result.execResult.returnValue) });
+    };
+    const first = await call("buy", [token, 0n, a], 10_000_000_000n);
+    expect(first.execResult.exceptionError).toBeUndefined();
+    // 100 HBAR buy: 1 HBAR fee, 0.7 platform, 0.07 reserved for referrals.
+    expect(await pending(a)).toBe(7_000_000n);
+    const second = await call("buy", [token, 0n, b], 10_000_000_000n);
+    expect(second.execResult.exceptionError).toBeUndefined();
+    expect(await pending(a)).toBe(10_500_000n);
+    expect(await pending(b)).toBe(3_500_000n);
+    const third = await call("buy", [token, 0n, a], 10_000_000_000n);
+    expect(third.execResult.exceptionError).toBeUndefined();
+    // A now has twice B's volume; rounding can leave at most a few tinybars.
+    const earnedA = await pending(a);
+    const earnedB = await pending(b);
+    expect(Number(earnedA)).toBeCloseTo(15_166_666, -1);
+    expect(Number(earnedB)).toBeCloseTo(5_833_333, -1);
+  });
+
   it("rejects a memo over 100 UTF-8 bytes before spending on HTS", async () => {
     const { vm, call } = await setup();
     const result = await call("createToken", ["Boundary", "BOUND", "{}", "é".repeat(50) + "a", 0n], 1_500_000_000n);
