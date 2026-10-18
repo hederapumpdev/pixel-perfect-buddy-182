@@ -267,48 +267,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [attachEmail]);
 
-  // MetaMask (or any injected EVM wallet) on Hedera's EVM network.
-  const connectMetaMask = useCallback(async () => {
-    const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-    if (!eth) {
-      // Phone browser without MetaMask: reopen this page inside the MetaMask app.
-      window.location.href = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
-      return;
-    }
-    setConnecting(true);
-    try {
-      const chainHex = `0x${EVM_CHAIN_ID.toString(16)}`;
-      await eth.request({ method: "eth_requestAccounts" });
-      const current = await eth.request({ method: "eth_chainId" }).catch(() => null);
-      if (current !== chainHex) try {
-        await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: chainHex }] });
-      } catch {
-        await eth.request({
-          method: "wallet_addEthereumChain",
-          params: [{
-            chainId: chainHex,
-            chainName: NETWORK === "mainnet" ? "Hedera Mainnet" : "Hedera Testnet",
-            nativeCurrency: { name: "HBAR", symbol: "HBAR", decimals: 18 },
-            rpcUrls: [EVM_RPC_URL],
-            blockExplorerUrls: [HASHSCAN_URL],
-          }],
-        });
-      }
-      const { BrowserProvider } = await import("ethers");
-      const signer = await new BrowserProvider(eth as never).getSigner();
-      evmSigner.current = signer;
-      const addr = (await signer.getAddress()).toLowerCase();
-      setMode("metamask");
-      setEvm(addr);
-      const a = await fetch(`${MIRROR_URL}/api/v1/accounts/${addr}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-      setAccountId(a?.account ?? addr);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't connect MetaMask");
-    } finally {
-      setConnecting(false);
-    }
-  }, []);
-
   const disconnect = useCallback(async () => {
     await connector.current?.disconnectAll().catch(() => {});
     if (web3auth?.connected) await web3auth.logout().catch(() => {});
@@ -562,7 +520,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         connecting,
         connect,
         connectEmail,
-        connectMetaMask,
         mode,
         disconnect,
         execute,
