@@ -11,7 +11,7 @@
 
 - Subdirectories have their own `AGENTS.md` (e.g. `contracts/`); read it before changing files there.
 - Network, contract IDs and WalletConnect ID live in `src/lib/hedera-config.ts` for centralized configuration.
-- Original v4 stays indexed/tradable; repaired v4 has a separate ID, and creation stays disabled until replacement deployment is verified to prevent paid retries against the broken contract.
+- Both failed v4 deployments stay indexed/tradable; the legacy-service replacement has a separate ID/artifact, and creation stays disabled until its deployed mainnet creation is verified to prevent paid retries. Admin must target the pending legacy artifact, not a previously deployed version.
 - Coin/trade tables are filled only by `syncChain` from Hedera mirror-node events — the chain is the source of truth, never write them from user input.
 - Browser Node polyfills in Vite must resolve directly to absolute npm package files, only in the client environment; re-resolving bare built-ins can recurse through aliases and exhaust the build.
 - Wallet SDKs are stubbed server-side in `vite.config.ts`; dynamically import in browsers only to avoid Worker crashes.
@@ -29,6 +29,7 @@
 - Profiles use useProfiles for alias identity; HederaAddress resolves display IDs only, preserving chain/database addresses.
 - The sitemap uses required route-level staticData.sitemap decisions and paginated public-key token reads; exclude private surfaces and omit non-authoritative lastmod dates so search discovery stays safe and complete.
 - Referral links: ?ref=<wallet> captured once into localStorage (src/lib/referral.ts, first referrer wins) and sent with every v4 trade; profile shows the Referrals block only when PUMP_CONTRACT_V4_ID is set.
+- Legacy v4 referral accounting preserves pending rewards before increasing volume, checkpoints debt before each new pool top-up, and tracks accrued rewards separately so repeated referred trades cannot erase earnings; validate with local EVM tests.
 - Legacy SaucerSwap assistance exports synced pre-v4 HTS information client-side with Davinci Pics guidance; never imply submission success or attempt metadata updates because those tokens lack update keys.
 - BondingProgress uses synced reserves for a display-only HBAR/USD graduation estimate, including the existing fee; never use it to execute trades.
 - Promotions: rules in `src/lib/promotions.ts`; bot payouts (`payouts.server.ts`, `/api/public/jobs/payouts`) send one tx per call, keyed uniquely in `bot_payouts` and never resent when uncertain — nothing may be paid twice.

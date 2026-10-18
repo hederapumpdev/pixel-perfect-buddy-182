@@ -9,7 +9,7 @@ interface IHTS {
     struct HederaToken {
         string name; string symbol; address treasury; string memo;
         bool tokenSupplyType; int64 maxSupply; bool freezeDefault;
-        TokenKey[] tokenKeys; Expiry expiry; bytes metadata;
+        TokenKey[] tokenKeys; Expiry expiry;
     }
     function createFungibleToken(HederaToken memory token, int64 initialTotalSupply, int32 decimals)
         external payable returns (int64 responseCode, address tokenAddress);
@@ -31,14 +31,13 @@ interface ISaucerRouter {
         external payable returns (uint256 amountToken, uint256 amountETH, uint256 liquidity);
 }
 
-/// @title HederaPump v4 bonding-curve launchpad: native HTS tokens with on-chain HIP-405
-/// metadata (SaucerSwap picks up logo/info automatically), automatic SaucerSwap listing and
+/// @title HederaPump v4 bonding-curve launchpad: native HTS tokens with an information URL
+/// in the token memo (not HIP-405 metadata), automatic SaucerSwap liquidity listing and
 /// referral rewards. HBAR in tinybars (1e8). Tokens have 8 decimals. The contract is the token
 /// treasury; tokens have no admin/supply/freeze keys, so supply is fixed forever.
 /// Deploy with unlimited max auto-associations so the contract can receive the SaucerSwap LP token.
 contract HederaPumpV4 {
-    // HIP-405 metadata creation is exposed at 0x16c, not the legacy 0x167.
-    IHTS constant HTS_CREATE = IHTS(address(0x16c));
+    // Mainnet supports the legacy tuple at 0x167; HIP-1028 metadata creation is deferred.
     IHTS constant HTS = IHTS(address(0x167));
     IExchangeRate constant RATES = IExchangeRate(address(0x168));
     int64 constant OK = 22;
@@ -79,6 +78,7 @@ contract HederaPumpV4 {
     uint256 public totalReferralVolume;
     mapping(address => uint256) public referralVolume;
     mapping(address => uint256) public referralRewardDebt;
+    mapping(address => uint256) public referralAccrued;
     mapping(address => Curve) public curves;
     address[] public allTokens;
     uint256 private locked = 1;
@@ -105,8 +105,8 @@ contract HederaPumpV4 {
     function tokenCount() external view returns (uint256) { return allTokens.length; }
 
     /// @param metadata off-chain coin metadata (description/links JSON), emitted for indexing.
-    /// @param metadataUrl HIP-405 metadata URL stored on the token itself (max 100 bytes);
-    /// SaucerSwap reads logo, description and links from it automatically.
+    /// @param metadataUrl Information URL stored in the token memo (max 100 UTF-8 bytes).
+    /// This is not HIP-405 metadata; automatic ingestion by SaucerSwap is unconfirmed.
     /// @param buyHbar part of msg.value used for the creator's first buy. The rest above
     /// creationFee pays Hedera's token-creation fee; anything not charged is refunded.
     function createToken(string calldata name_, string calldata symbol_, string calldata metadata, string calldata metadataUrl, uint256 buyHbar)
@@ -123,15 +123,14 @@ contract HederaPumpV4 {
         t.name = name_;
         t.symbol = symbol_;
         t.treasury = address(this);
-        t.memo = "HederaPump";
+        t.memo = bytes(metadataUrl).length > 0 ? metadataUrl : "HederaPump";
         t.tokenSupplyType = true;
         t.maxSupply = int64(int256(TOTAL_SUPPLY));
         t.tokenKeys = new IHTS.TokenKey[](0);
         t.expiry = IHTS.Expiry(0, address(this), 7_776_000);
-        t.metadata = bytes(metadataUrl);
 
         uint256 b0 = address(this).balance;
-        (int64 rc, address tok) = HTS_CREATE.createFungibleToken{value: htsBudget}(t, int64(int256(TOTAL_SUPPLY)), 8);
+        (int64 rc, address tok) = HTS.createFungibleToken{value: htsBudget}(t, int64(int256(TOTAL_SUPPLY)), 8);
         require(rc == OK, "hts create");
         uint256 unspent = htsBudget - (b0 - address(this).balance);
         token = tok;
@@ -244,12 +243,13 @@ contract HederaPumpV4 {
         uint256 pf = fee - cf;
         if (referrer != address(0)) {
             uint256 rf = (fee * REFERRER_SHARE_BPS) / 10_000;
-            // Credit the volume first so the pool top-up below divides over all volume
-            // including this trade (and never by zero).
+            // Preserve previous earnings before changing this referrer's weight.
+            referralAccrued[referrer] = pendingReferralFees(referrer);
             referralVolume[referrer] += volume;
             totalReferralVolume += volume;
-            accReferralPerVolume += (rf * SCALE) / totalReferralVolume;
+            // New volume must not earn historical top-ups; it does earn this one.
             referralRewardDebt[referrer] = (referralVolume[referrer] * accReferralPerVolume) / SCALE;
+            accReferralPerVolume += (rf * SCALE) / totalReferralVolume;
             pf -= rf;
             emit ReferralFee(token, referrer, rf);
         }
@@ -263,7 +263,7 @@ contract HederaPumpV4 {
     function pendingReferralFees(address referrer) public view returns (uint256) {
         uint256 earned = (referralVolume[referrer] * accReferralPerVolume) / SCALE;
         uint256 debt = referralRewardDebt[referrer];
-        return earned > debt ? earned - debt : 0;
+        return referralAccrued[referrer] + (earned > debt ? earned - debt : 0);
     }
 
     function claimCreatorFees() external nonReentrant {
@@ -276,7 +276,8 @@ contract HederaPumpV4 {
     function claimReferralFees() external nonReentrant {
         uint256 a = pendingReferralFees(msg.sender);
         require(a > 0, "none");
-        referralRewardDebt[msg.sender] += a;
+        referralAccrued[msg.sender] = 0;
+        referralRewardDebt[msg.sender] = (referralVolume[msg.sender] * accReferralPerVolume) / SCALE;
         _send(msg.sender, a);
     }
 
@@ -298,5 +299,5 @@ contract HederaPumpV4 {
     }
 
     /// Accepts refunds from the token service / router only.
-    receive() external payable { require(msg.sender == router || msg.sender == address(0x167) || msg.sender == address(0x16c), "direct"); }
+    receive() external payable { require(msg.sender == router || msg.sender == address(0x167), "direct"); }
 }
