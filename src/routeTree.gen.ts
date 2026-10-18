@@ -18,6 +18,7 @@ import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as TeamRouteImport } from './routes/team'
 import { Route as TokenIdRouteImport } from './routes/token.$id'
 import { Route as ApiPublicSupportChatRouteImport } from './routes/api/public/support-chat'
 import { Route as ApiPublicDexscreenerAssetRouteImport } from './routes/api/public/dexscreener/asset'
@@ -76,6 +77,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TokenIdRoute = TokenIdRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
+  '/team': typeof TeamRoute
   '/token/$id': typeof TokenIdRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
   '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
+  '/team': typeof TeamRoute
   '/token/$id': typeof TokenIdRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
   '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
+  '/team': typeof TeamRoute
   '/token/$id': typeof TokenIdRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
   '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
@@ -245,6 +254,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/sitemap.xml'
     | '/support'
+    | '/team'
     | '/token/$id'
     | '/api/public/support-chat'
     | '/api/public/dexscreener/asset'
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/sitemap.xml'
     | '/support'
+    | '/team'
     | '/token/$id'
     | '/api/public/support-chat'
     | '/api/public/dexscreener/asset'
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/sitemap.xml'
     | '/support'
+    | '/team'
     | '/token/$id'
     | '/api/public/support-chat'
     | '/api/public/dexscreener/asset'
@@ -321,6 +333,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
+  TeamRoute: typeof TeamRoute
   TokenIdRoute: typeof TokenIdRoute
   ApiPublicSupportChatRoute: typeof ApiPublicSupportChatRoute
   ApiPublicDexscreenerAssetRoute: typeof ApiPublicDexscreenerAssetRoute
@@ -400,6 +413,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/token/$id': {
@@ -513,6 +533,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
+  TeamRoute: TeamRoute,
   TokenIdRoute: TokenIdRoute,
   ApiPublicSupportChatRoute: ApiPublicSupportChatRoute,
   ApiPublicDexscreenerAssetRoute: ApiPublicDexscreenerAssetRoute,
