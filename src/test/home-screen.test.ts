@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const manifest = JSON.parse(readFileSync(new URL("../../public/manifest.webmanifest", import.meta.url), "utf8"));
+const manifest = JSON.parse(readFileSync("public/manifest.webmanifest", "utf8"));
 
 describe("phone home-screen support", () => {
   it("opens HederaPump as a standalone app at the site's root", () => {
