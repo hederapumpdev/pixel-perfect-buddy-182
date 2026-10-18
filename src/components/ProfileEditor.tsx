@@ -29,7 +29,7 @@ function editKey() {
   return k;
 }
 
-async function squareImage(f: File): Promise<File> {
+export async function squareImage(f: File): Promise<File> {
   const bmp = await createImageBitmap(f);
   const side = Math.min(bmp.width, bmp.height);
   const c = document.createElement("canvas");
@@ -39,7 +39,7 @@ async function squareImage(f: File): Promise<File> {
   if (!b) throw new Error("Couldn't read this image");
   return new File([b], "avatar.jpg", { type: "image/jpeg" });
 }
-const toB64 = (f: File) =>
+export const toB64 = (f: File) =>
   new Promise<string>((res, rej) => {
     const r = new FileReader();
     r.onload = () => res(String(r.result).split(",")[1] ?? "");

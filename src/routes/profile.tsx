@@ -1,6 +1,7 @@
 import { InstantWallet } from "@/components/InstantWallet";
 import { WalletHoldings } from "@/components/WalletHoldings";
 import { ProfileEditor } from "@/components/ProfileEditor";
+import { StaffClaim } from "@/components/StaffClaim";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -239,6 +240,8 @@ function Profile() {
           </Button>
         </div>
       </div>
+
+      <StaffClaim wallets={addrs.map((a) => a.toLowerCase())} />
 
       {PUMP_CONTRACT_V4_ID && (
         <div className="mt-6 rounded-lg border border-border bg-card p-4">
