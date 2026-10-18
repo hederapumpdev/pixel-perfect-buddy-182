@@ -57,9 +57,6 @@ function WalletButton() {
       <Button size="sm" variant="secondary" onClick={w.connectEmail} disabled={w.connecting}>
         Sign in
       </Button>
-      <Button size="sm" variant="secondary" onClick={w.connectMetaMask} disabled={w.connecting}>
-        MetaMask
-      </Button>
       <Button size="sm" onClick={w.connect} disabled={w.connecting}>
         <Wallet className="h-4 w-4" />
         {w.connecting ? "…" : "WalletConnect"}
