@@ -134,6 +134,13 @@
       "when": 1792323894937,
       "tag": "0018_discord_new_coins_channel",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792340913068,
+      "tag": "0019_staff_members",
+      "breakpoints": true
     }
   ]
 }

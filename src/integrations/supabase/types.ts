@@ -166,6 +166,36 @@ export type Database = {
           },
         ]
       }
+      staff_members: {
+        Row: {
+          account_id: string | null
+          avatar: string | null
+          created_at: string
+          joined_at: string
+          left_at: string | null
+          name: string
+          wallet: string
+        }
+        Insert: {
+          account_id?: string | null
+          avatar?: string | null
+          created_at?: string
+          joined_at?: string
+          left_at?: string | null
+          name: string
+          wallet: string
+        }
+        Update: {
+          account_id?: string | null
+          avatar?: string | null
+          created_at?: string
+          joined_at?: string
+          left_at?: string | null
+          name?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
       support_requests: {
         Row: {
           contact: string
@@ -586,6 +616,10 @@ export type Database = {
         }
       }
       creator_fee_totals: { Args: { creators: string[] }; Returns: number }
+      fee_total_between: {
+        Args: { p_from: string; p_network: string; p_to: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
