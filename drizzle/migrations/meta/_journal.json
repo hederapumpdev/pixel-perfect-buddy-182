@@ -120,6 +120,13 @@
       "when": 1792261292799,
       "tag": "0016_bot_payouts",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792323703662,
+      "tag": "0017_discord_coin_announcements",
+      "breakpoints": true
     }
   ]
 }

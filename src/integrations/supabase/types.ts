@@ -122,6 +122,50 @@ export type Database = {
         }
         Relationships: []
       }
+      discord_coin_posts: {
+        Row: {
+          channel_id: string
+          created_at: string
+          id: number
+          last_error: string | null
+          memo: string | null
+          message_id: string | null
+          sent_at: string | null
+          status: string
+          token: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          id?: never
+          last_error?: string | null
+          memo?: string | null
+          message_id?: string | null
+          sent_at?: string | null
+          status?: string
+          token: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          id?: never
+          last_error?: string | null
+          memo?: string | null
+          message_id?: string | null
+          sent_at?: string | null
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discord_coin_posts_token_fkey"
+            columns: ["token"]
+            isOneToOne: false
+            referencedRelation: "tokens"
+            referencedColumns: ["address"]
+          },
+        ]
+      }
       support_requests: {
         Row: {
           contact: string
@@ -513,6 +557,16 @@ export type Database = {
       acquire_telegram_top_lease: { Args: never; Returns: boolean }
       acquire_x_posting_lease: { Args: never; Returns: boolean }
       admin_user_stats: { Args: never; Returns: Json }
+      claim_discord_coin_post: {
+        Args: never
+        Returns: {
+          channel: string
+          coin_name: string
+          coin_symbol: string
+          post_id: number
+          token_address: string
+        }[]
+      }
       claim_telegram_graduation: {
         Args: { p_network: string }
         Returns: {

@@ -33,3 +33,4 @@
 - Legacy SaucerSwap assistance exports synced pre-v4 HTS information client-side with Davinci Pics guidance; never imply submission success or attempt metadata updates because those tokens lack update keys.
 - BondingProgress uses synced reserves for a display-only HBAR/USD graduation estimate, including the existing fee; never use it to execute trades.
 - Promotions: rules in `src/lib/promotions.ts`; bot payouts (`payouts.server.ts`, `/api/public/jobs/payouts`) send one tx per call, keyed uniquely in `bot_payouts` and never resent when uncertain — nothing may be paid twice.
+- Discord coin announcements use a managed authenticated schedule and one atomic token/channel claim per call; read the exact HTS memo from Hedera, disable mentions, persist confirmations, and never retry uncertain sends to avoid duplicate announcements.
