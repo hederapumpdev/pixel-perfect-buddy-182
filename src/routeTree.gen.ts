@@ -27,6 +27,7 @@ import { Route as ApiPublicDexscreenerPairRouteImport } from './routes/api/publi
 import { Route as ApiPublicImgHashRouteImport } from './routes/api/public/img.$hash'
 import { Route as ApiPublicJobsAutobuyRouteImport } from './routes/api/public/jobs/autobuy'
 import { Route as ApiPublicJobsDailyXRouteImport } from './routes/api/public/jobs/daily-x'
+import { Route as ApiPublicJobsDiscordCoinsRouteImport } from './routes/api/public/jobs/discord-coins'
 import { Route as ApiPublicJobsPayoutsRouteImport } from './routes/api/public/jobs/payouts'
 import { Route as ApiPublicJobsTelegramAppRouteImport } from './routes/api/public/jobs/telegram-app'
 import { Route as ApiPublicJobsTelegramTopRouteImport } from './routes/api/public/jobs/telegram-top'
@@ -126,6 +127,12 @@ const ApiPublicJobsDailyXRoute = ApiPublicJobsDailyXRouteImport.update({
   path: '/api/public/jobs/daily-x',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsDiscordCoinsRoute =
+  ApiPublicJobsDiscordCoinsRouteImport.update({
+    id: '/api/public/jobs/discord-coins',
+    path: '/api/public/jobs/discord-coins',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsPayoutsRoute = ApiPublicJobsPayoutsRouteImport.update({
   id: '/api/public/jobs/payouts',
   path: '/api/public/jobs/payouts',
@@ -169,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
+  '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
@@ -193,6 +201,7 @@ export interface FileRoutesByTo {
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
+  '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
@@ -218,6 +227,7 @@ export interface FileRoutesById {
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
+  '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
     | '/api/public/jobs/daily-x'
+    | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
     | '/api/public/jobs/daily-x'
+    | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
@@ -292,6 +304,7 @@ export interface FileRouteTypes {
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
     | '/api/public/jobs/daily-x'
+    | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
@@ -317,6 +330,7 @@ export interface RootRouteChildren {
   ApiPublicImgHashRoute: typeof ApiPublicImgHashRoute
   ApiPublicJobsAutobuyRoute: typeof ApiPublicJobsAutobuyRoute
   ApiPublicJobsDailyXRoute: typeof ApiPublicJobsDailyXRoute
+  ApiPublicJobsDiscordCoinsRoute: typeof ApiPublicJobsDiscordCoinsRoute
   ApiPublicJobsPayoutsRoute: typeof ApiPublicJobsPayoutsRoute
   ApiPublicJobsTelegramAppRoute: typeof ApiPublicJobsTelegramAppRoute
   ApiPublicJobsTelegramTopRoute: typeof ApiPublicJobsTelegramTopRoute
@@ -451,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsDailyXRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/discord-coins': {
+      id: '/api/public/jobs/discord-coins'
+      path: '/api/public/jobs/discord-coins'
+      fullPath: '/api/public/jobs/discord-coins'
+      preLoaderRoute: typeof ApiPublicJobsDiscordCoinsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/payouts': {
       id: '/api/public/jobs/payouts'
       path: '/api/public/jobs/payouts'
@@ -501,6 +522,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicImgHashRoute: ApiPublicImgHashRoute,
   ApiPublicJobsAutobuyRoute: ApiPublicJobsAutobuyRoute,
   ApiPublicJobsDailyXRoute: ApiPublicJobsDailyXRoute,
+  ApiPublicJobsDiscordCoinsRoute: ApiPublicJobsDiscordCoinsRoute,
   ApiPublicJobsPayoutsRoute: ApiPublicJobsPayoutsRoute,
   ApiPublicJobsTelegramAppRoute: ApiPublicJobsTelegramAppRoute,
   ApiPublicJobsTelegramTopRoute: ApiPublicJobsTelegramTopRoute,
