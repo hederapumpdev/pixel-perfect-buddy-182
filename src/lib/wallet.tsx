@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
+import { connectionDeadline, openWalletPicker, WalletConnectionCancelled } from "./wallet-connection";
 import { deployStep, deployProgressOf, findDeployOnMirror, type DeployProgress, type DeployState } from "./hashpack-deploy";
 import {
   MIRROR_URL,
@@ -157,7 +158,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     initPromise.current = (async () => {
       if (!WALLETCONNECT_PROJECT_ID)
         throw new Error("Wallet connection isn't configured yet (missing WalletConnect project ID).");
-      const { wc, sdk } = await loadLibs();
+      const { wc, sdk } = await connectionDeadline(loadLibs(), 20_000,
+        "WalletConnect couldn't load. Refresh the page and try again.");
       const ledger = NETWORK === "mainnet" ? sdk.LedgerId.MAINNET : sdk.LedgerId.TESTNET;
       const chain = NETWORK === "mainnet" ? wc.HederaChainId.Mainnet : wc.HederaChainId.Testnet;
       const c = new wc.DAppConnector(
@@ -173,7 +175,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         [wc.HederaSessionEvent.ChainChanged, wc.HederaSessionEvent.AccountsChanged],
         [chain],
       );
-      await c.init({ logger: "error" });
+      await connectionDeadline(c.init({ logger: "error" }), 20_000,
+        "WalletConnect couldn't reach the connection service. Check your connection and try again.");
+      // The SDK logs init failures instead of rejecting them. Never cache a
+      // connector that cannot actually generate a pairing request.
+      if (!c.walletConnectClient) throw new Error(
+        "WalletConnect couldn't start. Check your connection and try again.",
+      );
       connector.current = c;
       return c;
     })().catch((e) => {
@@ -223,18 +231,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       .catch(() => {});
   }, [accountId, tick]);
 
+  const connectInFlight = useRef(false);
   const connect = useCallback(async () => {
+    if (connectInFlight.current) return;
+    connectInFlight.current = true;
     setConnecting(true);
     try {
       try {
         const c = await init();
-        await c.openModal();
+        await openWalletPicker(c);
       } catch (e) {
         // A stale WalletConnect pairing makes the relay reject messages
         // ("Failed to publish custom payload"). Clear it and retry once.
         const msg = e instanceof Error ? e.message : String(e);
         if (!/publish|relay|pairing|session|expired|no matching key/i.test(msg)) throw e;
-        await connector.current?.disconnectAll().catch(() => {});
+        const old = connector.current;
+        old?.walletConnectModal.closeModal();
+        if (old) await connectionDeadline(old.disconnectAll(), 3_000, "Connection reset timed out").catch(() => {});
         try {
           Object.keys(localStorage)
             .filter((k) => k.startsWith("wc@2") || k.startsWith("walletconnect"))
@@ -244,12 +257,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         initPromise.current = null;
         toast.message("Resetting the wallet connection, trying again…");
         const c = await init();
-        await c.openModal();
+        await openWalletPicker(c);
       }
       syncAccount();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't connect wallet");
+      if (!(e instanceof WalletConnectionCancelled))
+        toast.error(e instanceof Error ? e.message : "Couldn't connect wallet");
     } finally {
+      connectInFlight.current = false;
       setConnecting(false);
     }
   }, [init, syncAccount]);
