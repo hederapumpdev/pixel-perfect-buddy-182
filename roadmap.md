@@ -1,6 +1,7 @@
 # Roadmap
 - [x] Verify Discord footer visibility on narrow screens and restore it if clipped.
-- [ ] Automatically post all new chain-confirmed coins and their exact token memo in Discord #official-links and #rules, including existing Pepe and HashCat; verify delivery and schedule.
+- [x] Post Pepe and HashCat with exact Hedera memos to #official-links and #rules; all four messages read back from Discord, duplicate invocation sent nothing, unsigned endpoint rejected.
+- [ ] Activate the prepared per-minute Discord coin announcement schedule on the public site — waits for user publishing the new endpoint (currently public URL returns 404).
 - [x] Diagnose real coin creation revert: metadata selector called legacy 0x167 and received empty data; prepare corrected 0x16c bytecode, restore admin deploy form, block paid retries, retain existing contracts, and test v4 launch-buy encoding
 - [x] Record replacement v4 deployment 0.0.10925851 and test its mainnet creation without payment
 - [x] Prepare separate legacy-service v4 artifact and admin deployment with information URL in tokenmemo; local EVM creation/refund/100-byte boundary and referral accounting tests. Automatic SaucerSwap metadata ingestion remains unconfirmed.
