@@ -8,14 +8,19 @@ function mockConnector() {
   const unsubscribe = vi.fn();
   const closeModal = vi.fn();
   let approve = () => {};
+  let sendUri = () => {};
   const connector = {
-    openModal: vi.fn(() => new Promise<void>((resolve) => { approve = resolve; })),
+    connect: vi.fn((onUri: (uri: string) => void) => new Promise<void>((resolve) => {
+      approve = resolve;
+      sendUri = () => onUri("wc:test-pairing");
+    })),
     walletConnectModal: {
+      openModal: vi.fn(async (_options: { uri: string }) => {}),
       subscribeModal: (fn: typeof listener) => { listener = fn; return unsubscribe; },
       closeModal,
     },
   };
-  return { connector, emit: (open: boolean) => listener({ open }), approve: () => approve(), unsubscribe, closeModal };
+  return { connector, uri: () => sendUri(), emit: (open: boolean) => listener({ open }), approve: () => approve(), unsubscribe, closeModal };
 }
 
 describe("wallet connection recovery", () => {
@@ -27,15 +32,16 @@ describe("wallet connection recovery", () => {
     await assertion;
   });
 
-  it("rejects when no picker opens within 15 seconds and cleans up", async () => {
+  it("rejects when no picker opens within 30 seconds after pairing and cleans up", async () => {
     vi.useFakeTimers();
     const mock = mockConnector();
     const assertion = expect(openWalletPicker(mock.connector)).rejects.toThrow("couldn't open");
-    await vi.advanceTimersByTimeAsync(15_000);
+    mock.uri();
+    await vi.advanceTimersByTimeAsync(30_000);
     await assertion;
     expect(mock.unsubscribe).toHaveBeenCalledOnce();
     expect(mock.closeModal).toHaveBeenCalledOnce();
-    expect(mock.connector.openModal).toHaveBeenCalledOnce();
+    expect(mock.connector.connect).toHaveBeenCalledOnce();
   });
 
   it("allows approval after the opening timeout when picker is visible", async () => {
@@ -72,7 +78,7 @@ describe("wallet connection recovery", () => {
   it("preserves a wallet rejection when the SDK closes before rejecting", async () => {
     const mock = mockConnector();
     let rejectApproval = (_error: Error) => {};
-    mock.connector.openModal.mockImplementation(() => new Promise<void>((_resolve, reject) => {
+    mock.connector.connect.mockImplementation(() => new Promise<void>((_resolve, reject) => {
       rejectApproval = reject;
     }));
     const result = openWalletPicker(mock.connector);
@@ -89,6 +95,29 @@ describe("wallet connection recovery", () => {
     mock.emit(true);
     await vi.advanceTimersByTimeAsync(180_000);
     await assertion;
-    expect(mock.connector.openModal).toHaveBeenCalledOnce();
+    expect(mock.connector.connect).toHaveBeenCalledOnce();
+  });
+
+  it("allows a new pairing to take longer than 15 seconds", async () => {
+    vi.useFakeTimers();
+    const mock = mockConnector();
+    const result = openWalletPicker(mock.connector);
+    await vi.advanceTimersByTimeAsync(25_000);
+    mock.uri();
+    expect(mock.connector.walletConnectModal.openModal).toHaveBeenCalledWith({ uri: "wc:test-pairing" });
+    mock.emit(true);
+    await vi.advanceTimersByTimeAsync(35_000);
+    mock.approve();
+    await expect(result).resolves.toBeUndefined();
+  });
+
+  it("stops a stalled pairing after 45 seconds and ignores its late URI", async () => {
+    vi.useFakeTimers();
+    const mock = mockConnector();
+    const assertion = expect(openWalletPicker(mock.connector)).rejects.toThrow("pairing");
+    await vi.advanceTimersByTimeAsync(45_000);
+    await assertion;
+    mock.uri();
+    expect(mock.connector.walletConnectModal.openModal).not.toHaveBeenCalled();
   });
 });
