@@ -193,10 +193,12 @@ export async function spotlightCoin(now = new Date()) {
   const pool = (coins ?? []).filter((c) => !isOfficial(c.creator));
   if (!pool.length) return { step: "no coins to spotlight" };
   const coin = pool[Math.floor(Math.random() * pool.length)];
+  if (!coin) return { step: "no coins to spotlight" };
+  const picked: PromoCoin = { address: coin.address, name: coin.name ?? "", symbol: coin.symbol ?? "" };
   return sendNext(
     db,
     spotlightSlot(now),
-    spotlightMessages(coin as PromoCoin, coin.trade_count, Number(coin.volume_hbar)),
+    spotlightMessages(picked, coin.trade_count ?? 0, Number(coin.volume_hbar ?? 0)),
     "app",
     3,
   );
