@@ -166,6 +166,36 @@ export type Database = {
           },
         ]
       }
+      promo_posts: {
+        Row: {
+          channel: string
+          created_at: string
+          external_id: string | null
+          last_error: string | null
+          slot: string
+          status: string
+          text: string | null
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          external_id?: string | null
+          last_error?: string | null
+          slot: string
+          status?: string
+          text?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          external_id?: string | null
+          last_error?: string | null
+          slot?: string
+          status?: string
+          text?: string | null
+        }
+        Relationships: []
+      }
       staff_members: {
         Row: {
           account_id: string | null
