@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Separate first-time WalletConnect pairing from picker loading; nine regression tests pass, fresh mobile visitor opens/closes/reopens HashPack picker. Reported iPhone connection still requires user's device approval.
 - [x] Diagnose WalletConnect failure from screen recording — picker/HashPack open but SDK closure before approval resolution was treated as cancellation. Regression tests reproduce this; defer dismissal until approval settles. Real HashPack approval still requires user's device.
 - [x] Add estimated USD trading profit/loss per recent wallet in Admin → Users; trading fees included, current curve valuation, unavailable unpriced positions; nine tests passed and real PIN-unlocked results verified on mobile without overflow.
 - [x] Prevent wallet connection hanging without a popup: bounded setup/opening and dismissal cleanup; five tests passed; fresh browser with no saved session showed the picker on phone-sized view, closing and reopening succeeded. Actual HashPack approval and the reported phone's first connection still require user's device.
