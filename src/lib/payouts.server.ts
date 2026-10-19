@@ -2,7 +2,7 @@
 // One transaction per call; each payout has a unique id so nothing is ever paid twice.
 import { MIRROR_URL, NETWORK, PUMP_CONTRACTS } from "./hedera-config";
 import { encodePump, encodePumpV2, isV2 } from "./curve";
-import { botWallet } from "./bot.server";
+import { botFee, botWallet } from "./bot.server";
 import {
   CONTEST_PRIZE_HBAR,
   FREE_COIN_LIMIT,
@@ -103,7 +103,7 @@ export async function pay(db: any, w: ReturnType<typeof botWallet>, row: { id: s
   const { error } = await db.from("bot_payouts").insert({ ...row, hbar_amount: Number(tinybars) / 1e8, status: "pending" });
   if (error) return { step: "claimed elsewhere" };
   try {
-    const tx = await w.sendTransaction({ to: row.recipient, value: tinybars * WEI, gasLimit: 50_000n });
+    const tx = await w.sendTransaction({ to: row.recipient, value: tinybars * WEI, gasLimit: 50_000n, ...(await botFee(w)) });
     await db.from("bot_payouts").update({ status: "sent", tx_hash: tx.hash }).eq("id", row.id);
     return { step: "sent", id: row.id };
   } catch (e) {

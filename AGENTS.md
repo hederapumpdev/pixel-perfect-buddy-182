@@ -9,7 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Subdirectories have their own `AGENTS.md` (e.g. `contracts/`); read it before changing files there.
+- Subdirectories have their own `AGENTS.md` (`contracts/`, `src/lib/`); read it before changing files there.
 - Home-screen support is manifest-only with brand icons; offline workers require explicit user request to avoid stale previews.
 - Network, contract IDs and WalletConnect ID live in `src/lib/hedera-config.ts` for centralized configuration.
 - Failed v4 deployments stay indexed/tradable. Legacy replacement has a separate ID/artifact; creation requires verified mainnet creation to avoid paid retries. Admin targets the pending legacy artifact.
@@ -23,12 +23,9 @@
 - Pin `protobufjs` >=8.6.6 at the root: `@hiero-ledger/proto` (via hedera-wallet-connect) needs `Reader.tag()`; older 8.0.0 breaks wallet transactions with "e.tag is not a function".
 - Wallet transactions are frozen for the multi-node list `WALLET_NODE_IDS` in `hedera-config.ts`, never a single node — HashPack rejects unknown nodes and fails outright when its only node is busy.
 - Coins carry a `contract` column; every trade/quote/claim path must branch on it via `isV2`/`tokenUnit` in `src/lib/curve.ts` (v1: 18-dec ERC20 in-contract, v2: 8-dec HTS with associate/allowance steps) — never assume one contract or one decimal count.
-- Auto-buy bot (`src/lib/bot.server.ts`, key derived from BOT_SEED) runs one transaction step per scheduled call to `/api/public/jobs/autobuy`, tracked in `bot_buys` (token unique) — scheduled requests are short and a coin must never be bought twice. The same bot wallet creates max 4 official coins/day (`official-coins.server.ts`, `official_coins` table, Official badge) themed on DexScreener trending.
-- Bot buys use `encodeBotBuy` for contract-specific referral arguments; official launches persist a bundled original mascot hash before submission so chain-synced logos cannot be missing. Authenticated replacement calls bypass timing, never uniqueness or daily limits.
 - All scheduled social posting (daily X, Telegram top-10/app/graduation, Discord new-coins, and `promo.server.ts` contest/weekly/graduation/spotlight/Discord-mirror) uses managed authenticated schedules, unique database slot/lease claims and one external send per call; uncertain sends are marked and never retried (X has no idempotency key). Images are bundled branded assets uploaded through the gateway; Discord disables mentions and reads the exact HTS memo from Hedera.
 - Profiles use useProfiles for alias identity; HederaAddress resolves display IDs only, preserving chain/database addresses.
 - The sitemap uses required route-level staticData.sitemap decisions and paginated public-key token reads; exclude private surfaces and omit non-authoritative lastmod dates.
 - Referral links: ?ref=<wallet> captured once into localStorage (src/lib/referral.ts, first referrer wins) and sent with every v4 trade; profile shows the Referrals block only when PUMP_CONTRACT_V4_ID is set.
 - Legacy SaucerSwap assistance exports synced pre-v4 HTS information client-side with Davinci Pics guidance; never imply submission success or attempt metadata updates because those tokens lack update keys.
 - BondingProgress uses synced reserves for a display-only HBAR/USD graduation estimate, including the existing fee; never use it to execute trades.
-- Bot payouts (contest/refunds in `promotions.ts`, staff in `staff.ts`) go through `pay()` in `payouts.server.ts`: one tx per call, unique `bot_payouts` id, never resent when uncertain. Staff claims need no signature since funds only go to the registered wallet.
