@@ -32,7 +32,9 @@ import { Route as ApiPublicJobsDailyXRouteImport } from './routes/api/public/job
 import { Route as ApiPublicJobsDiscordCoinsRouteImport } from './routes/api/public/jobs/discord-coins'
 import { Route as ApiPublicJobsDiscordDailyRouteImport } from './routes/api/public/jobs/discord-daily'
 import { Route as ApiPublicJobsGraduationPromoRouteImport } from './routes/api/public/jobs/graduation-promo'
+import { Route as ApiPublicJobsOfficialCoinRouteImport } from './routes/api/public/jobs/official-coin'
 import { Route as ApiPublicJobsPayoutsRouteImport } from './routes/api/public/jobs/payouts'
+import { Route as ApiPublicJobsSpotlightRouteImport } from './routes/api/public/jobs/spotlight'
 import { Route as ApiPublicJobsTelegramAppRouteImport } from './routes/api/public/jobs/telegram-app'
 import { Route as ApiPublicJobsTelegramTopRouteImport } from './routes/api/public/jobs/telegram-top'
 import { Route as ApiPublicJobsWeeklySummaryRouteImport } from './routes/api/public/jobs/weekly-summary'
@@ -161,9 +163,20 @@ const ApiPublicJobsGraduationPromoRoute =
     path: '/api/public/jobs/graduation-promo',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsOfficialCoinRoute =
+  ApiPublicJobsOfficialCoinRouteImport.update({
+    id: '/api/public/jobs/official-coin',
+    path: '/api/public/jobs/official-coin',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsPayoutsRoute = ApiPublicJobsPayoutsRouteImport.update({
   id: '/api/public/jobs/payouts',
   path: '/api/public/jobs/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicJobsSpotlightRoute = ApiPublicJobsSpotlightRouteImport.update({
+  id: '/api/public/jobs/spotlight',
+  path: '/api/public/jobs/spotlight',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicJobsTelegramAppRoute =
@@ -215,7 +228,9 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
+  '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
@@ -245,7 +260,9 @@ export interface FileRoutesByTo {
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
+  '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
@@ -276,7 +293,9 @@ export interface FileRoutesById {
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
+  '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
@@ -308,7 +327,9 @@ export interface FileRouteTypes {
     | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/discord-daily'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
+    | '/api/public/jobs/spotlight'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
     | '/api/public/jobs/weekly-summary'
@@ -338,7 +359,9 @@ export interface FileRouteTypes {
     | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/discord-daily'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
+    | '/api/public/jobs/spotlight'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
     | '/api/public/jobs/weekly-summary'
@@ -368,7 +391,9 @@ export interface FileRouteTypes {
     | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/discord-daily'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
+    | '/api/public/jobs/spotlight'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
     | '/api/public/jobs/weekly-summary'
@@ -399,7 +424,9 @@ export interface RootRouteChildren {
   ApiPublicJobsDiscordCoinsRoute: typeof ApiPublicJobsDiscordCoinsRoute
   ApiPublicJobsDiscordDailyRoute: typeof ApiPublicJobsDiscordDailyRoute
   ApiPublicJobsGraduationPromoRoute: typeof ApiPublicJobsGraduationPromoRoute
+  ApiPublicJobsOfficialCoinRoute: typeof ApiPublicJobsOfficialCoinRoute
   ApiPublicJobsPayoutsRoute: typeof ApiPublicJobsPayoutsRoute
+  ApiPublicJobsSpotlightRoute: typeof ApiPublicJobsSpotlightRoute
   ApiPublicJobsTelegramAppRoute: typeof ApiPublicJobsTelegramAppRoute
   ApiPublicJobsTelegramTopRoute: typeof ApiPublicJobsTelegramTopRoute
   ApiPublicJobsWeeklySummaryRoute: typeof ApiPublicJobsWeeklySummaryRoute
@@ -569,11 +596,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsGraduationPromoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/official-coin': {
+      id: '/api/public/jobs/official-coin'
+      path: '/api/public/jobs/official-coin'
+      fullPath: '/api/public/jobs/official-coin'
+      preLoaderRoute: typeof ApiPublicJobsOfficialCoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/payouts': {
       id: '/api/public/jobs/payouts'
       path: '/api/public/jobs/payouts'
       fullPath: '/api/public/jobs/payouts'
       preLoaderRoute: typeof ApiPublicJobsPayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/spotlight': {
+      id: '/api/public/jobs/spotlight'
+      path: '/api/public/jobs/spotlight'
+      fullPath: '/api/public/jobs/spotlight'
+      preLoaderRoute: typeof ApiPublicJobsSpotlightRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/jobs/telegram-app': {
@@ -631,7 +672,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsDiscordCoinsRoute: ApiPublicJobsDiscordCoinsRoute,
   ApiPublicJobsDiscordDailyRoute: ApiPublicJobsDiscordDailyRoute,
   ApiPublicJobsGraduationPromoRoute: ApiPublicJobsGraduationPromoRoute,
+  ApiPublicJobsOfficialCoinRoute: ApiPublicJobsOfficialCoinRoute,
   ApiPublicJobsPayoutsRoute: ApiPublicJobsPayoutsRoute,
+  ApiPublicJobsSpotlightRoute: ApiPublicJobsSpotlightRoute,
   ApiPublicJobsTelegramAppRoute: ApiPublicJobsTelegramAppRoute,
   ApiPublicJobsTelegramTopRoute: ApiPublicJobsTelegramTopRoute,
   ApiPublicJobsWeeklySummaryRoute: ApiPublicJobsWeeklySummaryRoute,

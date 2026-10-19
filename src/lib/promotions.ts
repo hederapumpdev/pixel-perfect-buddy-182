@@ -1,8 +1,11 @@
 // Browser-safe promotion rules: official coins, weekly launch contest, free first coins.
 import { FEE_WALLET_EVM } from "./hedera-config";
 
+/** The platform bot wallet; coins it creates are labelled "Official". */
+export const BOT_WALLET_EVM = "0xd14adf40256c7fdab669ec2a5eee25afaa755392";
+
 /** Creators whose coins are labelled "Official" (the team's own wallets). */
-export const OFFICIAL_CREATORS: string[] = [FEE_WALLET_EVM];
+export const OFFICIAL_CREATORS: string[] = [FEE_WALLET_EVM, BOT_WALLET_EVM];
 export const isOfficial = (creator: string | null | undefined) =>
   !!creator && OFFICIAL_CREATORS.some((c) => c.toLowerCase() === creator.toLowerCase());
 

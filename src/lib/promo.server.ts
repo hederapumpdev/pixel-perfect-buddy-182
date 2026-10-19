@@ -2,7 +2,7 @@
 // Every post is claimed in promo_posts before sending; one external send per call;
 // uncertain sends are marked "unknown" and never retried automatically.
 import { NETWORK } from "./hedera-config";
-import { CONTEST_PRIZE_HBAR, contestLeaderboard, weekKey, weekStart } from "./promotions";
+import { CONTEST_PRIZE_HBAR, contestLeaderboard, isOfficial, weekKey, weekStart } from "./promotions";
 import {
   contestMessages,
   contestSlot,
@@ -10,6 +10,8 @@ import {
   graduationDiscordMessage,
   graduationSlot,
   graduationXMessage,
+  spotlightMessages,
+  spotlightSlot,
   weeklyMessages,
   weeklySlot,
   type PromoCoin,
@@ -174,6 +176,32 @@ export async function promoteGraduation() {
     }
   }
   return { step: "up to date" };
+}
+
+/** Every six hours: highlights a random community coin (never an official one) on all channels. */
+export async function spotlightCoin(now = new Date()) {
+  const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+  const { data: coins, error } = await db
+    .from("tokens")
+    .select("address,name,symbol,creator,trade_count,volume_hbar")
+    .eq("network", NETWORK)
+    .eq("graduated", false)
+    .gt("trade_count", 0)
+    .order("volume_hbar", { ascending: false })
+    .limit(20);
+  if (error) throw error;
+  const pool = (coins ?? []).filter((c) => !isOfficial(c.creator));
+  if (!pool.length) return { step: "no coins to spotlight" };
+  const coin = pool[Math.floor(Math.random() * pool.length)];
+  if (!coin) return { step: "no coins to spotlight" };
+  const picked: PromoCoin = { address: coin.address, name: coin.name ?? "", symbol: coin.symbol ?? "" };
+  return sendNext(
+    db,
+    spotlightSlot(now),
+    spotlightMessages(picked, coin.trade_count ?? 0, Number(coin.volume_hbar ?? 0)),
+    "app",
+    3,
+  );
 }
 
 /** Sunday: posts the past 7 days of launchpad activity to all three channels. */

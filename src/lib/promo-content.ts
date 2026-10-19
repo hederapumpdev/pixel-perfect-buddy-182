@@ -16,6 +16,17 @@ export const contestSlot = (weekKey: string) => `contest:${weekKey}`;
 export const weeklySlot = (day: string) => `weekly:${day}`;
 export const graduationSlot = (token: string) => `graduation:${token.toLowerCase()}`;
 export const discordDailySlot = (xSlot: string) => `x:${xSlot}`;
+/** One spotlight per six-hour window: spotlight:YYYY-MM-DD-(0..3). */
+export const spotlightSlot = (d: Date) => `spotlight:${d.toISOString().slice(0, 10)}-${Math.floor(d.getUTCHours() / 6)}`;
+
+export function spotlightMessages(coin: PromoCoin, trades: number, volumeHbar: number) {
+  const name = coin.name.slice(0, 32);
+  const symbol = coin.symbol.slice(0, 12);
+  const x = `🔦 Coin spotlight: ${name} ($${symbol})\n\n${num(trades)} trades · ${num(volumeHbar)} HBAR volume so far.\n\nTake a look:\n${coinUrl(coin.address)}\n\n#Hedera #HederaPump`;
+  const telegram = `<b>🔦 Coin spotlight</b>\n\n<a href="${coinUrl(coin.address)}">${escapeHtml(name)} ($${escapeHtml(symbol)})</a> — <b>${num(trades)}</b> trades, <b>${num(volumeHbar)} HBAR</b> volume so far.\n\n${RISK}`;
+  const discord = `🔦 **Coin spotlight**\n\n**${escapeMd(name)} ($${escapeMd(symbol)})** — **${num(trades)}** trades, **${num(volumeHbar)} HBAR** volume so far.\n\nCoin: ${coinUrl(coin.address)}\n\n${RISK}`;
+  return { x, telegram, discord };
+}
 
 export function contestMessages(coin: PromoCoin, volumeHbar: number, prizeHbar: number) {
   const name = coin.name.slice(0, 32);

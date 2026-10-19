@@ -169,6 +169,13 @@
       "when": 1792423578597,
       "tag": "0023_admin_new_users_today",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792426205315,
+      "tag": "0024_create_official_coins",
+      "breakpoints": true
     }
   ]
 }
