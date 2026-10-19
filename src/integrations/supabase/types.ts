@@ -166,6 +166,36 @@ export type Database = {
           },
         ]
       }
+      official_coins: {
+        Row: {
+          created_at: string
+          id: string
+          last_error: string | null
+          name: string
+          status: string
+          symbol: string
+          tx_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          last_error?: string | null
+          name: string
+          status?: string
+          symbol: string
+          tx_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          name?: string
+          status?: string
+          symbol?: string
+          tx_hash?: string | null
+        }
+        Relationships: []
+      }
       promo_posts: {
         Row: {
           channel: string
