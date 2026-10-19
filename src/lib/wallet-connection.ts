@@ -22,6 +22,7 @@ export async function openWalletPicker(connector: ModalConnector): Promise<void>
   let unsubscribe = () => {};
   let openingTimer: ReturnType<typeof setTimeout> | undefined;
   let approvalTimer: ReturnType<typeof setTimeout> | undefined;
+  let dismissalTimer: ReturnType<typeof setTimeout> | undefined;
   try {
     await new Promise<void>((resolve, reject) => {
       openingTimer = setTimeout(() => reject(new Error(
@@ -34,8 +35,15 @@ export async function openWalletPicker(connector: ModalConnector): Promise<void>
         if (state.open) {
           opened = true;
           clearTimeout(openingTimer);
+          clearTimeout(dismissalTimer);
         } else if (opened) {
-          reject(new WalletConnectionCancelled("Wallet connection cancelled"));
+          // The SDK closes in finally BEFORE its approval promise settles.
+          // Only an unresolved close is a user dismissal; otherwise a successful
+          // approval looks cancelled and the provider never reads the signer.
+          clearTimeout(dismissalTimer);
+          dismissalTimer = setTimeout(() => {
+            reject(new WalletConnectionCancelled("Wallet connection cancelled"));
+          }, 0);
         }
       });
       connector.openModal().then(() => resolve(), reject);
@@ -43,6 +51,7 @@ export async function openWalletPicker(connector: ModalConnector): Promise<void>
   } finally {
     clearTimeout(openingTimer);
     clearTimeout(approvalTimer);
+    clearTimeout(dismissalTimer);
     unsubscribe();
     connector.walletConnectModal.closeModal();
   }

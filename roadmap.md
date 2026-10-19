@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Diagnose reported WalletConnect failure — user confirms tapping WalletConnect does nothing, without any error; investigate initial tap, restored sessions, setup delays and silent guards, then verify the relevant fix. Completed HashPack approval still requires the user's device.
+- [x] Diagnose WalletConnect failure from screen recording — picker/HashPack open but SDK closure before approval resolution was treated as cancellation. Regression tests reproduce this; defer dismissal until approval settles. Real HashPack approval still requires user's device.
 - [x] Add estimated USD trading profit/loss per recent wallet in Admin → Users; trading fees included, current curve valuation, unavailable unpriced positions; nine tests passed and real PIN-unlocked results verified on mobile without overflow.
 - [x] Prevent wallet connection hanging without a popup: bounded setup/opening and dismissal cleanup; five tests passed; fresh browser with no saved session showed the picker on phone-sized view, closing and reopening succeeded. Actual HashPack approval and the reported phone's first connection still require user's device.
 - [x] Add manifest-only phone home-screen support with HederaPump icons and Apple head tags; App Store/Google Play packaging is handled separately by the user.
