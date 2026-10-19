@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Investigate Aubry's reported identical connection-window error for both buttons from supplied screenshot; distinguish browser/device issue from WalletConnect timeout, reproduce before changing code.
+- [ ] Diagnose Aubry's device-specific connection-window error: screenshot matches WalletConnect picker timeout, not a staff restriction; no same error reproduced in fresh preview checks. Waits for phone OS/browser versions and a fresh separate-button attempt; no speculative code change.
 - [x] Prepare evidence-based HederaPump promotion recommendations; research and ranked plan saved. Prioritize Aubry connection diagnosis and factual risk/listing copy before outreach. No new external posts or spending authorized.
 - [x] Check Aubry's staff membership vs sign-in: WalletConnect/email connection does not read staff; staff balance is a separate profile query. Asked which connection button and stopping point; actual device failure remains unverified.
 - [x] Separate first-time WalletConnect pairing from picker loading; nine regression tests pass, fresh mobile visitor opens/closes/reopens HashPack picker. Reported iPhone connection still requires user's device approval.
