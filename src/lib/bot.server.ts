@@ -12,7 +12,7 @@ import {
   NETWORK,
   PUMP_CONTRACTS,
 } from "./hedera-config";
-import { encodePump, encodePumpV2, isV2 } from "./curve";
+import { encodeBotBuy, isV2 } from "./curve";
 
 const RESERVE_TINYBARS = 5n * 100_000_000n; // always keep 5 HBAR for gas
 const WEI = 10_000_000_000n; // 1 tinybar = 1e10 weibar on JSON-RPC
@@ -131,7 +131,7 @@ async function sendBuy(db: any, w: ethers.Wallet, token: string, usd: number) {
   try {
     const tx = await w.sendTransaction({
       to: idToEvm(t.contract),
-      data: (v2 ? encodePumpV2 : encodePump)("buy", [token, 0n]),
+      data: encodeBotBuy(t.contract, token),
       gasLimit: BigInt(v2 ? GAS_V2.buy : GAS.buy),
       value: amount * WEI,
     });
