@@ -73,5 +73,10 @@ export const encodePumpV2 = (functionName: string, args: unknown[] = []) =>
   encodeFunctionData({ abi: artifactV2.pumpAbi as Abi, functionName, args } as never);
 export const encodePumpV4 = (functionName: string, args: unknown[] = []) =>
   encodeFunctionData({ abi: artifactV4.pumpAbi as Abi, functionName, args } as never);
+/** Bot trades never claim an organic referrer; v4 still requires the zero-address argument. */
+export const encodeBotBuy = (contract: string, token: string) =>
+  isV4(contract)
+    ? encodePumpV4("buy", [token, 0n, "0x0000000000000000000000000000000000000000"])
+    : (isV2(contract) ? encodePumpV2 : encodePump)("buy", [token, 0n]);
 export const encodeToken = (functionName: string, args: unknown[] = []) =>
   encodeFunctionData({ abi: artifact.tokenAbi as Abi, functionName, args } as never);
