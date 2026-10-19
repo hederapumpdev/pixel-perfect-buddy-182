@@ -32,3 +32,7 @@
 - Legacy SaucerSwap assistance exports synced pre-v4 HTS information client-side with Davinci Pics guidance; never imply submission success or attempt metadata updates because those tokens lack update keys.
 - BondingProgress uses synced reserves for a display-only HBAR/USD graduation estimate, including the existing fee; never use it to execute trades.
 - Bot payouts (contest/refunds in `promotions.ts`, staff in `staff.ts`) go through `pay()` in `payouts.server.ts`: one tx per call, unique `bot_payouts` id, never resent when uncertain. Staff claims need no signature since funds only go to the registered wallet.
+
+- Bot transactions (buys, payouts, official launches) use `botFee()` from `bot.server.ts` (legacy type with a floored gas price) — Hedera rejects ethers estimates below its minimum gas price.
+- Discord routing lives in `promo.server.ts`: coin-specific posts go to the new-coins channel, platform news to announcements — keeps each channel on-topic.
+- Official coins generate their own logo via `coin-image.server.ts` before claiming/paying (bundled mascot fallback) so no coin launches without an image and an aborted request costs nothing.
