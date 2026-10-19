@@ -138,6 +138,7 @@ export async function mirrorDailyToDiscord() {
   const { data: posts, error } = await db.from("x_daily_posts").select("slot,text,created_at").eq("status", "sent").order("created_at").limit(50);
   if (error) throw error;
   for (const post of posts ?? []) {
+    if (!post.text) continue;
     const slot = discordDailySlot(post.slot);
     const { data: existing, error: readError } = await db.from("promo_posts").select("status").eq("slot", slot).eq("channel", "discord").maybeSingle();
     if (readError) throw readError;
