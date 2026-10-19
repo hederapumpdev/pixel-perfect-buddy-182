@@ -35,3 +35,4 @@
 - BondingProgress uses synced reserves for a display-only HBAR/USD graduation estimate, including the existing fee; never use it to execute trades.
 - Discord coin announcements use a managed authenticated schedule and one atomic token/channel claim per call; read the exact HTS memo from Hedera, disable mentions, persist confirmations, and never retry uncertain sends to avoid duplicate announcements.
 - Bot payouts (contest/refunds in `promotions.ts`, staff in `staff.ts`) go through `pay()` in `payouts.server.ts`: one tx per call, unique `bot_payouts` id, never resent when uncertain. Staff claims need no signature since funds only go to the registered wallet.
+- Automatic promotion posts (Monday contest winner, Sunday weekly summary, graduations on X/Discord, daily X mirrored to Discord #announcements) go through `promo.server.ts`: unique `promo_posts` slot+channel claims, one external send per scheduled call, uncertain sends marked `unknown` and never retried.
