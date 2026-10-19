@@ -119,6 +119,7 @@ export async function announceContest(now = new Date()) {
     return { step: "no winner" };
   }
   if (prize.status !== "done") return { step: "prize not confirmed" };
+  if (!prize.token) return { step: "prize without token" };
   const { data: coin, error: coinError } = await db.from("tokens").select("address,name,symbol,creator").eq("address", prize.token).eq("network", NETWORK).single();
   if (coinError) throw coinError;
   const trades: { token: string; hbar_amount: number; created_at: string }[] = [];
