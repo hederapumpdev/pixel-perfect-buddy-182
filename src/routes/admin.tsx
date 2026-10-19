@@ -579,10 +579,11 @@ function UsersOverview() {
       <p className="mt-1 text-sm text-muted-foreground">
         A wallet counts here as soon as it has traded — the site keeps no account list of its own.
       </p>
-      <div className="mt-3 grid gap-3 sm:grid-cols-4">
+      <div className="mt-3 grid gap-3 sm:grid-cols-5">
         <Stat label="Wallets" value={num(q.data?.wallets)} />
         <Stat label="Active today" value={num(q.data?.wallets_1d)} />
         <Stat label="Active 7 days" value={num(q.data?.wallets_7d)} />
+        <Stat label="New today" value={num(q.data?.wallets_new_1d)} />
         <Stat label="Profiles" value={num(q.data?.profiles)} />
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-4">

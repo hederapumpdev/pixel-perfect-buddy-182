@@ -2,6 +2,7 @@ export type UserStats = {
   wallets: number;
   wallets_1d: number;
   wallets_7d: number;
+  wallets_new_1d: number;
   creators: number;
   profiles: number;
   comment_authors: number;
