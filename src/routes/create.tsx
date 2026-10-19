@@ -107,7 +107,7 @@ function Create() {
   const [busy, setBusy] = useState<string | null>(null);
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) =>
     setF({ ...f, [k]: e.target.value });
-  const ok = f.name.trim().length >= 2 && /^[A-Z0-9]{2,10}$/.test(f.ticker);
+  const ok = f.name.trim().length >= 2 && /^[A-Z0-9]{2,10}$/.test(f.ticker) && !!file;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -115,6 +115,7 @@ function Create() {
     const contractId = LATEST_CONTRACT_ID;
     const accountId = w.accountId;
     if (!accountId) return w.connect();
+    if (!file) return toast.error("Add an image for your coin first.");
     try {
       let image: string | undefined;
       if (file) {
@@ -241,10 +242,11 @@ function Create() {
               rows={8}
             />
           </Field>
-          <Field label="Image (any size, auto-cropped to a square)">
+          <Field label="Image (required — any size, auto-cropped to a square)">
             <Input
               type="file"
               accept="image/png,image/jpeg,image/webp,image/gif"
+              required
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
           </Field>

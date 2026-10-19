@@ -3,9 +3,10 @@
 // the bot wallet is the creator, so every coin shows the "Official" badge.
 import { GAS_V2, LATEST_CONTRACT_ID, MIRROR_URL, NETWORK } from "./hedera-config";
 import { encodePumpV2, encodePumpV4, isV4 } from "./curve";
-import { botWallet } from "./bot.server";
+import { botFee, botWallet } from "./bot.server";
 import { pickTrending, sanitizeTrending, type TrendingCandidate } from "./trending";
 import { officialIceCatImage } from "./official-ice-cat-image";
+import { generateCoinLogo } from "./coin-image.server";
 
 const DAILY_CAP = 4;
 const MIN_GAP_MS = 2 * 3_600_000;
@@ -69,12 +70,21 @@ export async function createOfficialCoin(now = new Date(), replacement = false) 
   const pick = pickTrending(candidates, taken);
   if (!pick) return { step: "nothing new to theme on" };
 
-  // Persist the original team mascot before paying; the chain event carries its hash.
-  const bytes = Uint8Array.from(atob(officialIceCatImage), (c) => c.charCodeAt(0));
+  const w = botWallet();
+  const creator = w.address.toLowerCase();
+  if (!w.provider) throw new Error("Bot provider unavailable");
+  const fee = await creationFee(LATEST_CONTRACT_ID);
+  if ((await w.provider.getBalance(w.address)) / WEI < fee + HTS_CREATE_BUDGET + RESERVE_TINYBARS)
+    return { step: "low balance" }; // checked before generating an image, so nothing is wasted
+
+  // Every official coin gets its own original logo (bundled mascot as fallback), stored before
+  // paying; the chain event carries its hash so the synced coin always has an image.
+  const data = (await generateCoinLogo(pick.name, pick.symbol)) ?? officialIceCatImage;
+  const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   const image = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
   const { error: imageError } = await db.from("token_images").upsert(
-    { hash: image, mime: "image/jpeg", data: officialIceCatImage },
+    { hash: image, mime: "image/jpeg", data },
     { onConflict: "hash", ignoreDuplicates: true },
   );
   if (imageError) throw imageError;
@@ -83,23 +93,13 @@ export async function createOfficialCoin(now = new Date(), replacement = false) 
   const { error: claimError } = await db.from("official_coins").insert({ id, name: pick.name, symbol: pick.symbol });
   if (claimError) return { step: claimError.code === "23505" ? "claimed elsewhere" : "claim failed" };
 
-  const w = botWallet();
-  const creator = w.address.toLowerCase();
   try {
-    const fee = await creationFee(LATEST_CONTRACT_ID);
-    if (!w.provider) throw new Error("Bot provider unavailable");
-    const bal = (await w.provider.getBalance(w.address)) / WEI;
-    if (bal < fee + HTS_CREATE_BUDGET + RESERVE_TINYBARS) {
-      // Free the claim so it is retried once the wallet is topped up.
-      await db.from("official_coins").delete().eq("id", id);
-      return { step: "low balance" };
-    }
     const { count } = await db.from("tokens").select("address", { count: "exact", head: true }).ilike("creator", creator);
     const metadataUrl = `https://hederapump.dev/api/public/token-meta/${creator}/${count ?? 0}`;
     const meta = JSON.stringify({
       description: replacement
         ? "Official HederaPump replacement for our image-less CATONICE test launch. Original team mascot, inspired by cat memes trending on Solana; not affiliated with other tokens."
-        : `Official HederaPump coin inspired by $${pick.symbol}, trending on ${pick.chain}. Original team mascot; not affiliated with the original token.`,
+        : `Official HederaPump coin inspired by $${pick.symbol}, trending on ${pick.chain}. Original artwork; not affiliated with the original token.`,
       image,
       website: "https://hederapump.dev",
     });
@@ -111,6 +111,7 @@ export async function createOfficialCoin(now = new Date(), replacement = false) 
       data: calldata,
       gasLimit: BigInt(GAS_V2.create),
       value: (fee + HTS_CREATE_BUDGET) * WEI,
+      ...(await botFee(w)),
     });
     await db.from("official_coins").update({ status: "sent", tx_hash: tx.hash }).eq("id", id);
     return { step: "creation sent", symbol: pick.symbol };

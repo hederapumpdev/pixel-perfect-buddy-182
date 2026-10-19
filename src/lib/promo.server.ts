@@ -20,7 +20,9 @@ import { xAuthorization } from "./x-oauth.server";
 import { TelegramError, telegram } from "./telegram.server";
 import { telegramImage } from "./telegram-images.server";
 
-const DISCORD_ANNOUNCEMENTS_CHANNEL = "1561015919428378665";
+// Discord routing: platform news in #announcements, anything about a specific coin in #new-coins.
+export const DISCORD_ANNOUNCEMENTS_CHANNEL = "1561015919428378665";
+export const DISCORD_NEW_COINS_CHANNEL = "1561344278591045693";
 const TELEGRAM_CHAT = "@hederapump";
 const CHANNELS = ["x", "telegram", "discord"] as const;
 type Channel = (typeof CHANNELS)[number];
@@ -51,11 +53,11 @@ async function sendTelegram(text: string, image: Blob): Promise<string> {
   return String(sent.message_id);
 }
 
-async function sendDiscord(text: string, nonce: string): Promise<string> {
+async function sendDiscord(text: string, nonce: string, channelId: string): Promise<string> {
   const key = process.env["DISCORD_API_KEY"];
   const appKey = process.env["LOVABLE_API_KEY"];
   if (!key || !appKey) throw new PromoSendError("Discord connection is not configured", true);
-  const response = await fetch(`https://connector-gateway.lovable.dev/discord/channels/${DISCORD_ANNOUNCEMENTS_CHANNEL}/messages`, {
+  const response = await fetch(`https://connector-gateway.lovable.dev/discord/channels/${channelId}/messages`, {
     method: "POST",
     headers: { Authorization: `Bearer ${appKey}`, "X-Connection-Api-Key": key, "Content-Type": "application/json" },
     body: JSON.stringify({ content: text, allowed_mentions: { parse: [] }, nonce, enforce_nonce: true }),
@@ -72,7 +74,7 @@ async function sendDiscord(text: string, nonce: string): Promise<string> {
 type Db = any;
 
 /** Posts the first unsettled channel for a slot; one external send per call. */
-async function sendNext(db: Db, slot: string, texts: Partial<Record<Channel, string>>, imageKind: "app" | "graduation", imageIndex = 0) {
+async function sendNext(db: Db, slot: string, texts: Partial<Record<Channel, string>>, imageKind: "app" | "graduation", imageIndex = 0, discordChannel = DISCORD_ANNOUNCEMENTS_CHANNEL) {
   for (const channel of CHANNELS) {
     const text = texts[channel];
     if (!text) continue;
@@ -93,7 +95,7 @@ async function sendNext(db: Db, slot: string, texts: Partial<Record<Channel, str
           ? await sendXText(text)
           : channel === "telegram"
             ? await sendTelegram(text, telegramImage(imageKind, imageIndex))
-            : await sendDiscord(text, slot);
+            : await sendDiscord(text, slot, discordChannel);
       const { error: saved } = await db.from("promo_posts").update({ status: "sent", external_id: id, last_error: null }).eq("slot", slot).eq("channel", channel);
       if (saved) throw saved;
       return { step: `${channel} sent` };
@@ -138,7 +140,7 @@ export async function announceContest(now = new Date()) {
 /** Mirrors each sent daily X post to Discord #announcements, one per call. */
 export async function mirrorDailyToDiscord() {
   const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
-  const { data: posts, error } = await db.from("x_daily_posts").select("slot,text,created_at").eq("status", "sent").order("created_at").limit(50);
+  const { data: posts, error } = await db.from("x_daily_posts").select("slot,text,created_at").eq("status", "sent").gte("created_at", new Date(Date.now() - 12 * 3_600_000).toISOString()).order("created_at").limit(50);
   if (error) throw error;
   for (const post of posts ?? []) {
     if (!post.text) continue;
@@ -172,7 +174,7 @@ export async function promoteGraduation() {
       if (coinError) throw coinError;
       if (!coin.graduated) return { step: "graduation not confirmed" };
       const text = channel === "x" ? graduationXMessage(coin as PromoCoin) : graduationDiscordMessage(coin as PromoCoin);
-      return sendNext(db, slot, { [channel]: text }, "graduation");
+      return sendNext(db, slot, { [channel]: text }, "graduation", 0, DISCORD_NEW_COINS_CHANNEL);
     }
   }
   return { step: "up to date" };
@@ -201,6 +203,7 @@ export async function spotlightCoin(now = new Date()) {
     spotlightMessages(picked, coin.trade_count ?? 0, Number(coin.volume_hbar ?? 0)),
     "app",
     3,
+    DISCORD_NEW_COINS_CHANNEL,
   );
 }
 

@@ -26,6 +26,23 @@ export function botWallet() {
 
 const idToEvm = (id: string) => "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
+/** Hedera's relay rejects gas prices below its minimum; ethers' fee estimate sometimes returns ~0. */
+export const MIN_GAS_PRICE_WEI = 1_100_000_000_000n;
+export function safeGasPrice(reported: bigint | null | undefined): bigint {
+  const withMargin = ((reported ?? 0n) * 12n) / 10n;
+  return withMargin > MIN_GAS_PRICE_WEI ? withMargin : MIN_GAS_PRICE_WEI;
+}
+/** Legacy-type fee fields for bot transactions so a bad estimate never gets the tx rejected. */
+export async function botFee(w: ethers.Wallet) {
+  let reported: bigint | null = null;
+  try {
+    reported = BigInt(await (w.provider as ethers.JsonRpcProvider).send("eth_gasPrice", []));
+  } catch {
+    /* fall back to the minimum */
+  }
+  return { type: 0, gasPrice: safeGasPrice(reported) };
+}
+
 export async function botInfo() {
   const w = botWallet();
   const r = await fetch(`${MIRROR_URL}/api/v1/accounts/${w.address}`);
@@ -98,11 +115,17 @@ export async function runAutobuy() {
   if (error) return { step: "claimed elsewhere" }; // unique token: never bought twice
 
   if (isV2(next.contract)) {
+    // Don't spend gas on associating while there isn't enough for the buy itself.
+    const need = (await usdToTinybars(usd)) + RESERVE_TINYBARS;
+    if ((await w.provider!.getBalance(w.address)) / WEI < need) {
+      await db.from("bot_buys").delete().eq("token", next.address);
+      return { step: "low balance" };
+    }
     // HTS precompile associateToken(account, token)
     const data =
       "0x0914e2e2" + w.address.slice(2).toLowerCase().padStart(64, "0") + next.address.slice(2).padStart(64, "0");
     try {
-      const tx = await w.sendTransaction({ to: "0x0000000000000000000000000000000000000167", data, gasLimit: 800_000n });
+      const tx = await w.sendTransaction({ to: "0x0000000000000000000000000000000000000167", data, gasLimit: 800_000n, ...(await botFee(w)) });
       await db.from("bot_buys").update({ status: "assoc_sent", tx_hash: tx.hash }).eq("token", next.address);
       return { step: "associate sent", token: next.address };
     } catch (e) {
@@ -123,8 +146,10 @@ async function sendBuy(db: any, w: ethers.Wallet, token: string, usd: number) {
   const amount = await usdToTinybars(usd);
   const bal = (await w.provider!.getBalance(w.address)) / WEI;
   if (bal < amount + RESERVE_TINYBARS) {
-    // Leave it pending-free so it is retried once the wallet is topped up.
-    await db.from("bot_buys").delete().eq("token", token);
+    // Nothing sent: an already-associated coin keeps its row and buys once topped up;
+    // a fresh coin is released so it is picked up again.
+    const { data: row } = await db.from("bot_buys").select("status").eq("token", token).maybeSingle();
+    if (row?.status !== "assoc_sent") await db.from("bot_buys").delete().eq("token", token);
     return { step: "low balance" };
   }
   const v2 = isV2(t.contract);
@@ -134,6 +159,7 @@ async function sendBuy(db: any, w: ethers.Wallet, token: string, usd: number) {
       data: encodeBotBuy(t.contract, token),
       gasLimit: BigInt(v2 ? GAS_V2.buy : GAS.buy),
       value: amount * WEI,
+      ...(await botFee(w)),
     });
     await db
       .from("bot_buys")
