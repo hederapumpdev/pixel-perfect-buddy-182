@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Automatic promotion pack: Monday contest-winner announcement on X/Telegram/Discord, daily X posts mirrored to Discord #announcements, graduation alerts on X + Discord, Sunday weekly summary on all three. promo_posts table, promo.server.ts dispatchers, four cron routes and managed schedules live; 99 tests pass. New endpoints work on the live site after the user publishes.
+- [x] Admin: "New today" count (wallets whose first trade is today) in UsersOverview via admin_user_stats wallets_new_1d.
 - [ ] Diagnose Aubry's device-specific connection-window error: screenshot matches WalletConnect picker timeout, not a staff restriction; no same error reproduced in fresh preview checks. Waits for phone OS/browser versions and a fresh separate-button attempt; no speculative code change.
 - [x] Prepare evidence-based HederaPump promotion recommendations; research and ranked plan saved. Prioritize Aubry connection diagnosis and factual risk/listing copy before outreach. No new external posts or spending authorized.
 - [x] Check Aubry's staff membership vs sign-in: WalletConnect/email connection does not read staff; staff balance is a separate profile query. Asked which connection button and stopping point; actual device failure remains unverified.

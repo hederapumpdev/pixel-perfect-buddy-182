@@ -27,11 +27,15 @@ import { Route as ApiPublicDexscreenerLatestBlockRouteImport } from './routes/ap
 import { Route as ApiPublicDexscreenerPairRouteImport } from './routes/api/public/dexscreener/pair'
 import { Route as ApiPublicImgHashRouteImport } from './routes/api/public/img.$hash'
 import { Route as ApiPublicJobsAutobuyRouteImport } from './routes/api/public/jobs/autobuy'
+import { Route as ApiPublicJobsContestAnnounceRouteImport } from './routes/api/public/jobs/contest-announce'
 import { Route as ApiPublicJobsDailyXRouteImport } from './routes/api/public/jobs/daily-x'
 import { Route as ApiPublicJobsDiscordCoinsRouteImport } from './routes/api/public/jobs/discord-coins'
+import { Route as ApiPublicJobsDiscordDailyRouteImport } from './routes/api/public/jobs/discord-daily'
+import { Route as ApiPublicJobsGraduationPromoRouteImport } from './routes/api/public/jobs/graduation-promo'
 import { Route as ApiPublicJobsPayoutsRouteImport } from './routes/api/public/jobs/payouts'
 import { Route as ApiPublicJobsTelegramAppRouteImport } from './routes/api/public/jobs/telegram-app'
 import { Route as ApiPublicJobsTelegramTopRouteImport } from './routes/api/public/jobs/telegram-top'
+import { Route as ApiPublicJobsWeeklySummaryRouteImport } from './routes/api/public/jobs/weekly-summary'
 import { Route as ApiPublicTokenMetaCreatorIndexRouteImport } from './routes/api/public/token-meta.$creator.$index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -128,6 +132,12 @@ const ApiPublicJobsAutobuyRoute = ApiPublicJobsAutobuyRouteImport.update({
   path: '/api/public/jobs/autobuy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsContestAnnounceRoute =
+  ApiPublicJobsContestAnnounceRouteImport.update({
+    id: '/api/public/jobs/contest-announce',
+    path: '/api/public/jobs/contest-announce',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsDailyXRoute = ApiPublicJobsDailyXRouteImport.update({
   id: '/api/public/jobs/daily-x',
   path: '/api/public/jobs/daily-x',
@@ -137,6 +147,18 @@ const ApiPublicJobsDiscordCoinsRoute =
   ApiPublicJobsDiscordCoinsRouteImport.update({
     id: '/api/public/jobs/discord-coins',
     path: '/api/public/jobs/discord-coins',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicJobsDiscordDailyRoute =
+  ApiPublicJobsDiscordDailyRouteImport.update({
+    id: '/api/public/jobs/discord-daily',
+    path: '/api/public/jobs/discord-daily',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicJobsGraduationPromoRoute =
+  ApiPublicJobsGraduationPromoRouteImport.update({
+    id: '/api/public/jobs/graduation-promo',
+    path: '/api/public/jobs/graduation-promo',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicJobsPayoutsRoute = ApiPublicJobsPayoutsRouteImport.update({
@@ -154,6 +176,12 @@ const ApiPublicJobsTelegramTopRoute =
   ApiPublicJobsTelegramTopRouteImport.update({
     id: '/api/public/jobs/telegram-top',
     path: '/api/public/jobs/telegram-top',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicJobsWeeklySummaryRoute =
+  ApiPublicJobsWeeklySummaryRouteImport.update({
+    id: '/api/public/jobs/weekly-summary',
+    path: '/api/public/jobs/weekly-summary',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicTokenMetaCreatorIndexRoute =
@@ -182,11 +210,15 @@ export interface FileRoutesByFullPath {
   '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
+  '/api/public/jobs/contest-announce': typeof ApiPublicJobsContestAnnounceRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
+  '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
+  '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
+  '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
 }
 export interface FileRoutesByTo {
@@ -208,11 +240,15 @@ export interface FileRoutesByTo {
   '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
+  '/api/public/jobs/contest-announce': typeof ApiPublicJobsContestAnnounceRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
+  '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
+  '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
+  '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
 }
 export interface FileRoutesById {
@@ -235,11 +271,15 @@ export interface FileRoutesById {
   '/api/public/dexscreener/pair': typeof ApiPublicDexscreenerPairRoute
   '/api/public/img/$hash': typeof ApiPublicImgHashRoute
   '/api/public/jobs/autobuy': typeof ApiPublicJobsAutobuyRoute
+  '/api/public/jobs/contest-announce': typeof ApiPublicJobsContestAnnounceRoute
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
+  '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
+  '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
+  '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
 }
 export interface FileRouteTypes {
@@ -263,11 +303,15 @@ export interface FileRouteTypes {
     | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
+    | '/api/public/jobs/contest-announce'
     | '/api/public/jobs/daily-x'
     | '/api/public/jobs/discord-coins'
+    | '/api/public/jobs/discord-daily'
+    | '/api/public/jobs/graduation-promo'
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
+    | '/api/public/jobs/weekly-summary'
     | '/api/public/token-meta/$creator/$index'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -289,11 +333,15 @@ export interface FileRouteTypes {
     | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
+    | '/api/public/jobs/contest-announce'
     | '/api/public/jobs/daily-x'
     | '/api/public/jobs/discord-coins'
+    | '/api/public/jobs/discord-daily'
+    | '/api/public/jobs/graduation-promo'
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
+    | '/api/public/jobs/weekly-summary'
     | '/api/public/token-meta/$creator/$index'
   id:
     | '__root__'
@@ -315,11 +363,15 @@ export interface FileRouteTypes {
     | '/api/public/dexscreener/pair'
     | '/api/public/img/$hash'
     | '/api/public/jobs/autobuy'
+    | '/api/public/jobs/contest-announce'
     | '/api/public/jobs/daily-x'
     | '/api/public/jobs/discord-coins'
+    | '/api/public/jobs/discord-daily'
+    | '/api/public/jobs/graduation-promo'
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
+    | '/api/public/jobs/weekly-summary'
     | '/api/public/token-meta/$creator/$index'
   fileRoutesById: FileRoutesById
 }
@@ -342,11 +394,15 @@ export interface RootRouteChildren {
   ApiPublicDexscreenerPairRoute: typeof ApiPublicDexscreenerPairRoute
   ApiPublicImgHashRoute: typeof ApiPublicImgHashRoute
   ApiPublicJobsAutobuyRoute: typeof ApiPublicJobsAutobuyRoute
+  ApiPublicJobsContestAnnounceRoute: typeof ApiPublicJobsContestAnnounceRoute
   ApiPublicJobsDailyXRoute: typeof ApiPublicJobsDailyXRoute
   ApiPublicJobsDiscordCoinsRoute: typeof ApiPublicJobsDiscordCoinsRoute
+  ApiPublicJobsDiscordDailyRoute: typeof ApiPublicJobsDiscordDailyRoute
+  ApiPublicJobsGraduationPromoRoute: typeof ApiPublicJobsGraduationPromoRoute
   ApiPublicJobsPayoutsRoute: typeof ApiPublicJobsPayoutsRoute
   ApiPublicJobsTelegramAppRoute: typeof ApiPublicJobsTelegramAppRoute
   ApiPublicJobsTelegramTopRoute: typeof ApiPublicJobsTelegramTopRoute
+  ApiPublicJobsWeeklySummaryRoute: typeof ApiPublicJobsWeeklySummaryRoute
   ApiPublicTokenMetaCreatorIndexRoute: typeof ApiPublicTokenMetaCreatorIndexRoute
 }
 
@@ -478,6 +534,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsAutobuyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/contest-announce': {
+      id: '/api/public/jobs/contest-announce'
+      path: '/api/public/jobs/contest-announce'
+      fullPath: '/api/public/jobs/contest-announce'
+      preLoaderRoute: typeof ApiPublicJobsContestAnnounceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/daily-x': {
       id: '/api/public/jobs/daily-x'
       path: '/api/public/jobs/daily-x'
@@ -490,6 +553,20 @@ declare module '@tanstack/react-router' {
       path: '/api/public/jobs/discord-coins'
       fullPath: '/api/public/jobs/discord-coins'
       preLoaderRoute: typeof ApiPublicJobsDiscordCoinsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/discord-daily': {
+      id: '/api/public/jobs/discord-daily'
+      path: '/api/public/jobs/discord-daily'
+      fullPath: '/api/public/jobs/discord-daily'
+      preLoaderRoute: typeof ApiPublicJobsDiscordDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/graduation-promo': {
+      id: '/api/public/jobs/graduation-promo'
+      path: '/api/public/jobs/graduation-promo'
+      fullPath: '/api/public/jobs/graduation-promo'
+      preLoaderRoute: typeof ApiPublicJobsGraduationPromoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/jobs/payouts': {
@@ -511,6 +588,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/jobs/telegram-top'
       fullPath: '/api/public/jobs/telegram-top'
       preLoaderRoute: typeof ApiPublicJobsTelegramTopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/weekly-summary': {
+      id: '/api/public/jobs/weekly-summary'
+      path: '/api/public/jobs/weekly-summary'
+      fullPath: '/api/public/jobs/weekly-summary'
+      preLoaderRoute: typeof ApiPublicJobsWeeklySummaryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/token-meta/$creator/$index': {
@@ -542,11 +626,15 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDexscreenerPairRoute: ApiPublicDexscreenerPairRoute,
   ApiPublicImgHashRoute: ApiPublicImgHashRoute,
   ApiPublicJobsAutobuyRoute: ApiPublicJobsAutobuyRoute,
+  ApiPublicJobsContestAnnounceRoute: ApiPublicJobsContestAnnounceRoute,
   ApiPublicJobsDailyXRoute: ApiPublicJobsDailyXRoute,
   ApiPublicJobsDiscordCoinsRoute: ApiPublicJobsDiscordCoinsRoute,
+  ApiPublicJobsDiscordDailyRoute: ApiPublicJobsDiscordDailyRoute,
+  ApiPublicJobsGraduationPromoRoute: ApiPublicJobsGraduationPromoRoute,
   ApiPublicJobsPayoutsRoute: ApiPublicJobsPayoutsRoute,
   ApiPublicJobsTelegramAppRoute: ApiPublicJobsTelegramAppRoute,
   ApiPublicJobsTelegramTopRoute: ApiPublicJobsTelegramTopRoute,
+  ApiPublicJobsWeeklySummaryRoute: ApiPublicJobsWeeklySummaryRoute,
   ApiPublicTokenMetaCreatorIndexRoute: ApiPublicTokenMetaCreatorIndexRoute,
 }
 export const routeTree = rootRouteImport

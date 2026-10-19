@@ -5,6 +5,7 @@ const stats = (recent: UserStats["recent"]): UserStats => ({
   wallets: recent.length,
   wallets_1d: 0,
   wallets_7d: 0,
+  wallets_new_1d: 0,
   creators: 0,
   profiles: 0,
   comment_authors: 0,

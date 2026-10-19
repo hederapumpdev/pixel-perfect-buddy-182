@@ -3,10 +3,10 @@ import { topCoinsMessage, graduationMessage, type TelegramCoin } from './telegra
 import { telegramAppSlot, telegramAppMessage } from './telegram-app-content';
 import { telegramImage } from './telegram-images.server';
 
-class TelegramError extends Error {
+export class TelegramError extends Error {
   constructor(public status: number, public body: string) { super(`Telegram [${status}]: ${body}`); }
 }
-async function telegram(method: string, body: Record<string, unknown>, image?: Blob) {
+export async function telegram(method: string, body: Record<string, unknown>, image?: Blob) {
   const key = process.env['TELEGRAM_API_KEY'];
   const appKey = process.env['LOVABLE_API_KEY'];
   if (!key || !appKey) throw new Error('Telegram connection is not configured');
