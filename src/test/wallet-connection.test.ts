@@ -57,6 +57,31 @@ describe("wallet connection recovery", () => {
     expect(mock.unsubscribe).toHaveBeenCalledOnce();
   });
 
+  it("accepts approval when the SDK closes the picker before its promise resolves", async () => {
+    const mock = mockConnector();
+    const result = openWalletPicker(mock.connector);
+    mock.emit(true);
+    // DAppConnector.openModal closes in finally, before its promise settles.
+    mock.emit(false);
+    mock.approve();
+    await expect(result).resolves.toBeUndefined();
+    expect(mock.unsubscribe).toHaveBeenCalledOnce();
+    expect(mock.closeModal).toHaveBeenCalledOnce();
+  });
+
+  it("preserves a wallet rejection when the SDK closes before rejecting", async () => {
+    const mock = mockConnector();
+    let rejectApproval = (_error: Error) => {};
+    mock.connector.openModal.mockImplementation(() => new Promise<void>((_resolve, reject) => {
+      rejectApproval = reject;
+    }));
+    const result = openWalletPicker(mock.connector);
+    mock.emit(true);
+    mock.emit(false);
+    rejectApproval(new Error("Wallet rejected connection"));
+    await expect(result).rejects.toThrow("Wallet rejected connection");
+  });
+
   it("bounds wallet approval to three minutes without retrying", async () => {
     vi.useFakeTimers();
     const mock = mockConnector();
