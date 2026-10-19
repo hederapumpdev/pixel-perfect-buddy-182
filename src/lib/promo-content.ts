@@ -16,7 +16,7 @@ export const contestSlot = (weekKey: string) => `contest:${weekKey}`;
 export const weeklySlot = (day: string) => `weekly:${day}`;
 export const graduationSlot = (token: string) => `graduation:${token.toLowerCase()}`;
 export const discordDailySlot = (xSlot: string) => `x:${xSlot}`;
-/** One spotlight per six-hour window: spotlights:YYYY-MM-DD-(0..3). */
+/** One spotlight per six-hour window: spotlight:YYYY-MM-DD-(0..3). */
 export const spotlightSlot = (d: Date) => `spotlight:${d.toISOString().slice(0, 10)}-${Math.floor(d.getUTCHours() / 6)}`;
 
 export function spotlightMessages(coin: PromoCoin, trades: number, volumeHbar: number) {
