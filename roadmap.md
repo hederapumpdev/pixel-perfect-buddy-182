@@ -1,4 +1,7 @@
 # Roadmap
+- [ ] Diagnose Aubry's device-specific connection-window error: screenshot matches WalletConnect picker timeout, not a staff restriction; no same error reproduced in fresh preview checks. Waits for phone OS/browser versions and a fresh separate-button attempt; no speculative code change.
+- [x] Prepare evidence-based HederaPump promotion recommendations; research and ranked plan saved. Prioritize Aubry connection diagnosis and factual risk/listing copy before outreach. No new external posts or spending authorized.
+- [x] Check Aubry's staff membership vs sign-in: WalletConnect/email connection does not read staff; staff balance is a separate profile query. Asked which connection button and stopping point; actual device failure remains unverified.
 - [x] Separate first-time WalletConnect pairing from picker loading; nine regression tests pass, fresh mobile visitor opens/closes/reopens HashPack picker. Reported iPhone connection still requires user's device approval.
 - [x] Diagnose WalletConnect failure from screen recording — picker/HashPack open but SDK closure before approval resolution was treated as cancellation. Regression tests reproduce this; defer dismissal until approval settles. Real HashPack approval still requires user's device.
 - [x] Add estimated USD trading profit/loss per recent wallet in Admin → Users; trading fees included, current curve valuation, unavailable unpriced positions; nine tests passed and real PIN-unlocked results verified on mobile without overflow.
