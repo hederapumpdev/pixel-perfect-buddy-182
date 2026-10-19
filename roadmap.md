@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Verify bot automatic purchase queue; add reliable images to official launches and create one replacement without deleting chain history.
 - [x] Official coins on a schedule + coin spotlight: bot wallet creates max 4 official coins/day at irregular hours (hourly cron with random skip), themed on DexScreener trending tokens, Official badge via BOT_WALLET_EVM in OFFICIAL_CREATORS; spotlight every 6h highlights a random community coin (never official) on X/Telegram/Discord. official_coins table (service_role only), routes /api/public/jobs/official-coin + /spotlight, managed schedules 11+12; 107 tests pass. Live after publish; each official coin costs the bot wallet ~20 HBAR + creation fee, so it needs funding.
 - [x] Automatic promotion pack: Monday contest-winner announcement on X/Telegram/Discord, daily X posts mirrored to Discord #announcements, graduation alerts on X + Discord, Sunday weekly summary on all three. promo_posts table, promo.server.ts dispatchers, four cron routes and managed schedules live; 99 tests pass. New endpoints work on the live site after the user publishes.
 - [x] Admin: "New today" count (wallets whose first trade is today) in UsersOverview via admin_user_stats wallets_new_1d.
@@ -39,7 +40,7 @@
 - [x] v3 contract (platform fee straight to fee wallet, creator claims) — testnet-tested
 - [x] Admin: fee overview, top coins, auto-buy bot ($2 per new coin)
 - [x] v3 live on mainnet (0.0.10924285)
-- [ ] Fund bot wallet 0xD14aDF40256C7FDab669Ec2a5eEE25aFaa755392 — waits on user
+- [x] Fund bot wallet: mainnet account 0.0.10927104 received 202 HBAR, verified through mirror node.
 - [ ] DexScreener listing request (user submits)
 - [x] Admin page only behind PIN
 - [ ] Daily X tweets link to hederapump.dev instead of the lovable.app URL
