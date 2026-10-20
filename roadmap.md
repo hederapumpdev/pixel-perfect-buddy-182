@@ -73,3 +73,6 @@
 - [x] Points leaderboard (/leaderboard) + "Show animations" toggle on Explore
 - [ ] 2% burn at graduation + trading after graduation — needs a new paid contract deployment; waiting for user go-ahead
 - [ ] NSFW filter / "promoted" sort — waiting for user decision (NSFW flag at creation; what "promoted" means)
+
+- [x] Deposit page with SODAX swap widget (HBAR on Hedera locked as destination)
+- [ ] SODAX 0.5% partner fee — blocked: SODAX must set it up on their side; needs an EVM fee address from owner

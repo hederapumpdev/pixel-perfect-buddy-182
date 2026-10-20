@@ -14,6 +14,7 @@ const nav = [
   { to: "/create", label: "Create Coin" },
   { to: "/contest", label: "Contest" },
   { to: "/leaderboard", label: "Leaderboard" },
+  { to: "/deposit", label: "Deposit" },
   { to: "/team", label: "Team" },
   { to: "/how-it-works", label: "How It Works" },
   { to: "/profile", label: "Profile" },
