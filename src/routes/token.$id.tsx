@@ -3,6 +3,7 @@ import { ShareButton } from "@/components/ShareCard";
 import { Comments, Holders } from "@/components/CoinExtras";
 import { FollowButton } from "@/components/PriceAlerts";
 import { Avatar, useProfiles } from "@/components/ProfileEditor";
+import { StaffBadge } from "@/components/StaffBadge";
 import { HederaAddress, useHederaId } from "@/components/HederaAddress";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -434,7 +435,7 @@ function TokenPage() {
                   </span>
                   <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground" title={r.trader}>
                     {profiles[r.trader.toLowerCase()] && <Avatar hash={profiles[r.trader.toLowerCase()]?.avatar} size={24} />}
-                    <span className="truncate">{profiles[r.trader.toLowerCase()]?.name ?? <HederaAddress address={r.trader} />}</span>
+                    <span className="truncate">{profiles[r.trader.toLowerCase()]?.name ?? <HederaAddress address={r.trader} />}</span><StaffBadge wallet={r.trader} />
                   </span>
                   <span>{Number(r.hbar_amount).toFixed(2)} ℏ</span>
                   <span className="text-right text-muted-foreground">
