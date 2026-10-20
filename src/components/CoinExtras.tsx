@@ -8,6 +8,7 @@ import { MIRROR_URL } from "@/lib/hedera-config";
 import { fmtAge } from "@/lib/queries";
 import { HederaAddress } from "@/components/HederaAddress";
 import { Avatar, useProfiles } from "@/components/ProfileEditor";
+import { StaffBadge } from "@/components/StaffBadge";
 
 type Trade = { trader: string; is_buy: boolean; token_amount: number | string };
 
@@ -69,7 +70,7 @@ export function Comments({ token, author }: { token: string; author: string | nu
               <p className="text-xs text-muted-foreground">
                 <span className="font-semibold text-foreground">
                   {profs[c.author.toLowerCase()]?.name ?? <HederaAddress address={c.author} />}
-                </span>{" "}
+                </span>{" "}<StaffBadge wallet={c.author} />{" "}
                 · {fmtAge(c.created_at)} ago
               </p>
               <p className="mt-1 whitespace-pre-wrap break-words">{c.body}</p>
@@ -150,7 +151,7 @@ export function Holders({
               <span className="flex min-w-0 items-center gap-2" title={r.who}>
                 <span className="shrink-0">{i + 1}.</span>
                 {profiles[w] && <Avatar hash={profiles[w]?.avatar} size={24} />}
-                <span className="truncate">{profiles[w]?.name ?? <HederaAddress address={r.who} />}</span>
+                <span className="truncate">{profiles[w]?.name ?? <HederaAddress address={r.who} />}</span><StaffBadge wallet={r.who} />
                 {tag && (
                   <span className="ml-2 rounded bg-secondary px-1.5 py-0.5 text-[10px] text-primary">{tag}</span>
                 )}
