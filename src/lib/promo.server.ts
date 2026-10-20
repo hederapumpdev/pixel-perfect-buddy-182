@@ -232,3 +232,9 @@ export async function postWeeklySummary(now = new Date()) {
   const day = (d: Date) => d.toISOString().slice(0, 10);
   return sendNext(db, slot, weeklyMessages(stats, day(from), day(to)), "app", 2);
 }
+
+/** One-off feature announcement (owner-triggered); same slot claims, one send per call. */
+export async function announceFeature(slot: string, texts: Partial<Record<Channel, string>>) {
+  const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+  return sendNext(db, slot, texts, "app", 4);
+}
