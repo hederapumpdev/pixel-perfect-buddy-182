@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ContestRouteImport } from './routes/contest'
 import { Route as CreateRouteImport } from './routes/create'
+import { Route as DepositRouteImport } from './routes/deposit'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
@@ -59,6 +60,11 @@ const ContestRoute = ContestRouteImport.update({
 const CreateRoute = CreateRouteImport.update({
   id: '/create',
   path: '/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DepositRoute = DepositRouteImport.update({
+  id: '/deposit',
+  path: '/deposit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExploreRoute = ExploreRouteImport.update({
@@ -215,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/contest': typeof ContestRoute
   '/create': typeof CreateRoute
+  '/deposit': typeof DepositRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/contest': typeof ContestRoute
   '/create': typeof CreateRoute
+  '/deposit': typeof DepositRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/contest': typeof ContestRoute
   '/create': typeof CreateRoute
+  '/deposit': typeof DepositRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contest'
     | '/create'
+    | '/deposit'
     | '/explore'
     | '/how-it-works'
     | '/leaderboard'
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contest'
     | '/create'
+    | '/deposit'
     | '/explore'
     | '/how-it-works'
     | '/leaderboard'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contest'
     | '/create'
+    | '/deposit'
     | '/explore'
     | '/how-it-works'
     | '/leaderboard'
@@ -417,6 +429,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ContestRoute: typeof ContestRoute
   CreateRoute: typeof CreateRoute
+  DepositRoute: typeof DepositRoute
   ExploreRoute: typeof ExploreRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -474,6 +487,13 @@ declare module '@tanstack/react-router' {
       path: '/create'
       fullPath: '/create'
       preLoaderRoute: typeof CreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deposit': {
+      id: '/deposit'
+      path: '/deposit'
+      fullPath: '/deposit'
+      preLoaderRoute: typeof DepositRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/explore': {
@@ -673,6 +693,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   ContestRoute: ContestRoute,
   CreateRoute: CreateRoute,
+  DepositRoute: DepositRoute,
   ExploreRoute: ExploreRoute,
   HowItWorksRoute: HowItWorksRoute,
   LeaderboardRoute: LeaderboardRoute,
