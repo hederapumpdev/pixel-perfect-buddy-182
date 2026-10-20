@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { TokenCard } from "@/components/TokenCard";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,12 @@ function Explore() {
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<keyof typeof sorts>("newest");
   const [status, setStatus] = useState<"all" | "curve" | "graduated">("all");
+  const [motion, setMotion] = useState(true);
+  useEffect(() => {
+    const on = localStorage.getItem("hp-motion") !== "off";
+    setMotion(on);
+    document.documentElement.classList.toggle("no-motion", !on);
+  }, []);
   const t0 = (s: string) => new Date(s).getTime();
   const list = tokens
     .filter((t) =>
@@ -90,6 +96,18 @@ function Explore() {
           <option value="curve">On bonding curve</option>
           <option value="graduated">Graduated</option>
         </select>
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={motion}
+            onChange={(e) => {
+              setMotion(e.target.checked);
+              localStorage.setItem("hp-motion", e.target.checked ? "on" : "off");
+              document.documentElement.classList.toggle("no-motion", !e.target.checked);
+            }}
+          />
+          Show animations
+        </label>
       </div>
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((t) => (
