@@ -68,3 +68,6 @@
 - [x] Official coins label, weekly contest (100 HBAR), 10 free first coins via bot
 
 - [x] Staff payouts: user chose bot wallet top-ups (no fee-wallet access)
+- [x] Points leaderboard (/leaderboard) + "Show animations" toggle on Explore
+- [ ] 2% burn at graduation + trading after graduation — needs a new paid contract deployment; waiting for user go-ahead
+- [ ] NSFW filter / "promoted" sort — waiting for user decision (NSFW flag at creation; what "promoted" means)

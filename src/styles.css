@@ -144,3 +144,5 @@
 }
 .ticker-track { animation: ticker-scroll 60s linear infinite; }
 .ticker-track:hover { animation-play-state: paused; }
+
+.no-motion *, .no-motion *::before, .no-motion *::after { animation: none !important; transition: none !important; }

@@ -15,6 +15,7 @@ import { Route as ContestRouteImport } from './routes/contest'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
@@ -68,6 +69,11 @@ const ExploreRoute = ExploreRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
@@ -243,6 +250,7 @@ export interface FileRoutesByTo {
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
@@ -276,6 +284,7 @@ export interface FileRoutesById {
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/explore'
     | '/how-it-works'
+    | '/leaderboard'
     | '/profile'
     | '/sitemap.xml'
     | '/support'
@@ -342,6 +352,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/explore'
     | '/how-it-works'
+    | '/leaderboard'
     | '/profile'
     | '/sitemap.xml'
     | '/support'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/explore'
     | '/how-it-works'
+    | '/leaderboard'
     | '/profile'
     | '/sitemap.xml'
     | '/support'
@@ -407,6 +419,7 @@ export interface RootRouteChildren {
   CreateRoute: typeof CreateRoute
   ExploreRoute: typeof ExploreRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   ProfileRoute: typeof ProfileRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
@@ -475,6 +488,13 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -655,6 +675,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreateRoute: CreateRoute,
   ExploreRoute: ExploreRoute,
   HowItWorksRoute: HowItWorksRoute,
+  LeaderboardRoute: LeaderboardRoute,
   ProfileRoute: ProfileRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
