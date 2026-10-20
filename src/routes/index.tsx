@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { tokensQuery, fmtHbar, mcapOf } from "@/lib/queries";
 import { useChainSync } from "@/hooks/use-sync";
 import { KingOfTheHill } from "@/components/KingOfTheHill";
+import { Trophy, ArrowRight } from "lucide-react";
+import { CONTEST_PRIZE_HBAR, CONTEST_MIN_VOLUME_HBAR } from "@/lib/promotions";
 import banner from "@/assets/banner.png";
 
 export const Route = createFileRoute("/")({
@@ -55,6 +57,19 @@ function Index() {
   ];
   return (
     <Shell>
+      <section aria-labelledby="home-contest-title" className="mb-6 flex flex-col gap-4 border-y border-primary/40 bg-primary/10 px-4 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <Trophy className="mt-1 h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
+          <div>
+            <h2 id="home-contest-title" className="text-xl font-bold">Weekly launch contest · {CONTEST_PRIZE_HBAR} HBAR prize</h2>
+            <p className="mt-1 text-sm text-muted-foreground">The highest-volume coin wins for its creator. Monday–Monday, UTC.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Minimum {CONTEST_MIN_VOLUME_HBAR.toLocaleString("en-US")} HBAR weekly volume · Official coins excluded.</p>
+          </div>
+        </div>
+        <Button asChild className="shrink-0 self-start sm:self-center">
+          <Link to="/contest">View contest & winners <ArrowRight className="h-4 w-4" /></Link>
+        </Button>
+      </section>
       <section className="grid-bg rounded-xl border border-border bg-card px-5 py-10 md:px-10 md:py-16">
         <img
           src={banner}
