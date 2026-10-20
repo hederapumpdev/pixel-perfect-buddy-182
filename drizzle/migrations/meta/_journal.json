@@ -176,6 +176,13 @@
       "when": 1792426205315,
       "tag": "0024_create_official_coins",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792508788142,
+      "tag": "0025_staff_shared_allocation_cap",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { MIRROR_URL, NETWORK } from "./hedera-config";
-import { STAFF_MAX, STAFF_MAX_PCT, STAFF_MIN_CLAIM_HBAR, staffClaimable, staffEarned } from "./staff";
+import { STAFF_MAX_PCT, STAFF_MIN_CLAIM_HBAR, staffClaimable, staffEarned } from "./staff";
 
 const norm = (w: unknown) => String(w ?? "").toLowerCase().trim();
 const checkPin = (p: string) => {
@@ -15,7 +15,8 @@ type StaffRow = { wallet: string; joined_at: string; left_at: string | null; sha
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function earnedSinceRate(db: any, s: StaffRow, until?: string) {
   const end = s.left_at ?? until ?? new Date().toISOString();
-  const { data: fees } = await db.rpc("fee_total_between", { p_network: NETWORK, p_from: s.rate_since ?? s.joined_at, p_to: end });
+  const { data: fees, error } = await db.rpc("fee_total_between", { p_network: NETWORK, p_from: s.rate_since ?? s.joined_at, p_to: end });
+  if (error) throw new Error("Could not calculate team earnings");
   return staffEarned(Number(fees ?? 0), Number(s.share_pct));
 }
 
@@ -84,13 +85,14 @@ export const adminListStaff = createServerFn({ method: "POST" })
     return Promise.all((rows ?? []).map(async (s) => ({ ...s, ...(await balanceOf(db, s)) })));
   });
 
-/** Admin: add a staff member (max 4 active). Earnings start now. */
+/** Admin: add staff without a headcount limit, within the shared allocation cap. */
 export const adminAddStaff = createServerFn({ method: "POST" })
-  .inputValidator((d: { pin: string; wallet: string; name: string; avatar?: string | null }) => {
+  .inputValidator((d: { pin: string; wallet: string; name: string; avatar?: string | null; pct: number }) => {
     const name = String(d.name ?? "").trim();
     if (name.length < 2 || name.length > 32) throw new Error("Name: 2–32 characters");
     if (d.avatar && !/^[0-9a-f]{64}$/.test(d.avatar)) throw new Error("Bad image");
-    return { pin: String(d.pin ?? ""), wallet: String(d.wallet ?? "").trim(), name, avatar: d.avatar ?? null };
+    if (!Number.isFinite(d.pct) || d.pct < 0 || d.pct > STAFF_MAX_PCT) throw new Error(`Percentage must be 0–${STAFF_MAX_PCT}%`);
+    return { pin: String(d.pin ?? ""), wallet: String(d.wallet ?? "").trim(), name, avatar: d.avatar ?? null, pct: Math.round(d.pct * 100) / 100 };
   })
   .handler(async ({ data }) => {
     checkPin(data.pin);
@@ -104,12 +106,10 @@ export const adminAddStaff = createServerFn({ method: "POST" })
       wallet = norm(j.evm_address ?? wallet);
     } else throw new Error("Enter a Hedera ID (0.0.x) or 0x address");
     const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
-    const { count } = await db.from("staff_members").select("wallet", { count: "exact", head: true }).is("left_at", null);
     const { data: existing } = await db.from("staff_members").select("wallet").eq("wallet", wallet).maybeSingle();
     if (existing) throw new Error("Already added");
-    if ((count ?? 0) >= STAFF_MAX) throw new Error(`Maximum ${STAFF_MAX} team members`);
-    const { error } = await db.from("staff_members").insert({ wallet, account_id: accountId, name: data.name, avatar: data.avatar, rate_since: new Date().toISOString() });
-    if (error) throw new Error("Saving failed");
+    const { error } = await db.from("staff_members").insert({ wallet, account_id: accountId, name: data.name, avatar: data.avatar, share_pct: data.pct, rate_since: new Date().toISOString() });
+    if (error) throw new Error("Could not add member. Active staff together may receive at most 20% of the platform share.");
     return { ok: true };
   });
 
@@ -131,7 +131,7 @@ export const adminUpdateStaff = createServerFn({ method: "POST" })
 /** Admin: change a member's % from now on; earnings so far stay at the old %. */
 export const adminSetStaffPct = createServerFn({ method: "POST" })
   .inputValidator((d: { pin: string; wallet: string; pct: number }) => {
-    if (!(typeof d.pct === "number" && d.pct >= 0 && d.pct <= STAFF_MAX_PCT)) throw new Error(`Percentage must be 0–${STAFF_MAX_PCT}%`);
+    if (!Number.isFinite(d.pct) || d.pct < 0 || d.pct > STAFF_MAX_PCT) throw new Error(`Percentage must be 0–${STAFF_MAX_PCT}%`);
     return { pin: String(d.pin ?? ""), wallet: norm(d.wallet), pct: Math.round(d.pct * 100) / 100 };
   })
   .handler(async ({ data }) => {
@@ -142,10 +142,13 @@ export const adminSetStaffPct = createServerFn({ method: "POST" })
     if (s.left_at) throw new Error("This member has stopped");
     const now = new Date().toISOString();
     const frozen = Number(s.earned_before) + (await earnedSinceRate(db, s, now));
-    const { error } = await db.from("staff_members")
+    let change = db.from("staff_members")
       .update({ earned_before: frozen, rate_since: now, share_pct: data.pct })
-      .eq("wallet", data.wallet).eq("rate_since", s.rate_since ?? s.joined_at);
-    if (error) throw new Error("Saving failed");
+      .eq("wallet", data.wallet).is("left_at", null);
+    change = s.rate_since === null ? change.is("rate_since", null) : change.eq("rate_since", s.rate_since);
+    const { data: changed, error } = await change.select("wallet");
+    if (error) throw new Error("Could not save percentage. Active staff together may receive at most 20% of the platform share.");
+    if (!changed?.length) throw new Error("Member changed meanwhile. Refresh and try again.");
     return { ok: true };
   });
 
@@ -155,6 +158,8 @@ export const adminRemoveStaff = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     checkPin(data.pin);
     const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
-    await db.from("staff_members").update({ left_at: new Date().toISOString() }).eq("wallet", data.wallet).is("left_at", null);
+    const { data: removed, error } = await db.from("staff_members").update({ left_at: new Date().toISOString() }).eq("wallet", data.wallet).is("left_at", null).select("wallet");
+    if (error) throw new Error("Could not remove team member");
+    if (!removed?.length) throw new Error("Member already removed or not found");
     return { ok: true };
   });

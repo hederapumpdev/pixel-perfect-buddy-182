@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Staff: removed headcount limit, added removal while retaining earned claims, and enforced the shared 20% platform-share cap in the database. Nine tests passed; real PIN-unlocked admin loaded two members, showed removal controls, allowed remaining allocation and rejected an over-cap change without modifying staff.
 - [x] Bot buys: fixed rejected transactions (gas price below Hedera minimum) on all bot sends; no gas spent on associating while underfunded; cleared 3 never-executed failed buys so they run once funded. Bot wallet holds ~2.3 HBAR after the 100 HBAR contest prize and two official launches — needs ~30 HBAR per $2 buy cycle; waits for user funding + publish.
 - [x] Discord routing: new coins, graduations and spotlights in #new-coins; daily app posts, contest and weekly summary in #announcements; daily mirror only posts the last 12h (no backlog flood).
 - [x] Every new coin has an image: create page requires an image; official coins get their own AI-generated logo (mascot fallback), generated only when the wallet can pay.

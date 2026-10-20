@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Subdirectories have their own `AGENTS.md` (`contracts/`, `src/lib/`); read it before changing files there.
+- Staff allocations are capped transactionally by a database trigger; removal uses retained inactive rows so earned funds and payout history remain claimable.
 - Home-screen support is manifest-only with brand icons; offline workers require explicit user request to avoid stale previews.
 - Network, contract IDs and WalletConnect ID live in `src/lib/hedera-config.ts` for centralized configuration.
 - Failed v4 deployments stay indexed/tradable. Legacy replacement has a separate ID/artifact; creation requires verified mainnet creation to avoid paid retries. Admin targets the pending legacy artifact.

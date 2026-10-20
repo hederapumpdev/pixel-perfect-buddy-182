@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, squareImage, toB64 } from "@/components/ProfileEditor";
 import { uploadImage } from "@/lib/chain.functions";
 import { adminAddStaff, adminListStaff, adminRemoveStaff, adminSetStaffPct, adminUpdateStaff } from "@/lib/staff.functions";
-import { STAFF_MAX, STAFF_MAX_PCT } from "@/lib/staff";
+import { STAFF_DEFAULT_PCT, STAFF_MAX_PCT, STAFF_TOTAL_MAX_PCT, staffAllocationAllowed } from "@/lib/staff";
 import { fmtHbar } from "@/lib/queries";
 import { useUsd } from "@/lib/usd";
 
@@ -33,8 +34,12 @@ export function StaffPanel({ pin }: { pin: string }) {
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pct, setNewPct] = useState(String(STAFF_DEFAULT_PCT));
+  const [showRemoved, setShowRemoved] = useState(false);
   const active = (q.data ?? []).filter((s) => !s.left_at).length;
   const totalPct = (q.data ?? []).filter((s) => !s.left_at).reduce((a, s) => a + Number(s.share_pct), 0);
+  const allocations = (q.data ?? []).filter((s) => !s.left_at).map((s) => Number(s.share_pct));
+  const canAdd = pct.trim() !== "" && staffAllocationAllowed(allocations, Number(pct));
 
   async function run(fn: () => Promise<unknown>, ok: string) {
     setBusy(true);
@@ -42,6 +47,8 @@ export function StaffPanel({ pin }: { pin: string }) {
       await fn();
       toast.success(ok);
       qc.invalidateQueries({ queryKey: ["staff-admin"] });
+      qc.invalidateQueries({ queryKey: ["team"] });
+      qc.invalidateQueries({ queryKey: ["staff-me"] });
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -54,11 +61,13 @@ export function StaffPanel({ pin }: { pin: string }) {
       <div>
         <h2 className="text-xl font-semibold">Team</h2>
         <p className="text-sm text-muted-foreground">
-          Each member earns their own % of the platform fee share on all trading. Changing a % only counts from that moment. Total now: {totalPct}%, and claims it from their profile. Payouts come from the bot wallet — keep it topped up.
+          {active} active members · Allocated: {totalPct.toFixed(2)}% / {STAFF_TOTAL_MAX_PCT}% of the platform share · Available: {Math.max(0, STAFF_TOTAL_MAX_PCT - totalPct).toFixed(2)}%. Past earnings stay claimable. Payouts come from the bot wallet.
         </p>
       </div>
       <div className="space-y-2">
-        {(q.data ?? []).map((s) => (
+        <label className="flex items-center gap-2 text-sm text-muted-foreground"><input type="checkbox" checked={showRemoved} onChange={(e) => setShowRemoved(e.target.checked)} />Show removed members</label>
+        {q.isError && <p className="text-sm text-destructive">Could not load team members.</p>}
+        {(q.data ?? []).filter((s) => showRemoved || !s.left_at).map((s) => (
           <div key={s.wallet} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3">
             <label className="cursor-pointer" title="Change photo">
               <Avatar hash={s.avatar} size={44} />
@@ -89,22 +98,22 @@ export function StaffPanel({ pin }: { pin: string }) {
               )}
               {!s.left_at && (
                 <Button size="sm" variant="destructive" disabled={busy} onClick={() => {
-                  if (confirm(`Stop earnings for ${s.name}? What they earned stays claimable.`))
-                    run(() => remove({ data: { pin, wallet: s.wallet } }), "Stopped");
-                }}>Stop</Button>
+                  if (confirm(`Remove ${s.name} from the team? Future earnings stop; already-earned funds remain claimable.`))
+                    run(() => remove({ data: { pin, wallet: s.wallet } }), "Team member removed");
+                }} title={`Remove ${s.name}`} aria-label={`Remove ${s.name}`}><Trash2 className="size-4" />Remove</Button>
               )}
             </div>
           </div>
         ))}
         {q.data?.length === 0 && <p className="text-sm text-muted-foreground">No team members yet.</p>}
       </div>
-      {active < STAFF_MAX && (
+      {(
         <form
           className="flex flex-wrap items-end gap-2 rounded-lg border border-border bg-card p-3"
           onSubmit={(e) => {
             e.preventDefault();
             run(async () => {
-              await add({ data: { pin, wallet, name, avatar } });
+              await add({ data: { pin, wallet, name, avatar, pct: Number(pct) } });
               setWallet(""); setName(""); setAvatar(null);
             }, "Team member added");
           }}
@@ -118,7 +127,9 @@ export function StaffPanel({ pin }: { pin: string }) {
           </label>
           <Input className="w-40" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
           <Input className="w-48" placeholder="Wallet (0.0.x)" value={wallet} onChange={(e) => setWallet(e.target.value)} autoCapitalize="off" />
-          <Button type="submit" disabled={busy || !wallet || !name}>Add ({active}/{STAFF_MAX})</Button>
+          <label className="space-y-1 text-xs text-muted-foreground">Platform share %<Input aria-label="New member percentage" className="w-28" type="number" min="0" max={STAFF_MAX_PCT} step="0.01" value={pct} onChange={(e) => setNewPct(e.target.value)} /></label>
+          <Button type="submit" disabled={busy || !wallet || !name || !canAdd || !q.isSuccess}>Add member</Button>
+          {!canAdd && <p className="w-full text-xs text-destructive">Choose a percentage within the remaining 20% team allocation, or lower another member’s percentage first.</p>}
         </form>
       )}
     </section>
