@@ -6,6 +6,7 @@ import { TokenCard } from "@/components/TokenCard";
 import { Input } from "@/components/ui/input";
 import { tokensQuery, mcapOf } from "@/lib/queries";
 import { useChainSync } from "@/hooks/use-sync";
+import { nativeHederaId } from "@/lib/hedera-address";
 
 export const Route = createFileRoute("/explore")({
   staticData: { sitemap: true },
@@ -41,7 +42,12 @@ function Explore() {
   const [status, setStatus] = useState<"all" | "curve" | "graduated">("all");
   const t0 = (s: string) => new Date(s).getTime();
   const list = tokens
-    .filter((t) => (t.name + t.symbol + t.address).toLowerCase().includes(q.toLowerCase()))
+    .filter((t) =>
+      [t.name, t.symbol, t.address, nativeHederaId(t.address) ?? ""]
+        .join(" ")
+        .toLowerCase()
+        .includes(q.trim().toLowerCase()),
+    )
     .filter((t) => status === "all" || (status === "graduated" ? t.graduated : !t.graduated))
     .sort((a, b) =>
       sort === "newest"
