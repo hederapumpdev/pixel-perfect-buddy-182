@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Selectable graduation targets for NEW coins: implement in an isolated draft with new versioned contract, creation choice, chain-synced per-coin targets and liquidity/curve regression tests; activation blocked until verified deployment and owner wallet approval. Existing coins remain unchanged.
 - [x] Community chat: public conversation, wallet-verified signed-in posting, profile identities/team badges, admin delete/block controls and transactional spam protection. Signed posting/readback, cooldown, admin block/unblock/delete and mobile layout checked; 13 tests pass.
 - [ ] Discord: give Noon moderator permissions and a distinct colored display name — blocked: Discord returned Missing Permissions; owner must enable Manage Roles for the Hederapump bot and keep its role above the moderator role.
 - [x] Per-coin manual logo-submission package: copy details, JSON/logo downloads and official form/DaVinci links; five tests passed, real token downloads verified on desktop/mobile. HashPack integration request prepared in Files, not sent.
