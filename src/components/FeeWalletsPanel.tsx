@@ -9,7 +9,7 @@ import { GAS, HASHSCAN_URL } from "@/lib/hedera-config";
 import { fmtHbar } from "@/lib/queries";
 import { useWallet } from "@/lib/wallet";
 
-const LABEL: Record<string, string> = { split: "Split wallet (receives platform fees)", team: "Team wallet (pays staff)", holdout: "Hold Out wallet (holder rewards + contest prize)" };
+const LABEL: Record<string, string> = { split: "Bot wallet (receives all platform fees)", team: "Team wallet (pays staff)", holdout: "Hold Out wallet (holder rewards + contest prize)" };
 const hb = (t: string | number) => fmtHbar(Number(t) / 1e8);
 
 /** Admin: balances of the three fee wallets and the owner action that points contracts at the split wallet. */
@@ -27,7 +27,7 @@ export function FeeWalletsPanel({ pin }: { pin: string }) {
     setBusy(contract);
     try {
       await w.execute({ calldata: encodePump("setFeeRecipient", [split.address]), gas: GAS.claim, contractId: contract });
-      toast.success(`Contract ${contract} now sends fees to the split wallet`);
+      toast.success(`Contract ${contract} now sends fees to the bot wallet`);
       q.refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Not changed — check your wallet history before trying again");
@@ -40,7 +40,7 @@ export function FeeWalletsPanel({ pin }: { pin: string }) {
     <section className="space-y-4">
       <h2 className="text-2xl font-semibold">Fee wallets</h2>
       <p className="text-sm text-muted-foreground">
-        Platform fees go to the split wallet, which forwards every hour: 2/7 team, 1/7 Hold Out, 4/7 platform wallet. Each wallet keeps 5 HBAR for network fees.
+        All platform fees go to the bot wallet, which forwards only the fee money every hour: 2/7 team, 1/7 Hold Out, 4/7 platform wallet. Its own buy budget is never forwarded.
       </p>
       {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
       <div className="grid gap-3 sm:grid-cols-3">
@@ -67,7 +67,7 @@ export function FeeWalletsPanel({ pin }: { pin: string }) {
                   <td className="p-2 text-right">
                     {!done && (
                       <Button size="sm" disabled={!split?.accountId || busy !== null} onClick={() => point(c.contract)}>
-                        {busy === c.contract ? "Confirm in wallet…" : "Send fees to split wallet"}
+                        {busy === c.contract ? "Confirm in wallet…" : "Send fees to bot wallet"}
                       </Button>
                     )}
                   </td>
