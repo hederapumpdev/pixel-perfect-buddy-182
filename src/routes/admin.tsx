@@ -701,6 +701,7 @@ function AdminLog() {
 function BotHoldings() {
   const load = useServerFn(getBotHoldings);
   const sell = useServerFn(sellBotCoin);
+  const usd = useUsd();
   const [busy, setBusy] = useState<string | null>(null);
   const pin = (() => {
     try {
@@ -726,10 +727,15 @@ function BotHoldings() {
   return (
     <section className="space-y-3">
       <h2 className="text-xl font-semibold">Bot coins</h2>
-      <p className="text-sm text-muted-foreground">Coins the bot bought and still holds. Selling sends HBAR back to the bot wallet. The first sale of a coin needs a one-time approval tap.</p>
+      <p className="text-sm text-muted-foreground">Every coin the bot bought, with its estimated profit or loss. Selling sends HBAR back to the bot wallet. The first sale of a coin needs a one-time approval tap.</p>
       {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
       {q.isError && <p className="text-sm text-destructive">Could not load bot coins.</p>}
       {q.data?.length === 0 && <p className="text-sm text-muted-foreground">The bot holds no coins.</p>}
+      {!!q.data?.length && (() => {
+        const known = q.data.filter((c) => !(c.graduated && c.tokens > 0));
+        const total = known.reduce((a, c) => a + c.profit, 0);
+        return <p className="text-sm">Total estimated result: <span className={total >= 0 ? "text-primary" : "text-destructive"}>{total >= 0 ? "+" : ""}{fmtHbar(total)} {usd(total)}</span> <span className="text-muted-foreground">(sold + current value − bought, incl. fees)</span></p>;
+      })()}
       <div className="space-y-2">
         {q.data?.map((c) => (
           <div key={c.address} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3">
@@ -738,8 +744,14 @@ function BotHoldings() {
               <p className="font-mono text-xs text-muted-foreground">
                 {c.tokens.toLocaleString(undefined, { maximumFractionDigits: 0 })} tokens · {c.graduated ? "graduated — sell on SaucerSwap" : `≈ ${fmtHbar(c.hbarOut)}`}
               </p>
+              <p className="font-mono text-xs">
+                Bought {fmtHbar(c.spent)} · Sold {fmtHbar(c.received)} ·{" "}
+                <span className={c.profit >= 0 ? "text-primary" : "text-destructive"}>
+                  {c.graduated && c.tokens > 0 ? "result unknown (graduated)" : `${c.profit >= 0 ? "+" : ""}${fmtHbar(c.profit)} ${usd(c.profit)}`}
+                </span>
+              </p>
             </div>
-            {!c.graduated && (
+            {!c.graduated && c.tokens > 0 && (
               <div className="flex gap-2">
                 {[25, 50, 100].map((p) => (
                   <Button key={p} size="sm" variant={p === 100 ? "destructive" : "outline"} disabled={busy !== null} onClick={() => doSell(c.address, c.symbol, p)}>

@@ -188,11 +188,17 @@ export async function botHoldings(db: any) {
   const { data: tokens } = await db.from("tokens")
     .select("address,name,symbol,contract,graduated,virtual_hbar,virtual_tokens,tokens_sold").in("address", addrs);
   const { fromUnits, quoteSell, tokenUnit } = await import("./curve");
+  const { data: trades } = await db.from("trades").select("token,is_buy,hbar_amount")
+    .eq("trader", w.address.toLowerCase()).in("token", addrs).limit(5000);
+  const spent = new Map<string, number>(), got = new Map<string, number>();
+  for (const tr of trades ?? []) {
+    const m = tr.is_buy ? spent : got;
+    m.set(tr.token, (m.get(tr.token) ?? 0) + Number(tr.hbar_amount));
+  }
   const out = [];
   for (const t of tokens ?? []) {
     let bal = 0n;
     try { bal = await new ethers.Contract(t.address, ERC20, w).getFunction("balanceOf")(w.address); } catch { continue; }
-    if (bal <= 0n) continue;
     const unit = tokenUnit(t.contract);
     const state = {
       virtualHbar: BigInt(Math.round(Number(t.virtual_hbar) * 1e8)),
@@ -201,10 +207,11 @@ export async function botHoldings(db: any) {
     };
     out.push({
       address: t.address as string, name: t.name as string, symbol: t.symbol as string, graduated: !!t.graduated,
-      tokens: fromUnits(bal, t.contract), hbarOut: t.graduated ? 0 : Number(quoteSell(state, bal).hbarOut) / 1e8,
+      tokens: fromUnits(bal, t.contract), hbarOut: t.graduated || bal <= 0n ? 0 : Number(quoteSell(state, bal).hbarOut) / 1e8,
+      spent: spent.get(t.address) ?? 0, received: got.get(t.address) ?? 0,
     });
   }
-  return out;
+  return out.map((c) => ({ ...c, profit: c.received + c.hbarOut - c.spent }));
 }
 
 /** Sells a % of the bot's coin back to the curve. One transaction per call: a one-time approval first, then the sale. */
