@@ -18,7 +18,7 @@ export function CommunityModeration({ pin }: { pin: string }) {
   async function act(action: "remove" | "block" | "unblock", id?: string, author?: string) {
     if (!window.confirm(`${action === "remove" ? "Remove this message" : action === "block" ? "Block this wallet from chat" : "Unblock this wallet"}?`)) return;
     setBusy(true);
-    try { await moderate({ data: { pin, action, id, author } }); await Promise.all([qc.invalidateQueries({ queryKey: ["community-moderation"] }), qc.invalidateQueries({ queryKey: ["community"] })]); }
+    try { await moderate({ data: { pin, action, ...(id ? { id } : {}), ...(author ? { author } : {}) } }); await Promise.all([qc.invalidateQueries({ queryKey: ["community-moderation"] }), qc.invalidateQueries({ queryKey: ["community"] })]); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Moderation failed."); }
     finally { setBusy(false); }
   }
