@@ -26,7 +26,7 @@ export function fundWallet(name: FundWalletName) {
 
 /** The public key a wallet needs to open this account on Hedera. The key itself never leaves the server. */
 export function fundWalletPublicKey(name: FundWalletName) {
-  return fundWallet(name).publicKey;
+  return fundWallet(name).signingKey.compressedPublicKey;
 }
 
 /**
@@ -220,7 +220,7 @@ export async function fundWalletsInfo() {
     FUND_WALLETS.map(async (name) => {
       const w = fundWallet(name);
       const a = await mirrorAccount(w.address);
-      return { name, address: w.address.toLowerCase(), publicKey: w.publicKey, accountId: a?.accountId ?? null, hbar: a ? Number(a.tinybars) / 1e8 : 0 };
+      return { name, address: w.address.toLowerCase(), publicKey: w.signingKey.compressedPublicKey, accountId: a?.accountId ?? null, hbar: a ? Number(a.tinybars) / 1e8 : 0 };
     }),
   );
 }
