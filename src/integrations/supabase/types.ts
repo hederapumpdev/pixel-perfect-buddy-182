@@ -244,6 +244,105 @@ export type Database = {
           },
         ]
       }
+      holdout_payouts: {
+        Row: {
+          account: string
+          coins: Json
+          created_at: string
+          error: string | null
+          id: string
+          period: string
+          status: string
+          tinybars: number
+          tx_hash: string | null
+        }
+        Insert: {
+          account: string
+          coins?: Json
+          created_at?: string
+          error?: string | null
+          id: string
+          period: string
+          status?: string
+          tinybars: number
+          tx_hash?: string | null
+        }
+        Update: {
+          account?: string
+          coins?: Json
+          created_at?: string
+          error?: string | null
+          id?: string
+          period?: string
+          status?: string
+          tinybars?: number
+          tx_hash?: string | null
+        }
+        Relationships: []
+      }
+      holdout_periods: {
+        Row: {
+          coins: Json
+          created_at: string
+          period: string
+          planned_tinybars: number
+          pot_tinybars: number
+          residual_tinybars: number
+          status: string
+        }
+        Insert: {
+          coins?: Json
+          created_at?: string
+          period: string
+          planned_tinybars?: number
+          pot_tinybars?: number
+          residual_tinybars?: number
+          status?: string
+        }
+        Update: {
+          coins?: Json
+          created_at?: string
+          period?: string
+          planned_tinybars?: number
+          pot_tinybars?: number
+          residual_tinybars?: number
+          status?: string
+        }
+        Relationships: []
+      }
+      holdout_snapshots: {
+        Row: {
+          created_at: string
+          lots: Json
+          period: string
+          skipped: boolean
+          slot: string
+          supply: number
+          token: string
+          weights: Json
+        }
+        Insert: {
+          created_at?: string
+          lots?: Json
+          period: string
+          skipped?: boolean
+          slot: string
+          supply?: number
+          token: string
+          weights?: Json
+        }
+        Update: {
+          created_at?: string
+          lots?: Json
+          period?: string
+          skipped?: boolean
+          slot?: string
+          supply?: number
+          token?: string
+          weights?: Json
+        }
+        Relationships: []
+      }
       official_coins: {
         Row: {
           created_at: string
@@ -657,6 +756,42 @@ export type Database = {
           name?: string
           updated_at?: string
           wallet?: string
+        }
+        Relationships: []
+      }
+      wallet_transfers: {
+        Row: {
+          created_at: string
+          error: string | null
+          from_wallet: string
+          id: string
+          kind: string
+          recipient: string
+          status: string
+          tinybars: number
+          tx_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          from_wallet: string
+          id: string
+          kind: string
+          recipient: string
+          status?: string
+          tinybars?: number
+          tx_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          from_wallet?: string
+          id?: string
+          kind?: string
+          recipient?: string
+          status?: string
+          tinybars?: number
+          tx_hash?: string | null
         }
         Relationships: []
       }
