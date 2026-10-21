@@ -162,10 +162,14 @@ export async function runFeeSplit() {
     });
   }
 
-  // 4) Forward what is above the reserve.
+  // 4) Forward only received fee money — never the bot's own buy budget or reserve.
   const acc = await mirrorAccount(split.address);
-  const spare = (acc?.tinybars ?? 0n) - WALLET_RESERVE;
-  if (spare < MIN_FORWARD) return { step: "idle" };
+  if (!acc) return { step: "idle" };
+  await recordFeeInflows(db, acc.accountId);
+  const fees = await unforwardedFees(db, split.address);
+  const room = acc.tinybars - WALLET_RESERVE;
+  const spare = fees < room ? fees : room;
+  if (spare < MIN_FORWARD) return { step: "idle", fees: fees.toString() };
   const a = splitAmounts(spare);
   const team = fundWallet("team").address;
   const holdout = fundWallet("holdout").address;
