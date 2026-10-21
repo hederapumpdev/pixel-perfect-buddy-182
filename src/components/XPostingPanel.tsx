@@ -13,6 +13,7 @@ export function XPostingPanel({ pin }: { pin: string }) {
   const q = useQuery({ queryKey: ["x-posting"], queryFn: () => load({ data: { pin } }), refetchInterval: 30_000 });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [open, setOpen] = useState(false);
   async function update(enabled: boolean, resume = false) {
     setBusy(true); setError("");
     try { await save({ data: { pin, enabled, resume } }); await q.refetch(); }
@@ -30,9 +31,10 @@ export function XPostingPanel({ pin }: { pin: string }) {
     {(error || q.error) && <p className="text-sm text-destructive">{error || "Could not load X posts"}</p>}
     {q.data?.state?.pause_reason && <div className="space-y-2"><p className="text-sm text-destructive">{q.data.state.pause_reason}</p><Button variant="outline" disabled={busy} onClick={() => update(true, true)}>Resume after fixing X access</Button></div>}
     {!q.data?.posts.length && <p className="text-sm text-muted-foreground">Introduction queued.</p>}
-    <div className="divide-y divide-border">{q.data?.posts.map((post) => <article key={post.slot} className="space-y-1 py-3 text-sm">
+    <div className="divide-y divide-border">{(open ? q.data?.posts : q.data?.posts.slice(0, 5))?.map((post) => <article key={post.slot} className="space-y-1 py-3 text-sm">
       <div className="flex items-center justify-between gap-2"><span className="text-muted-foreground">{post.status} · {post.slot}</span>{post.tweet_id && <a href={`https://x.com/hederapumpdev/status/${post.tweet_id}`} target="_blank" rel="noreferrer" aria-label="Open tweet"><ExternalLink className="size-4" /></a>}</div>
       <p className="whitespace-pre-line break-words">{post.text}</p>{post.error && <p className="text-destructive">{post.error}</p>}
     </article>)}</div>
+    {(q.data?.posts.length ?? 0) > 5 && <Button variant="outline" size="sm" onClick={() => setOpen(!open)}>{open ? "Show less" : `Show all ${q.data?.posts.length} posts`}</Button>}
   </section>;
 }
