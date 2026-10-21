@@ -70,16 +70,30 @@ export const getFundWalletsAdmin = createServerFn({ method: "POST" })
   const db = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
     const { contractFeeStatus, fundWalletsInfo } = await import("./fund-wallets.server");
     const [wallets, contracts] = await Promise.all([fundWalletsInfo(), contractFeeStatus()]);
-    const { data: transfers } = await db.from("wallet_transfers").select("*").order("created_at", { ascending: false }).limit(20);
+    const { data: transfers } = await db.from("wallet_transfers").select("*").neq("tinybars", 0)
+      .order("created_at", { ascending: false }).limit(20);
     const { data: payouts } = await db.from("holdout_payouts").select("id,account,tinybars,status,tx_hash,created_at")
       .order("created_at", { ascending: false }).limit(20);
     const { data: staff } = await db.from("bot_payouts").select("id,recipient,hbar_amount,status,created_at").eq("kind", "staff")
       .order("created_at", { ascending: false }).limit(10);
+    const { data: periods } = await db.from("holdout_periods").select("period,status,pot_tinybars,planned_tinybars,residual_tinybars,coins")
+      .order("period", { ascending: false }).limit(8);
+    const { data: snaps } = await db.from("holdout_snapshots").select("period,slot,skipped").order("slot", { ascending: false }).limit(500);
+    const snapshots: Record<string, { slots: number; coins: number }> = {};
+    const seen = new Set<string>();
+    for (const r of snaps ?? []) {
+      const e = (snapshots[r.period] ??= { slots: 0, coins: 0 });
+      e.coins++;
+      const k = `${r.period}|${r.slot}`;
+      if (!seen.has(k)) { seen.add(k); e.slots++; }
+    }
     return {
       wallets,
       contracts: contracts.map((c) => ({ ...c, platformFees: s(c.platformFees) })),
       transfers: transfers ?? [],
       payouts: payouts ?? [],
       staff: staff ?? [],
+      periods: (periods ?? []).map((p: { coins: unknown[] }) => ({ ...p, coinCount: Array.isArray(p.coins) ? p.coins.length : 0, coins: undefined })),
+      snapshots,
     };
   });
