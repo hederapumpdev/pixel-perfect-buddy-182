@@ -1,5 +1,6 @@
 # Roadmap
-- [ ] Add per-coin manual logo-submission package and prepare HashPack/DaVinci automatic integration request; automatic submissions require provider support.
+- [x] Per-coin manual logo-submission package: copy details, JSON/logo downloads and official form/DaVinci links; five tests passed, real token downloads verified on desktop/mobile. HashPack integration request prepared in Files, not sent.
+- [ ] Automatic token-logo submission — blocked on HashPack/DaVinci providing an official integration and confirming contract-created token eligibility.
 - [x] Make the weekly contest prominent at the top of the homepage with the existing prize, eligibility rules and a direct contest/winners link.
 - [x] Staff: removed headcount limit, added removal while retaining earned claims, and enforced the shared 20% platform-share cap in the database. Nine tests passed; real PIN-unlocked admin loaded two members, showed removal controls, allowed remaining allocation and rejected an over-cap change without modifying staff.
 - [x] Bot buys: fixed rejected transactions (gas price below Hedera minimum) on all bot sends; no gas spent on associating while underfunded; cleared 3 never-executed failed buys so they run once funded. Bot wallet holds ~2.3 HBAR after the 100 HBAR contest prize and two official launches — needs ~30 HBAR per $2 buy cycle; waits for user funding + publish.
