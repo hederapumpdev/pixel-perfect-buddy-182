@@ -22,20 +22,34 @@ export function adminLoginMessage(accountId: string, time: string) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function adminStaff(db: any, accountId: string) {
-  const { data } = await db.from("staff_members").select("wallet,account_id").eq("account_id", accountId)
+  const { data } = await db.from("staff_members").select("wallet,account_id,name").eq("account_id", accountId)
     .eq("is_admin", true).is("left_at", null).maybeSingle();
-  return data as { wallet: string; account_id: string } | null;
+  return data as { wallet: string; account_id: string; name?: string } | null;
 }
 
 /** Accepts the owner PIN or a wallet-admin session; removed or demoted staff lose access immediately. */
-export async function requireAdmin(pin: unknown) {
+export async function requireAdmin(pin: unknown, action?: string) {
+  const actor = await adminActor(pin);
+  if (action) await logAdmin(actor, action);
+  return actor;
+}
+
+/** Records who did what in the admin area (best effort, never blocks the action). */
+export async function logAdmin(actor: string, action: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  await supabaseAdmin.from("admin_log").insert({ actor, action: action.slice(0, 300) }).then(() => {}, () => {});
+}
+
+async function adminActor(pin: unknown): Promise<string> {
   const p = typeof pin === "string" ? pin.trim() : "";
   const real = process.env["ADMIN_PIN"];
-  if (real && p && p === real.trim()) return;
+  if (real && p && p === real.trim()) return "Owner (PIN)";
   const m = /^w1\.(0\.0\.\d+)\.(\d+)\.([0-9a-f]{64})$/.exec(p);
   if (!m || Number(m[2]) < Date.now() || mac(`${m[1]}.${m[2]}`) !== m[3] || !m[1]) throw new Error("Wrong PIN");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  if (!(await adminStaff(supabaseAdmin, m[1]!))) throw new Error("Wrong PIN");
+  const s = await adminStaff(supabaseAdmin, m[1]!);
+  if (!s) throw new Error("Wrong PIN");
+  return `${s.name ?? "Team"} (${m[1]})`;
 }
 
 export async function isAdmin(pin: unknown) {
@@ -47,7 +61,8 @@ export async function walletAdminLogin(accountId: string, time: string, signatur
   const t = Date.parse(time);
   if (!Number.isFinite(t) || Math.abs(Date.now() - t) > MAX_SKEW_MS) throw new Error("Login expired, try again");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  if (!(await adminStaff(supabaseAdmin, accountId))) throw new Error("This wallet has no admin access");
+  const staff = await adminStaff(supabaseAdmin, accountId);
+  if (!staff) throw new Error("This wallet has no admin access");
   const r = await fetch(`${MIRROR_URL}/api/v1/accounts/${accountId}`);
   if (!r.ok) throw new Error("Wallet not found on Hedera");
   const acct = (await r.json()) as { key?: { _type?: string; key?: string }; evm_address?: string };
@@ -67,6 +82,7 @@ export async function walletAdminLogin(accountId: string, time: string, signatur
     } catch { ok = false; }
   }
   if (!ok) throw new Error("Signature check failed");
+  await logAdmin(`${staff.name ?? "Team"} (${accountId})`, "Logged in with wallet");
   const exp = Date.now() + TOKEN_HOURS * 3600_000;
   return `w1.${accountId}.${exp}.${mac(`${accountId}.${exp}`)}`;
 }
