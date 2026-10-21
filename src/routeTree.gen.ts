@@ -16,6 +16,7 @@ import { Route as ContestRouteImport } from './routes/contest'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as DepositRouteImport } from './routes/deposit'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as HoldoutRouteImport } from './routes/holdout'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -78,6 +79,11 @@ const DepositRoute = DepositRouteImport.update({
 const ExploreRoute = ExploreRouteImport.update({
   id: '/explore',
   path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HoldoutRoute = HoldoutRouteImport.update({
+  id: '/holdout',
+  path: '/holdout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/create': typeof CreateRoute
   '/deposit': typeof DepositRoute
   '/explore': typeof ExploreRoute
+  '/holdout': typeof HoldoutRoute
   '/how-it-works': typeof HowItWorksRoute
   '/leaderboard': typeof LeaderboardRoute
   '/profile': typeof ProfileRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/create': typeof CreateRoute
   '/deposit': typeof DepositRoute
   '/explore': typeof ExploreRoute
+  '/holdout': typeof HoldoutRoute
   '/how-it-works': typeof HowItWorksRoute
   '/leaderboard': typeof LeaderboardRoute
   '/profile': typeof ProfileRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/create': typeof CreateRoute
   '/deposit': typeof DepositRoute
   '/explore': typeof ExploreRoute
+  '/holdout': typeof HoldoutRoute
   '/how-it-works': typeof HowItWorksRoute
   '/leaderboard': typeof LeaderboardRoute
   '/profile': typeof ProfileRoute
@@ -356,6 +365,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/deposit'
     | '/explore'
+    | '/holdout'
     | '/how-it-works'
     | '/leaderboard'
     | '/profile'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/deposit'
     | '/explore'
+    | '/holdout'
     | '/how-it-works'
     | '/leaderboard'
     | '/profile'
@@ -430,6 +441,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/deposit'
     | '/explore'
+    | '/holdout'
     | '/how-it-works'
     | '/leaderboard'
     | '/profile'
@@ -468,6 +480,7 @@ export interface RootRouteChildren {
   CreateRoute: typeof CreateRoute
   DepositRoute: typeof DepositRoute
   ExploreRoute: typeof ExploreRoute
+  HoldoutRoute: typeof HoldoutRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LeaderboardRoute: typeof LeaderboardRoute
   ProfileRoute: typeof ProfileRoute
@@ -547,6 +560,13 @@ declare module '@tanstack/react-router' {
       path: '/explore'
       fullPath: '/explore'
       preLoaderRoute: typeof ExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/holdout': {
+      id: '/holdout'
+      path: '/holdout'
+      fullPath: '/holdout'
+      preLoaderRoute: typeof HoldoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -756,6 +776,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreateRoute: CreateRoute,
   DepositRoute: DepositRoute,
   ExploreRoute: ExploreRoute,
+  HoldoutRoute: HoldoutRoute,
   HowItWorksRoute: HowItWorksRoute,
   LeaderboardRoute: LeaderboardRoute,
   ProfileRoute: ProfileRoute,
