@@ -56,3 +56,20 @@ export function graduationDiscordMessage(coin: PromoCoin) {
   const symbol = escapeMd(coin.symbol.slice(0, 12));
   return `🎓 **${name} ($${symbol}) has graduated!**\n\nThe bonding curve is full and liquidity is now listed on SaucerSwap.\n\nCoin: ${coinUrl(coin.address)}\n\n${RISK}`;
 }
+
+/** One-off Hold Out announcement: one post per channel, ever. */
+export const holdoutSlot = "holdout:announce";
+
+export function holdoutMessages() {
+  const x = `🫂 Hold Out: weekly HBAR rewards for HederaPump holders.
+
+Hold at least 7 days — the longer you hold, the bigger your share (up to 2× after 60 days). Funded by trading fees.
+
+First pot counts Monday 26 October.
+https://hederapump.dev
+
+#Hedera #HederaPump`;
+  const telegram = `<b>🫂 Hold Out</b>\n\nWeekly HBAR rewards for <a href="https://hederapump.dev">HederaPump</a> holders.\n\nHold at least 7 days — the longer you hold, the bigger your share, up to 2× after 60 days. Every coin has its own weekly pot, funded by a slice of trading fees.\n\nFirst pot counts from Monday 26 October.\n\n${RISK}`;
+  const discord = `🫂 **Hold Out**\n\nWeekly HBAR rewards for HederaPump holders.\n\nHold at least 7 days — the longer you hold, the bigger your share, up to 2× after 60 days. Every coin has its own weekly pot, funded by a slice of trading fees.\n\nFirst pot counts from Monday 26 October.\n\nhttps://hederapump.dev\n\n${RISK}`;
+  return { x, telegram, discord };
+}
