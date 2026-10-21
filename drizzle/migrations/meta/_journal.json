@@ -183,6 +183,13 @@
       "when": 1792508788142,
       "tag": "0025_staff_shared_allocation_cap",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792611573154,
+      "tag": "0026_migration",
+      "breakpoints": true
     }
   ]
 }
