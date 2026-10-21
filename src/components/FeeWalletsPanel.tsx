@@ -100,6 +100,31 @@ export function FeeWalletsPanel({ pin }: { pin: string }) {
           </ul>
         </div>
       </div>
+
+      <div>
+        <h3 className="font-semibold">Hold Out weeks</h3>
+        <div className="mt-1 overflow-x-auto rounded-lg border border-border">
+          <table className="w-full text-xs">
+            <thead className="bg-muted/40 text-left text-muted-foreground"><tr><th className="p-2">Week</th><th className="p-2">Status</th><th className="p-2">Pot</th><th className="p-2">Paid out</th><th className="p-2">Carried over</th><th className="p-2">Coins</th><th className="p-2">Snapshots</th></tr></thead>
+            <tbody>
+              {(q.data?.periods ?? []).map((p: { period: string; status: string; pot_tinybars: number; planned_tinybars: number; residual_tinybars: number; coinCount: number }) => (
+                <tr key={p.period} className="border-t border-border">
+                  <td className="p-2 font-mono">{p.period}</td><td className="p-2">{p.status}</td>
+                  <td className="p-2 font-mono">{hb(p.pot_tinybars)}</td><td className="p-2 font-mono">{hb(p.planned_tinybars)}</td>
+                  <td className="p-2 font-mono">{hb(p.residual_tinybars)}</td><td className="p-2">{p.coinCount}</td>
+                  <td className="p-2">{q.data?.snapshots?.[p.period]?.slots ?? 0}/4</td>
+                </tr>
+              ))}
+              {Object.entries(q.data?.snapshots ?? {}).filter(([k]) => !(q.data?.periods ?? []).some((p: { period: string }) => p.period === k)).map(([k, v]) => (
+                <tr key={k} className="border-t border-border"><td className="p-2 font-mono">{k}</td><td className="p-2">collecting</td><td className="p-2" colSpan={4}>—</td><td className="p-2">{v.slots}/4</td></tr>
+              ))}
+              {!(q.data?.periods ?? []).length && !Object.keys(q.data?.snapshots ?? {}).length && (
+                <tr><td className="p-2 text-muted-foreground" colSpan={7}>No Hold Out week yet — counting starts Monday 26 October.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
   );
 }
