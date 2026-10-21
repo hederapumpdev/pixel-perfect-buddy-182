@@ -56,7 +56,7 @@ export function FeeWalletsPanel({ pin }: { pin: string }) {
       <div className="space-y-2">
         {(q.data?.contracts ?? []).map((c) => {
           const done = !!split && c.feeRecipient?.toLowerCase() === split.address;
-          const to = c.feeRecipient ? (c.feeRecipient.toLowerCase() === "0x" + "a6ace9".padStart(40, "0") ? "0.0.10923241 (your wallet)" : `0.0.${parseInt(c.feeRecipient.slice(-12), 16)}`) : "?";
+          const to = c.feeRecipient ? `0.0.${parseInt(c.feeRecipient.slice(-12), 16)}` : "?";
           return (
             <div key={c.contract} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card p-3 text-sm">
               <div className="min-w-0">
