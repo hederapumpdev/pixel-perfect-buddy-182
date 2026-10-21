@@ -115,7 +115,7 @@ export async function sendOnce(
       to: row.recipient,
       value: row.data ? 0n : row.tinybars * WEI,
       ...(row.data ? { data: row.data } : {}),
-      gasLimit: row.data ? 200_000n : 50_000n,
+      gasLimit: row.data ? 200_000n : row.kind === "fund" ? 600_000n : 50_000n, // opening a new account needs extra gas
       ...(nonce === undefined ? {} : { nonce }),
       ...(await botFee(w)),
     });
@@ -149,7 +149,7 @@ export async function runFeeSplit() {
     const w = fundWallet(name);
     if (await mirrorAccount(w.address)) continue;
     const bot = botWallet();
-    return sendOnce(db, bot, { id: `fund:${name}`, kind: "fund", from_wallet: bot.address, recipient: w.address, tinybars: FUND_AMOUNT });
+    return sendOnce(db, bot, { id: `fund:${name}:v2`, kind: "fund", from_wallet: bot.address, recipient: w.address, tinybars: FUND_AMOUNT });
   }
 
   const hour = new Date().toISOString().slice(0, 13);
