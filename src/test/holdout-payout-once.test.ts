@@ -31,7 +31,7 @@ describe("transfers are sent at most once", () => {
     const w = { ...wallet(), sendTransaction: vi.fn(async () => { throw new Error("timeout"); }) };
     const row = { id: "split:h:holdout", kind: "split", from_wallet: "x", recipient: "0x1", tinybars: 5n };
     expect((await sendOnce(db, w as never, row)).step).toBe("send error");
-    expect(db.rows.get(row.id)?.status).toBe("unknown");
+    expect(db.rows.get(row.id)?.["status"]).toBe("unknown");
     expect((await sendOnce(db, w as never, row)).step).toBe("claimed elsewhere");
     expect(w.sendTransaction).toHaveBeenCalledTimes(1);
   });

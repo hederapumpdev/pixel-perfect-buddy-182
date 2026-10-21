@@ -103,7 +103,7 @@ async function takeSnapshots(db: Db, now: number, max = 3) {
         }
         supply += b.balance;
         lots[b.account] = updateLots(prevLots[b.account] ?? [], b.balance, s.t);
-        const w = lotWeight(lots[b.account], s.t);
+        const w = lotWeight(lots[b.account] ?? [], s.t);
         if (w > 0n) weights[b.account] = w.toString();
       }
       const { error } = await db.from("holdout_snapshots").insert({

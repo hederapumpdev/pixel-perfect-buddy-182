@@ -95,7 +95,7 @@ function HoldOut() {
           <h2 className="text-xl font-semibold">Recent payouts</h2>
           {!d?.payouts.length ? <p className="mt-2 text-sm text-muted-foreground">No payouts yet.</p> : (
             <ul className="mt-2 divide-y divide-border rounded-lg border border-border text-sm">
-              {d.payouts.map((p) => (
+              {d.payouts.map((p: { period: string; account: string; tinybars: string | number; status: string; tx_hash: string | null }) => (
                 <li key={`${p.period}${p.account}`} className="flex flex-wrap items-center justify-between gap-2 p-2">
                   <HederaAddress address={p.account} />
                   <span className="text-muted-foreground">Week of {p.period}</span>

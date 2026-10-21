@@ -69,7 +69,7 @@ export async function sendOnce(
     const tx = await w.sendTransaction({
       to: row.recipient,
       value: row.data ? 0n : row.tinybars * WEI,
-      data: row.data,
+      ...(row.data ? { data: row.data } : {}),
       gasLimit: row.data ? 200_000n : 50_000n,
       ...(nonce === undefined ? {} : { nonce }),
       ...(await botFee(w)),

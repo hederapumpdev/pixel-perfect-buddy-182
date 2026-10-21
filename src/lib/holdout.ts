@@ -54,7 +54,7 @@ export function updateLots(lots: Lot[], balance: bigint, at: number): Lot[] {
   let total = out.reduce((s, [a]) => s + a, 0n);
   if (balance > total) out.push([balance - total, at]);
   while (total > balance && out.length) {
-    const last = out[out.length - 1];
+    const last = out[out.length - 1]!;
     const cut = total - balance < last[0] ? total - balance : last[0];
     last[0] -= cut;
     total -= cut;
