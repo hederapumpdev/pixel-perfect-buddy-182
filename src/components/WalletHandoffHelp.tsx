@@ -1,9 +1,13 @@
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
+
+const MOBILE = "(max-width: 768px)";
 
 /**
  * Shown when the wallet app was asked to open but never came back — the usual
  * cause on iPhone is Safari's small "Open in HashPack?" prompt going unnoticed.
+ * Desktop users get a QR code instead, so this stays out of their way.
  */
 export function WalletHandoffHelp({
   uri,
@@ -14,7 +18,18 @@ export function WalletHandoffHelp({
   retry: () => void;
   onClose: () => void;
 }) {
-  if (typeof document === "undefined") return null;
+  const [mobile, setMobile] = useState(
+    () => typeof window !== "undefined" && !!window.matchMedia?.(MOBILE).matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE);
+    const on = () => setMobile(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+
+  if (typeof document === "undefined" || !mobile) return null;
 
   const copy = async () => {
     try {
