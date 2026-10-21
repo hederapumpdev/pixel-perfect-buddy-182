@@ -16,10 +16,55 @@ const FUND_AMOUNT = 5n * 100_000_000n + 50_000_000n; // initial deposit from the
 const MIN_FORWARD = 100_000_000n; // only forward when ≥ 1 HBAR is spare
 
 export function fundWallet(name: FundWalletName) {
+  // The bot wallet itself receives all platform fees and forwards them.
+  if (name === "split") return botWallet();
   const seed = process.env["BOT_SEED"];
   if (!seed) throw new Error("BOT_SEED missing");
   const provider = new ethers.JsonRpcProvider(EVM_RPC_URL, EVM_CHAIN_ID, { staticNetwork: true });
   return new ethers.Wallet(ethers.keccak256(ethers.toUtf8Bytes(`${seed}:hederapump-fund-wallet:${name}`)), provider);
+}
+
+/**
+ * Records every fee HBAR the bot received from a launchpad contract during someone else's
+ * transaction (per-trade fee pushes). The bot's own buys/sells are excluded so its trading
+ * budget is never forwarded. Unique `fee:<timestamp>` ids make each inflow count once.
+ */
+async function recordFeeInflows(db: Db, botId: string) {
+  const { data: last } = await db.from("wallet_transfers").select("tx_hash").eq("kind", "fee_in").order("tx_hash", { ascending: false }).limit(1);
+  const since = last?.[0]?.tx_hash as string | undefined;
+  if (!since) {
+    // Start counting from now; nothing earlier is treated as fee money.
+    const now = (Date.now() / 1000).toFixed(9);
+    await db.from("wallet_transfers").insert({ id: "fee:start", kind: "fee_in", from_wallet: "-", recipient: botId, tinybars: "0", status: "done", tx_hash: now });
+    return;
+  }
+  const r = await fetch(`${MIRROR_URL}/api/v1/transactions?account.id=${botId}&timestamp=gt:${since}&order=asc&limit=100`);
+  if (!r.ok) return;
+  const j = await r.json();
+  const contracts = new Set(PUMP_CONTRACTS);
+  for (const t of j.transactions ?? []) {
+    if (t.result !== "SUCCESS") continue;
+    const payer = String(t.transaction_id ?? "").split("-")[0];
+    const transfers = (t.transfers ?? []) as { account: string; amount: number }[];
+    const fromContract = transfers.some((x) => contracts.has(x.account) && x.amount < 0);
+    const credit = transfers.filter((x) => x.account === botId).reduce((s, x) => s + BigInt(x.amount), 0n);
+    const amount = payer !== botId && fromContract && credit > 0n ? credit : 0n;
+    await db.from("wallet_transfers").insert({
+      id: `fee:${t.consensus_timestamp}`, kind: "fee_in", from_wallet: payer, recipient: botId, tinybars: amount.toString(), status: "done", tx_hash: t.consensus_timestamp,
+    });
+  }
+}
+
+/** Fee HBAR received (pushes + completed contract claims) minus what was already forwarded. */
+async function unforwardedFees(db: Db, bot: string) {
+  const { data } = await db.from("wallet_transfers").select("kind,tinybars,status,from_wallet").in("kind", ["fee_in", "claim_in", "split"]);
+  let total = 0n;
+  for (const t of data ?? []) {
+    const v = BigInt(t.tinybars ?? 0);
+    if (t.kind === "split" && t.from_wallet?.toLowerCase() === bot.toLowerCase()) total -= v; // any status: never forward twice
+    else if (t.kind !== "split" && t.status === "done") total += v;
+  }
+  return total;
 }
 
 export const idToEvm = (id: string) => "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
