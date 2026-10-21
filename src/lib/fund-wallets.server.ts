@@ -29,6 +29,11 @@ export function fundWalletPublicKey(name: FundWalletName) {
   return fundWallet(name).signingKey.compressedPublicKey;
 }
 
+/** An opened wallet gets the bot's starting deposit once, only while it can't yet cover its own gas. */
+export function needsStartDeposit(tinybars: bigint, alreadyFunded: boolean) {
+  return !alreadyFunded && tinybars < WALLET_RESERVE;
+}
+
 /**
  * A deposit whose receipt says "reverted" is known not to have arrived, so the next attempt may
  * use a fresh id. A deposit whose result is still unknown is never resent.
@@ -126,7 +131,7 @@ type Db = any;
 export async function sendOnce(
   db: Db,
   w: ethers.Wallet,
-  row: { id: string; kind: string; from_wallet: string; recipient: string; tinybars: bigint; data?: string },
+  row: { id: string; kind: string; from_wallet: string; recipient: string; tinybars: bigint; data?: string; gas?: bigint },
   nonce?: number,
 ) {
   const { error } = await db.from("wallet_transfers").insert({
@@ -138,7 +143,7 @@ export async function sendOnce(
       to: row.recipient,
       value: row.data ? 0n : row.tinybars * WEI,
       ...(row.data ? { data: row.data } : {}),
-      gasLimit: row.data ? 200_000n : row.kind === "fund" ? 600_000n : 50_000n, // opening a new account needs extra gas
+      gasLimit: row.gas ?? (row.data ? 200_000n : 50_000n),
       ...(nonce === undefined ? {} : { nonce }),
       ...(await botFee(w)),
     });
@@ -167,17 +172,20 @@ export async function runFeeSplit() {
   }
   if ((sent ?? []).length) return { step: "confirming" };
 
-  // 2) Create each wallet once with a bot deposit.
+  // 2) Give each opened wallet its one-time starting deposit (gas for its own payouts).
   for (const name of FUND_WALLETS) {
+    if (name === "split") continue; // the bot wallet funds the others
     const w = fundWallet(name);
-    if (await mirrorAccount(w.address)) continue;
-    // Hedera needs a real account before an address can hold HBAR, so a plain deposit here
-    // reverts until the wallet is opened in admin. Nothing is paid twice: each attempt claims
-    // its own id and a reverted one is allowed a fresh id.
+    const acc = await mirrorAccount(w.address);
+    // Hedera needs a real account before an address can hold HBAR: wait until it is opened in admin.
+    if (!acc) continue;
+    const { data: done } = await db.from("wallet_transfers").select("id").eq("kind", "fund").like("id", `fund:${name}:%`).eq("status", "done").limit(1);
+    if (!needsStartDeposit(acc.tinybars, (done ?? []).length > 0)) continue;
+    // Nothing is paid twice: each attempt claims its own id, only a confirmed revert gets a new one.
     const id = await fundAttempt(db, name);
     if (!id) return { step: `funding ${name} is uncertain` };
     const bot = botWallet();
-    return sendOnce(db, bot, { id, kind: "fund", from_wallet: bot.address, recipient: w.address, tinybars: FUND_AMOUNT });
+    return sendOnce(db, bot, { id, kind: "fund", from_wallet: bot.address, recipient: w.address, tinybars: FUND_AMOUNT, gas: 50_000n });
   }
 
   const hour = new Date().toISOString().slice(0, 13);

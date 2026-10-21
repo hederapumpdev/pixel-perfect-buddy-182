@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ethers } from "ethers";
-import { FUND_WALLETS, fundWallet, fundWalletPublicKey } from "@/lib/fund-wallets.server";
+import { FUND_WALLETS, fundWallet, fundWalletPublicKey, needsStartDeposit } from "@/lib/fund-wallets.server";
 
 // The keys are derived from a secret at runtime; a fixed seed keeps this test offline.
 process.env["BOT_SEED"] = "unit-test-seed";
@@ -20,5 +20,17 @@ describe("fee wallet keys", () => {
   it("the three fee wallets are separate accounts", () => {
     const addrs = FUND_WALLETS.map((n) => fundWallet(n).address.toLowerCase());
     expect(new Set(addrs).size).toBe(3);
+  });
+});
+
+describe("starting deposit for opened fee wallets", () => {
+  it("an opened wallet with 0 HBAR gets the deposit", () => {
+    expect(needsStartDeposit(0n, false)).toBe(true);
+  });
+  it("a wallet that already received its deposit never gets a second one", () => {
+    expect(needsStartDeposit(0n, true)).toBe(false);
+  });
+  it("a wallet already holding 5 HBAR or more needs no deposit", () => {
+    expect(needsStartDeposit(5n * 100_000_000n, false)).toBe(false);
   });
 });
