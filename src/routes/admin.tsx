@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
-import { checkAdminPin, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/chain.functions";
+import { checkAdminPin, walletAdminLogin, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/chain.functions";
 import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
@@ -65,6 +65,29 @@ const PIN_KEY = "hederaPump.adminPin";
 
 function Admin() {
   const check = useServerFn(checkAdminPin);
+  const walletLogin = useServerFn(walletAdminLogin);
+  const wallet = useWallet();
+  async function unlockWithWallet() {
+    setErr(null);
+    if (!wallet.accountId) {
+      await wallet.connect().catch(() => {});
+      return;
+    }
+    setBusy(true);
+    try {
+      const time = new Date().toISOString();
+      const msg = `HederaPump admin login\nWallet: ${wallet.accountId}\nTime: ${time}`;
+      const sig = await wallet.signText(msg);
+      const { token } = await walletLogin({ data: { accountId: wallet.accountId, time, ...sig } });
+      try { sessionStorage.setItem(PIN_KEY, token); } catch { /* storage blocked */ }
+      setPin(token);
+      setOk(true);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Wallet login failed");
+    } finally {
+      setBusy(false);
+    }
+  }
   const [ok, setOk] = useState(false);
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
@@ -117,6 +140,11 @@ function Admin() {
           <Button type="submit" className="w-full" disabled={busy}>
             {busy ? "Checking…" : "Open"}
           </Button>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" /></div>
+          <Button type="button" variant="outline" className="w-full" disabled={busy} onClick={unlockWithWallet}>
+            {wallet.accountId ? `Sign in with team wallet ${wallet.accountId}` : "Connect team wallet"}
+          </Button>
+          <p className="text-xs text-muted-foreground">Signing is free — no transaction, no HBAR.</p>
           {err && <p className="text-sm text-destructive">{err}</p>}
         </form>
       </Shell>

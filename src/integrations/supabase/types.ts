@@ -232,6 +232,7 @@ export type Database = {
           avatar: string | null
           created_at: string
           earned_before: number
+          is_admin: boolean
           joined_at: string
           left_at: string | null
           name: string
@@ -244,6 +245,7 @@ export type Database = {
           avatar?: string | null
           created_at?: string
           earned_before?: number
+          is_admin?: boolean
           joined_at?: string
           left_at?: string | null
           name: string
@@ -256,6 +258,7 @@ export type Database = {
           avatar?: string | null
           created_at?: string
           earned_before?: number
+          is_admin?: boolean
           joined_at?: string
           left_at?: string | null
           name?: string

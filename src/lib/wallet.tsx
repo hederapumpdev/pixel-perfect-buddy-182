@@ -55,6 +55,8 @@ type WalletCtx = {
   checkDeploy: (bytecode: string) => Promise<DeployProgress>;
   /** Last known deploy progress, so the UI can say which approval is next. */
   deployProgress: DeployProgress | null;
+  /** Signs a plain-text message (no transaction, no HBAR). */
+  signText: (text: string) => Promise<{ signature?: string; evmSignature?: string }>;
   refresh: () => void;
 };
 
@@ -526,6 +528,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return p;
   }, [resolveDeploy]);
 
+  const signText: WalletCtx["signText"] = useCallback(async (text) => {
+    if (evmSigner.current) return { evmSignature: await evmSigner.current.signMessage(text) };
+    const [r] = await signer().sign([new TextEncoder().encode(text)]);
+    if (!r) throw new Error("Wallet did not sign");
+    const hex = Array.from(r.signature, (b) => b.toString(16).padStart(2, "0")).join("");
+    return { signature: hex };
+  }, []);
+
   return (
     <Ctx.Provider
       value={{
@@ -543,6 +553,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         deploy,
         checkDeploy,
         deployProgress,
+        signText,
         refresh: () => setTick((t) => t + 1),
       }}
     >

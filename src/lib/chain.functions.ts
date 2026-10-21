@@ -238,8 +238,7 @@ export const saveBotSettings = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    const pin = process.env["ADMIN_PIN"];
-    if (!pin || data.pin.trim() !== pin.trim()) throw new Error("Wrong PIN");
+    await (await import("./admin-auth.server")).requireAdmin(data.pin);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("bot_settings")
@@ -249,6 +248,21 @@ export const saveBotSettings = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Wallet login for staff admins: verifies a signed message, returns an admin session. */
+export const walletAdminLogin = createServerFn({ method: "POST" })
+  .inputValidator((d: { accountId: string; time: string; signature?: string; evmSignature?: string }) => {
+    if (!/^0\.0\.\d+$/.test(String(d.accountId))) throw new Error("Invalid wallet");
+    const sig = String(d.signature ?? "");
+    const evm = d.evmSignature ? String(d.evmSignature) : undefined;
+    if (!evm && !/^[0-9a-f]{128}$/i.test(sig)) throw new Error("Invalid signature");
+    if (evm && !/^0x[0-9a-f]{130}$/i.test(evm)) throw new Error("Invalid signature");
+    return { accountId: d.accountId, time: String(d.time).slice(0, 40), signature: sig, evmSignature: evm };
+  })
+  .handler(async ({ data }) => {
+    const { walletAdminLogin: login } = await import("./admin-auth.server");
+    return { token: await login(data.accountId, data.time, data.signature, data.evmSignature) };
+  });
+
 /** Checks the admin PIN (gates the admin page). */
 export const checkAdminPin = createServerFn({ method: "POST" })
   .inputValidator((d: { pin: string }) => {
@@ -256,8 +270,7 @@ export const checkAdminPin = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    const pin = process.env["ADMIN_PIN"];
-    return { ok: !!pin && data.pin.trim() === pin.trim() };
+    return { ok: await (await import("./admin-auth.server")).isAdmin(data.pin) };
   });
 
 /** Bot settings + recent bot buys for the admin page (PIN-protected). */
@@ -267,8 +280,7 @@ export const getBotAdmin = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    const pin = process.env["ADMIN_PIN"];
-    if (!pin || data.pin.trim() !== pin.trim()) throw new Error("Wrong PIN");
+    await (await import("./admin-auth.server")).requireAdmin(data.pin);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [s, b] = await Promise.all([
       supabaseAdmin.from("bot_settings").select("*").eq("id", 1).maybeSingle(),

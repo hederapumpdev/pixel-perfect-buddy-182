@@ -9,8 +9,7 @@ export const getUserStats = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    const pin = process.env["ADMIN_PIN"];
-    if (!pin || data.pin.trim() !== pin.trim()) throw new Error("Wrong PIN");
+    await (await import("./admin-auth.server")).requireAdmin(data.pin);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: stats, error } = await supabaseAdmin.rpc("admin_user_stats");
     if (error || !stats) throw new Error("Loading failed");

@@ -31,3 +31,4 @@
 - Legacy SaucerSwap assistance exports synced pre-v4 HTS information client-side with Davinci Pics guidance; never imply submission success or attempt metadata updates because those tokens lack update keys.
 - BondingProgress uses synced reserves for a display-only HBAR/USD graduation estimate, including the existing fee; never use it to execute trades.
 - Token logo submission packages are client-side exports of synced coin data; external forms remain manual, with no automatic-submission or approval claims.
+- Admin access = owner PIN or a short-lived HMAC session from a wallet-signed login by an active staff member with is_admin; every admin server fn goes through requireAdmin in admin-auth.server.ts so removal revokes access immediately.
