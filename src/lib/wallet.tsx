@@ -9,8 +9,9 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
-import { connectionDeadline, openWalletPicker, WalletConnectionCancelled } from "./wallet-connection";
+import { connectionDeadline, openWalletPicker, WalletConnectionCancelled, type WalletHandoff } from "./wallet-connection";
 import { deployStep, deployProgressOf, findDeployOnMirror, type DeployProgress, type DeployState } from "./hashpack-deploy";
+import { WalletHandoffHelp } from "@/components/WalletHandoffHelp";
 import {
   MIRROR_URL,
   NETWORK,
@@ -138,6 +139,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<"hashpack" | "email" | null>(null);
   const evmSigner = useRef<EvmSigner | null>(null);
   const [deployProgress, setDeployProgress] = useState<DeployProgress | null>(null);
+  // Set when the wallet app was asked to open but never came back.
+  const [handoff, setHandoff] = useState<WalletHandoff | null>(null);
 
   const attachEmail = useCallback(async (w: import("@web3auth/modal").Web3Auth) => {
     if (!w.provider) return;
@@ -241,7 +244,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     try {
       try {
         const c = await init();
-        await openWalletPicker(c);
+        await openWalletPicker(c, { onHandoff: setHandoff });
       } catch (e) {
         // A stale WalletConnect pairing makes the relay reject messages
         // ("Failed to publish custom payload"). Clear it and retry once.
@@ -259,7 +262,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         initPromise.current = null;
         toast.message("Resetting the wallet connection, trying again…");
         const c = await init();
-        await openWalletPicker(c);
+        await openWalletPicker(c, { onHandoff: setHandoff });
       }
       syncAccount();
     } catch (e) {
@@ -268,6 +271,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } finally {
       connectInFlight.current = false;
       setConnecting(false);
+      setHandoff(null);
     }
   }, [init, syncAccount]);
 
@@ -558,6 +562,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
+      {handoff && (
+        <WalletHandoffHelp uri={handoff.uri} retry={handoff.retry} onClose={() => setHandoff(null)} />
+      )}
     </Ctx.Provider>
   );
 }
