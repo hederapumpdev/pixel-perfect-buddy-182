@@ -55,9 +55,9 @@ async function recordFeeInflows(db: Db, botId: string) {
   }
 }
 
-/** Fee HBAR received (pushes + completed contract claims) minus what was already forwarded. */
+/** Fee HBAR received (pushes + completed contract claims, kind "claim") minus what was already forwarded. */
 async function unforwardedFees(db: Db, bot: string) {
-  const { data } = await db.from("wallet_transfers").select("kind,tinybars,status,from_wallet").in("kind", ["fee_in", "claim_in", "split"]);
+  const { data } = await db.from("wallet_transfers").select("kind,tinybars,status,from_wallet").in("kind", ["fee_in", "claim", "split"]);
   let total = 0n;
   for (const t of data ?? []) {
     const v = BigInt(t.tinybars ?? 0);
