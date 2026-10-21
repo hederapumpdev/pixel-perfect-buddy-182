@@ -1,4 +1,5 @@
 import { OfficialBadge } from "@/components/OfficialBadge";
+import { TokenLogoSubmission } from "@/components/TokenLogoSubmission";
 import { ShareButton } from "@/components/ShareCard";
 import { Comments, Holders } from "@/components/CoinExtras";
 import { FollowButton } from "@/components/PriceAlerts";
@@ -275,6 +276,7 @@ function TokenPage() {
         <AddrRow label={isV2(t.contract) ? "Token ID" : "CA"} addr={t.address} href={`${HASHSCAN_URL}/${isV2(t.contract) ? "token" : "contract"}/${t.address}`} />
         <AddrRow label="Creator" addr={t.creator} href={`${HASHSCAN_URL}/account/${t.creator}`} />
       </div>
+      <div className="mt-3"><TokenLogoSubmission token={t} /></div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
         <aside className="order-first space-y-4 lg:order-last lg:sticky lg:top-20 lg:self-start">
