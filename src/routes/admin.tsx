@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
-import { checkAdminPin, walletAdminLogin, getAdminLog, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/chain.functions";
+import { checkAdminPin, walletAdminLogin, getAdminLog, getBotHoldings, sellBotCoin, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/chain.functions";
 import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
@@ -179,6 +179,7 @@ function Admin() {
         <LegacyTokenInfo />
         <StaffPanel pin={pin || sessionStorage.getItem(PIN_KEY) || ""} />
         <BotPanel />
+        <BotHoldings />
         <Deploy />
       </div>
     </Shell>
@@ -693,6 +694,63 @@ function AdminLog() {
         ))}
       </div>
       {rows.length > 5 && <Button variant="outline" size="sm" onClick={() => setOpen(!open)}>{open ? "Show less" : `Show all ${rows.length}`}</Button>}
+    </section>
+  );
+}
+
+function BotHoldings() {
+  const load = useServerFn(getBotHoldings);
+  const sell = useServerFn(sellBotCoin);
+  const [busy, setBusy] = useState<string | null>(null);
+  const pin = (() => {
+    try {
+      return sessionStorage.getItem(PIN_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  })();
+  const q = useQuery({ queryKey: ["bot-holdings"], queryFn: () => load({ data: { pin } }), refetchInterval: 120_000 });
+  async function doSell(token: string, symbol: string, pct: number) {
+    if (!confirm(`Sell ${pct}% of the bot's ${symbol}?`)) return;
+    setBusy(token);
+    try {
+      const r = await sell({ data: { pin, token, pct } });
+      toast.success(r.message);
+      await q.refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Sale failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+  return (
+    <section className="space-y-3">
+      <h2 className="text-xl font-semibold">Bot coins</h2>
+      <p className="text-sm text-muted-foreground">Coins the bot bought and still holds. Selling sends HBAR back to the bot wallet. The first sale of a coin needs a one-time approval tap.</p>
+      {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {q.isError && <p className="text-sm text-destructive">Could not load bot coins.</p>}
+      {q.data?.length === 0 && <p className="text-sm text-muted-foreground">The bot holds no coins.</p>}
+      <div className="space-y-2">
+        {q.data?.map((c) => (
+          <div key={c.address} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3">
+            <div className="min-w-0 flex-1">
+              <Link to="/token/$id" params={{ id: c.address }} className="font-semibold hover:underline">{c.name} ({c.symbol})</Link>
+              <p className="font-mono text-xs text-muted-foreground">
+                {c.tokens.toLocaleString(undefined, { maximumFractionDigits: 0 })} tokens · {c.graduated ? "graduated — sell on SaucerSwap" : `≈ ${fmtHbar(c.hbarOut)}`}
+              </p>
+            </div>
+            {!c.graduated && (
+              <div className="flex gap-2">
+                {[25, 50, 100].map((p) => (
+                  <Button key={p} size="sm" variant={p === 100 ? "destructive" : "outline"} disabled={busy !== null} onClick={() => doSell(c.address, c.symbol, p)}>
+                    {busy === c.address ? "…" : `Sell ${p}%`}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

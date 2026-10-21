@@ -302,3 +302,29 @@ export const getBotAdmin = createServerFn({ method: "POST" })
     ]);
     return { settings: s.data, buys: b.data ?? [] };
   });
+
+/** Admin: coins the bot still holds. */
+export const getBotHoldings = createServerFn({ method: "POST" })
+  .inputValidator((d: { pin: string }) => ({ pin: String(d.pin ?? "").slice(0, 200) }))
+  .handler(async ({ data }) => {
+    await (await import("./admin-auth.server")).requireAdmin(data.pin);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    return (await import("./bot.server")).botHoldings(supabaseAdmin);
+  });
+
+/** Admin: sell part or all of a bot-held coin (never retried automatically). */
+export const sellBotCoin = createServerFn({ method: "POST" })
+  .inputValidator((d: { pin: string; token: string; pct: number }) => {
+    if (!/^0x[0-9a-fA-F]{40}$/.test(String(d.token))) throw new Error("Invalid coin");
+    if (![25, 50, 100].includes(d.pct)) throw new Error("Choose 25, 50 or 100%");
+    return { pin: String(d.pin ?? "").slice(0, 200), token: d.token.toLowerCase(), pct: d.pct };
+  })
+  .handler(async ({ data }) => {
+    await (await import("./admin-auth.server")).requireAdmin(data.pin, `Bot sell ${data.pct}% of ${data.token}`);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    try {
+      return await (await import("./bot.server")).botSell(supabaseAdmin, data.token, data.pct);
+    } catch (e) {
+      throw new Error(e instanceof Error ? e.message.slice(0, 200) : "Sale failed");
+    }
+  });

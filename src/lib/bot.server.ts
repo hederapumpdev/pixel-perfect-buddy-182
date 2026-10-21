@@ -171,3 +171,81 @@ async function sendBuy(db: any, w: ethers.Wallet, token: string, usd: number) {
     return { step: "buy failed" };
   }
 }
+
+const ERC20 = [
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address,address) view returns (uint256)",
+  "function approve(address,uint256) returns (bool)",
+];
+
+/** Coins the bot bought that it still holds (read live from Hedera). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function botHoldings(db: any) {
+  const w = botWallet();
+  const { data: buys } = await db.from("bot_buys").select("token").in("status", ["buy_sent", "done"]).limit(200);
+  const addrs = (buys ?? []).map((b: { token: string }) => b.token);
+  if (!addrs.length) return [];
+  const { data: tokens } = await db.from("tokens")
+    .select("address,name,symbol,contract,graduated,virtual_hbar,virtual_tokens,tokens_sold").in("address", addrs);
+  const { fromUnits, quoteSell, tokenUnit } = await import("./curve");
+  const out = [];
+  for (const t of tokens ?? []) {
+    let bal = 0n;
+    try { bal = await new ethers.Contract(t.address, ERC20, w).getFunction("balanceOf")(w.address); } catch { continue; }
+    if (bal <= 0n) continue;
+    const unit = tokenUnit(t.contract);
+    const state = {
+      virtualHbar: BigInt(Math.round(Number(t.virtual_hbar) * 1e8)),
+      virtualTokens: BigInt(Math.round(Number(t.virtual_tokens))) * unit,
+      tokensSold: BigInt(Math.round(Number(t.tokens_sold))) * unit,
+    };
+    out.push({
+      address: t.address as string, name: t.name as string, symbol: t.symbol as string, graduated: !!t.graduated,
+      tokens: fromUnits(bal, t.contract), hbarOut: t.graduated ? 0 : Number(quoteSell(state, bal).hbarOut) / 1e8,
+    });
+  }
+  return out;
+}
+
+/** Sells a % of the bot's coin back to the curve. One transaction per call: a one-time approval first, then the sale. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function botSell(db: any, token: string, pct: number) {
+  const w = botWallet();
+  const { data: t } = await db.from("tokens")
+    .select("address,contract,graduated,virtual_hbar,virtual_tokens,tokens_sold").eq("address", token).maybeSingle();
+  if (!t) throw new Error("Coin not found");
+  if (t.graduated) throw new Error("This coin has graduated — sell it on SaucerSwap");
+  const { encodePump, encodePumpV2, encodePumpV4, isV4, quoteSell, tokenUnit } = await import("./curve");
+  const erc = new ethers.Contract(t.address, ERC20, w);
+  const bal: bigint = await erc.getFunction("balanceOf")(w.address);
+  const units = pct >= 100 ? bal : (bal * BigInt(Math.round(pct * 100))) / 10_000n;
+  if (units <= 0n) throw new Error("The bot holds none of this coin");
+  const spender = idToEvm(t.contract);
+  const v2 = isV2(t.contract);
+  const fee = await botFee(w);
+  if (v2) {
+    const allowed: bigint = await erc.getFunction("allowance")(w.address, spender);
+    if (allowed < units) {
+      const tx = await w.sendTransaction({
+        to: t.address, data: erc.interface.encodeFunctionData("approve", [spender, bal * 2n]), gasLimit: 1_000_000n, ...fee,
+      });
+      await tx.wait();
+      return { step: "approved", message: "One-time approval done — tap Sell again to sell." };
+    }
+  }
+  const unit = tokenUnit(t.contract);
+  const state = {
+    virtualHbar: BigInt(Math.round(Number(t.virtual_hbar) * 1e8)),
+    virtualTokens: BigInt(Math.round(Number(t.virtual_tokens))) * unit,
+    tokensSold: BigInt(Math.round(Number(t.tokens_sold))) * unit,
+  };
+  const min = (quoteSell(state, units).hbarOut * 9_500n) / 10_000n; // 5% slippage
+  const zero = "0x0000000000000000000000000000000000000000";
+  const data = isV4(t.contract)
+    ? encodePumpV4("sell", [t.address, units, min, zero])
+    : v2 ? encodePumpV2("sell", [t.address, units, min]) : encodePump("sell", [t.address, units, min]);
+  const tx = await w.sendTransaction({ to: spender, data, gasLimit: BigInt(v2 ? GAS_V2.sell : GAS.sell), ...fee });
+  const r = await tx.wait();
+  if (!r || r.status !== 1) throw new Error("Sale failed on Hedera");
+  return { step: "sold", message: `Sold — tx ${tx.hash.slice(0, 12)}…`, hash: tx.hash };
+}
