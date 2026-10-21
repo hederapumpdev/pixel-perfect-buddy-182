@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import { FUND_WALLETS, fundWallet, fundWalletPublicKey } from "@/lib/fund-wallets.server";
 
 // The keys are derived from a secret at runtime; a fixed seed keeps this test offline.
-process.env.BOT_SEED = "unit-test-seed";
+process.env["BOT_SEED"] = "unit-test-seed";
 
 describe("fee wallet keys", () => {
   for (const name of FUND_WALLETS) {
