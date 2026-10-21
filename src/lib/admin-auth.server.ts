@@ -33,9 +33,9 @@ export async function requireAdmin(pin: unknown) {
   const real = process.env["ADMIN_PIN"];
   if (real && p && p === real.trim()) return;
   const m = /^w1\.(0\.0\.\d+)\.(\d+)\.([0-9a-f]{64})$/.exec(p);
-  if (!m || Number(m[2]) < Date.now() || mac(`${m[1]}.${m[2]}`) !== m[3]) throw new Error("Wrong PIN");
+  if (!m || Number(m[2]) < Date.now() || mac(`${m[1]}.${m[2]}`) !== m[3] || !m[1]) throw new Error("Wrong PIN");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  if (!(await adminStaff(supabaseAdmin, m[1]))) throw new Error("Wrong PIN");
+  if (!(await adminStaff(supabaseAdmin, m[1]!))) throw new Error("Wrong PIN");
 }
 
 export async function isAdmin(pin: unknown) {

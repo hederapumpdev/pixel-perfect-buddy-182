@@ -531,6 +531,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const signText: WalletCtx["signText"] = useCallback(async (text) => {
     if (evmSigner.current) return { evmSignature: await evmSigner.current.signMessage(text) };
     const [r] = await signer().sign([new TextEncoder().encode(text)]);
+    if (!r) throw new Error("Wallet did not sign");
     const hex = Array.from(r.signature, (b) => b.toString(16).padStart(2, "0")).join("");
     return { signature: hex };
   }, []);
