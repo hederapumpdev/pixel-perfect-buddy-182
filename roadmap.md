@@ -1,5 +1,6 @@
 # Roadmap
 - [ ] Fee wallets: team and Hold Out accounts were never created on Hedera — the "fund by transfer" step reverts because the address has no account yet. Needs a real account creation (paid by the bot) before the split can pay staff, Hold Out and contest prizes.
+- [ ] Hold Out announcement on X, Telegram and Discord; user also asked to "change it in GitHub and in Discord" — scope of that still unclear (README text vs. Discord channel/roles).
 - [x] Wallet handoff help: when HashPack is asked to open but never comes back, show a panel (Safari "Open" prompt hint, reopen the same pairing, copy the connection code). Two regression tests added.
 - [ ] Selectable graduation targets for NEW coins: implement in an isolated draft with new versioned contract, creation choice, chain-synced per-coin targets and liquidity/curve regression tests; activation blocked until verified deployment and owner wallet approval. Existing coins remain unchanged.
 - [ ] Three-wallet platform split (team 20 / Hold Out 10 / platform 40) paid automatically; Hold Out wallet also pays referrals and contests — waits on user confirming wallet IDs and split interpretation.
