@@ -19,6 +19,10 @@ to SaucerSwap with locked liquidity. No coding, no liquidity setup, no permissio
 - **Referrals** — 10% of the platform fee (7% of the total fee) flows into one shared
   pool, split pro-rata by the trading volume each referrer's recruits generated.
   Referrers claim it themselves; the contract owner never signs a payout.
+- **Hold Out rewards** — every coin builds its own weekly HBAR pot from a slice of its
+  trading fees. Holders who keep tokens at least 7 days share it pro-rata, weighted by how
+  long they hold (up to 2× after 60 days). Paid straight to the wallet — no staking, no
+  locking, no claiming.
 - **Automatic graduation** — when 800M tokens are sold, the contract opens a SaucerSwap
   pool with all raised HBAR and locks the liquidity provider tokens forever. No rug pulls.
 - **Automatic token info** — v4 coins publish HIP-405 metadata (logo, description,
@@ -34,9 +38,12 @@ to SaucerSwap with locked liquidity. No coding, no liquidity setup, no permissio
 | v1      | 0.0.10923845 | 18-decimal ERC-20 style tokens held inside the contract              |
 | v2      | 0.0.10924256 | Native HTS tokens (8 decimals), automatic SaucerSwap listing         |
 | v3      | 0.0.10924285 | Platform fee paid straight to the fee wallet, creator fee claims     |
-| v4      | 0.0.10924813 | HIP-405 token metadata + shared referral pool — **current launchpad** |
+| v4      | 0.0.10924813 | HIP-405 token metadata + shared referral pool                        |
+| v4-fixed| 0.0.10925851 | v4 with corrected HTS precompile calls                               |
+| v4-legacy | 0.0.10925881 | v4 features + legacy HTS token creation — **current launchpad**     |
 
-Platform fee wallet: `0.0.10923241`.
+Platform fees land in the bot wallet `0.0.10927104`, which forwards them automatically;
+the platform wallet is `0.0.10923241`.
 Coins always stay on the contract that created them, so older coins keep working.
 
 ## How the data flows
@@ -76,7 +83,10 @@ wallet settings.
 ## Economics
 
 - Trade fee: **1%** of every buy and sell.
-- Split: **30% creator / 70% platform**.
+- Split: **30% creator**; the 70% platform share is forwarded automatically from the bot
+  wallet into **2/7 team**, **1/7 Hold Out** and **4/7 platform**.
+- Hold Out: that 1/7 builds **weekly per-coin holder pots**, shared by holders of at least
+  7 days, weighted by holding time (up to 2× after 60 days).
 - Referral pool: **10% of the platform share**, one shared pot, pro-rata by attributed volume.
 - Supply: **1B tokens** per coin, **800M** on the bonding curve.
 - Graduation at **800M sold** → SaucerSwap pool, LP locked forever.
