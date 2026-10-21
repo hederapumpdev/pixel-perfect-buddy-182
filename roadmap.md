@@ -1,5 +1,6 @@
 # Roadmap
 - [ ] Community chat: public conversation, signed-in posting, profile identities/team badges, admin delete/block controls and spam protection.
+- [ ] Discord: give Noon moderator permissions and a distinct colored display name.
 - [x] Per-coin manual logo-submission package: copy details, JSON/logo downloads and official form/DaVinci links; five tests passed, real token downloads verified on desktop/mobile. HashPack integration request prepared in Files, not sent.
 - [ ] Automatic token-logo submission — blocked on HashPack/DaVinci providing an official integration and confirming contract-created token eligibility.
 - [x] Make the weekly contest prominent at the top of the homepage with the existing prize, eligibility rules and a direct contest/winners link.
