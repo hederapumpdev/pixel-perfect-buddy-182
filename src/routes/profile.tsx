@@ -2,6 +2,7 @@ import { InstantWallet } from "@/components/InstantWallet";
 import { WalletHoldings } from "@/components/WalletHoldings";
 import { ProfileEditor } from "@/components/ProfileEditor";
 import { StaffClaim } from "@/components/StaffClaim";
+import { HoldOutCard } from "@/components/HoldOutCard";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -242,6 +243,8 @@ function Profile() {
       </div>
 
       <StaffClaim wallets={addrs.map((a) => a.toLowerCase())} />
+
+      {addrs[0] && <div className="mt-6"><HoldOutCard wallet={addrs[0].toLowerCase()} compact /></div>}
 
       {PUMP_CONTRACT_V4_ID && (
         <div className="mt-6 rounded-lg border border-border bg-card p-4">
