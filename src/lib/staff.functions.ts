@@ -3,7 +3,7 @@ import { MIRROR_URL, NETWORK } from "./hedera-config";
 import { STAFF_MAX_PCT, STAFF_MIN_CLAIM_HBAR, staffClaimable, staffEarned } from "./staff";
 
 const norm = (w: unknown) => String(w ?? "").toLowerCase().trim();
-const checkPin = async (p: unknown) => (await import("./admin-auth.server")).requireAdmin(p);
+const checkPin = async (p: unknown, action?: string) => (await import("./admin-auth.server")).requireAdmin(p, action);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type StaffRow = { wallet: string; joined_at: string; left_at: string | null; share_pct: number; rate_since: string | null; earned_before: number };
@@ -92,7 +92,7 @@ export const adminAddStaff = createServerFn({ method: "POST" })
     return { pin: String(d.pin ?? ""), wallet: String(d.wallet ?? "").trim(), name, avatar: d.avatar ?? null, pct: Math.round(d.pct * 100) / 100 };
   })
   .handler(async ({ data }) => {
-    await checkPin(data.pin);
+    await checkPin(data.pin, `Added team member ${data.name} (${data.wallet}) at ${data.pct}%`);
     let wallet = norm(data.wallet);
     let accountId: string | null = null;
     if (/^0\.0\.\d+$/.test(data.wallet) || /^0x[0-9a-f]{40}$/.test(wallet)) {
@@ -119,7 +119,7 @@ export const adminUpdateStaff = createServerFn({ method: "POST" })
     return { pin: String(d.pin ?? ""), wallet: norm(d.wallet), name, avatar: d.avatar ?? null };
   })
   .handler(async ({ data }) => {
-    await checkPin(data.pin);
+    await checkPin(data.pin, `Edited team member ${data.name} (${data.wallet})`);
     const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
     await db.from("staff_members").update({ name: data.name, avatar: data.avatar }).eq("wallet", data.wallet);
     return { ok: true };
@@ -132,7 +132,7 @@ export const adminSetStaffPct = createServerFn({ method: "POST" })
     return { pin: String(d.pin ?? ""), wallet: norm(d.wallet), pct: Math.round(d.pct * 100) / 100 };
   })
   .handler(async ({ data }) => {
-    await checkPin(data.pin);
+    await checkPin(data.pin, `Changed ${data.wallet} to ${data.pct}%`);
     const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
     const { data: s } = await db.from("staff_members").select("*").eq("wallet", data.wallet).maybeSingle();
     if (!s) throw new Error("Not found");
@@ -153,7 +153,7 @@ export const adminSetStaffPct = createServerFn({ method: "POST" })
 export const adminRemoveStaff = createServerFn({ method: "POST" })
   .inputValidator((d: { pin: string; wallet: string }) => ({ pin: String(d.pin ?? ""), wallet: norm(d.wallet) }))
   .handler(async ({ data }) => {
-    await checkPin(data.pin);
+    await checkPin(data.pin, `Removed team member ${data.wallet}`);
     const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
     const { data: removed, error } = await db.from("staff_members").update({ left_at: new Date().toISOString() }).eq("wallet", data.wallet).is("left_at", null).select("wallet");
     if (error) throw new Error("Could not remove team member");

@@ -238,7 +238,7 @@ export const saveBotSettings = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    await (await import("./admin-auth.server")).requireAdmin(data.pin);
+    await (await import("./admin-auth.server")).requireAdmin(data.pin, `Bot ${data.enabled ? "on" : "off"}, buy $${data.usd}`);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("bot_settings")
@@ -265,12 +265,26 @@ export const walletAdminLogin = createServerFn({ method: "POST" })
 
 /** Checks the admin PIN (gates the admin page). */
 export const checkAdminPin = createServerFn({ method: "POST" })
-  .inputValidator((d: { pin: string }) => {
+  .inputValidator((d: { pin: string; login?: boolean }) => {
     if (typeof d.pin !== "string" || d.pin.length > 200) throw new Error("Invalid PIN");
-    return d;
+    return { pin: d.pin, login: d.login === true };
   })
   .handler(async ({ data }) => {
-    return { ok: await (await import("./admin-auth.server")).isAdmin(data.pin) };
+    const a = await import("./admin-auth.server");
+    const ok = await a.isAdmin(data.pin);
+    if (ok && data.login) await a.requireAdmin(data.pin, "Logged in with PIN");
+    return { ok };
+  });
+
+/** Recent admin logins and changes. */
+export const getAdminLog = createServerFn({ method: "POST" })
+  .inputValidator((d: { pin: string }) => ({ pin: String(d.pin ?? "").slice(0, 200) }))
+  .handler(async ({ data }) => {
+    await (await import("./admin-auth.server")).requireAdmin(data.pin);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin.from("admin_log").select("id,actor,action,created_at").order("created_at", { ascending: false }).limit(100);
+    if (error) throw new Error("Could not load admin log");
+    return rows ?? [];
   });
 
 /** Bot settings + recent bot buys for the admin page (PIN-protected). */

@@ -17,7 +17,7 @@ export const getXPosting = createServerFn({ method: "POST" })
 export const setXPosting = createServerFn({ method: "POST" })
   .inputValidator(z.object({ pin: z.string().max(200), enabled: z.boolean(), resume: z.boolean().default(false) }))
   .handler(async ({ data }) => {
-    await (await import("./admin-auth.server")).requireAdmin(data.pin);
+    await (await import("./admin-auth.server")).requireAdmin(data.pin, `X posting ${data.enabled ? "on" : "off"}${data.resume ? " (resumed)" : ""}`);
     const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
     if (data.resume) {
       const { data: unknown, error } = await db.from("x_daily_posts").select("slot").in("status", ["sending", "unknown"]).limit(1);
