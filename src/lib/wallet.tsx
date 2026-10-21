@@ -9,8 +9,9 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
-import { connectionDeadline, openWalletPicker, WalletConnectionCancelled } from "./wallet-connection";
+import { connectionDeadline, openWalletPicker, WalletConnectionCancelled, type WalletHandoff } from "./wallet-connection";
 import { deployStep, deployProgressOf, findDeployOnMirror, type DeployProgress, type DeployState } from "./hashpack-deploy";
+import { WalletHandoffHelp } from "@/components/WalletHandoffHelp";
 import {
   MIRROR_URL,
   NETWORK,
@@ -57,6 +58,8 @@ type WalletCtx = {
   deployProgress: DeployProgress | null;
   /** Signs a plain-text message (no transaction, no HBAR). */
   signText: (text: string) => Promise<{ signature?: string; evmSignature?: string }>;
+  /** Opens one of the site's fee wallets on Hedera; the wallet pays only the network fee. */
+  createFundAccount: (publicKeyHex: string, label: string) => Promise<void>;
   refresh: () => void;
 };
 
@@ -138,6 +141,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<"hashpack" | "email" | null>(null);
   const evmSigner = useRef<EvmSigner | null>(null);
   const [deployProgress, setDeployProgress] = useState<DeployProgress | null>(null);
+  // Set when the wallet app was asked to open but never came back.
+  const [handoff, setHandoff] = useState<WalletHandoff | null>(null);
 
   const attachEmail = useCallback(async (w: import("@web3auth/modal").Web3Auth) => {
     if (!w.provider) return;
@@ -241,7 +246,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     try {
       try {
         const c = await init();
-        await openWalletPicker(c);
+        await openWalletPicker(c, { onHandoff: setHandoff });
       } catch (e) {
         // A stale WalletConnect pairing makes the relay reject messages
         // ("Failed to publish custom payload"). Clear it and retry once.
@@ -259,7 +264,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         initPromise.current = null;
         toast.message("Resetting the wallet connection, trying again…");
         const c = await init();
-        await openWalletPicker(c);
+        await openWalletPicker(c, { onHandoff: setHandoff });
       }
       syncAccount();
     } catch (e) {
@@ -268,6 +273,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } finally {
       connectInFlight.current = false;
       setConnecting(false);
+      setHandoff(null);
     }
   }, [init, syncAccount]);
 
@@ -528,6 +534,48 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return p;
   }, [resolveDeploy]);
 
+  /**
+   * Opens one of the site's fee wallets on Hedera. Hedera needs a real account before an
+   * address can hold HBAR, so this is signed by the user's wallet (the bot can't sign here).
+   * One wallet request; the result is read from Hedera's public record, never retried.
+   */
+  const createFundAccount: WalletCtx["createFundAccount"] = useCallback(async (publicKeyHex, label) => {
+    if (evmSigner.current) throw new Error("Create this wallet with HashPack, not an email wallet");
+    const { sdk } = await loadLibs();
+    const s = signer();
+    const client = sdk.Client.forMainnet();
+    const key = sdk.PublicKey.fromBytesECDSA(hexToBytes(publicKeyHex));
+    const tx = new sdk.AccountCreateTransaction().setECDSAKeyWithAlias(key);
+    tx.setNodeAccountIds(WALLET_NODE_IDS.map((n) => sdk.AccountId.fromString(n)) as never);
+    tx.setTransactionId(sdk.TransactionId.generate(s.getAccountId()));
+    tx.setTransactionMemo(`hederaPump:${label}`);
+    await tx.freezeWith(client);
+    const txId = tx.transactionId?.toString() ?? "";
+    try {
+      await tx.executeWithSigner(s as never);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (/INSUFFICIENT_PAYER_BALANCE|INSUFFICIENT_ACCOUNT_BALANCE/i.test(msg))
+        throw new Error("Not enough HBAR in your wallet to open this. Nothing was charged.");
+      if (/getByKey|unhealthy|txError/i.test(msg))
+        throw new Error("HashPack couldn't send this to Hedera. Nothing was charged — please try again.");
+      throw e;
+    }
+    const [acct, ts] = txId.split("@");
+    const mirrorId = `${acct}-${(ts ?? "").replace(".", "-")}`;
+    let result: string | null = null;
+    for (let i = 0; i < 40 && !result; i++) {
+      await new Promise((r) => setTimeout(r, 1500));
+      const j = await fetch(`${MIRROR_URL}/api/v1/transactions/${mirrorId}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null);
+      result = j?.transactions?.[0]?.result ?? null;
+    }
+    if (!result) throw new Error("Sent, but no confirmation yet. Check your wallet history before trying again.");
+    if (result !== "SUCCESS") throw new Error(`Wallet not created: ${result}`);
+    setTick((t) => t + 1);
+  }, []);
+
   const signText: WalletCtx["signText"] = useCallback(async (text) => {
     if (evmSigner.current) return { evmSignature: await evmSigner.current.signMessage(text) };
     const [r] = await signer().sign([new TextEncoder().encode(text)]);
@@ -554,10 +602,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         checkDeploy,
         deployProgress,
         signText,
+        createFundAccount,
         refresh: () => setTick((t) => t + 1),
       }}
     >
       {children}
+      {handoff && (
+        <WalletHandoffHelp uri={handoff.uri} retry={handoff.retry} onClose={() => setHandoff(null)} />
+      )}
     </Ctx.Provider>
   );
 }

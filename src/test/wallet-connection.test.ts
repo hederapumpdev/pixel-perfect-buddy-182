@@ -120,4 +120,39 @@ describe("wallet connection recovery", () => {
     mock.uri();
     expect(mock.connector.walletConnectModal.openModal).not.toHaveBeenCalled();
   });
+
+  it("offers to reopen the wallet when the handoff stalls, and reuses the same pairing", async () => {
+    vi.useFakeTimers();
+    const mock = mockConnector();
+    const onHandoff = vi.fn();
+    const result = openWalletPicker(mock.connector, { onHandoff });
+    mock.uri();
+    mock.emit(true);
+    await vi.advanceTimersByTimeAsync(12_000);
+    expect(onHandoff).toHaveBeenCalledTimes(1);
+    const handoff = onHandoff.mock.calls[0]![0] as { uri: string; retry: () => void };
+    expect(handoff.uri).toBe("wc:test-pairing");
+    handoff.retry();
+    expect(mock.connector.walletConnectModal.openModal).toHaveBeenCalledTimes(2);
+    expect(mock.connector.walletConnectModal.openModal).toHaveBeenLastCalledWith({ uri: "wc:test-pairing" });
+    mock.approve();
+    await expect(result).resolves.toBeUndefined();
+    await vi.advanceTimersByTimeAsync(20_000);
+    expect(onHandoff).toHaveBeenCalledTimes(1);
+  });
+
+  it("stays quiet about the handoff once the picker is closed", async () => {
+    vi.useFakeTimers();
+    const mock = mockConnector();
+    const onHandoff = vi.fn();
+    const result = openWalletPicker(mock.connector, { onHandoff });
+    const assertion = expect(result).rejects.toBeInstanceOf(WalletConnectionCancelled);
+    mock.uri();
+    mock.emit(true);
+    mock.emit(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await assertion;
+    await vi.advanceTimersByTimeAsync(20_000);
+    expect(onHandoff).not.toHaveBeenCalled();
+  });
 });

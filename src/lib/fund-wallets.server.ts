@@ -24,6 +24,29 @@ export function fundWallet(name: FundWalletName) {
   return new ethers.Wallet(ethers.keccak256(ethers.toUtf8Bytes(`${seed}:hederapump-fund-wallet:${name}`)), provider);
 }
 
+/** The public key a wallet needs to open this account on Hedera. The key itself never leaves the server. */
+export function fundWalletPublicKey(name: FundWalletName) {
+  return fundWallet(name).signingKey.compressedPublicKey;
+}
+
+/**
+ * A deposit whose receipt says "reverted" is known not to have arrived, so the next attempt may
+ * use a fresh id. A deposit whose result is still unknown is never resent.
+ */
+async function fundAttempt(db: Db, name: FundWalletName) {
+  const { data } = await db
+    .from("wallet_transfers")
+    .select("id,status")
+    .eq("kind", "fund")
+    .like("id", `fund:${name}:%`);
+  const rows = (data ?? []) as { id: string; status: string }[];
+  if (rows.some((r) => r.status === "pending" || r.status === "unknown")) return null;
+  const used = new Set(rows.map((r) => r.id));
+  let n = 3; // v1 and v2 predate the account-creation step
+  while (used.has(`fund:${name}:v${n}`)) n++;
+  return `fund:${name}:v${n}`;
+}
+
 /**
  * Records every fee HBAR the bot received from a launchpad contract during someone else's
  * transaction (per-trade fee pushes). The bot's own buys/sells are excluded so its trading
@@ -148,8 +171,13 @@ export async function runFeeSplit() {
   for (const name of FUND_WALLETS) {
     const w = fundWallet(name);
     if (await mirrorAccount(w.address)) continue;
+    // Hedera needs a real account before an address can hold HBAR, so a plain deposit here
+    // reverts until the wallet is opened in admin. Nothing is paid twice: each attempt claims
+    // its own id and a reverted one is allowed a fresh id.
+    const id = await fundAttempt(db, name);
+    if (!id) return { step: `funding ${name} is uncertain` };
     const bot = botWallet();
-    return sendOnce(db, bot, { id: `fund:${name}:v2`, kind: "fund", from_wallet: bot.address, recipient: w.address, tinybars: FUND_AMOUNT });
+    return sendOnce(db, bot, { id, kind: "fund", from_wallet: bot.address, recipient: w.address, tinybars: FUND_AMOUNT });
   }
 
   const hour = new Date().toISOString().slice(0, 13);
@@ -192,7 +220,7 @@ export async function fundWalletsInfo() {
     FUND_WALLETS.map(async (name) => {
       const w = fundWallet(name);
       const a = await mirrorAccount(w.address);
-      return { name, address: w.address.toLowerCase(), accountId: a?.accountId ?? null, hbar: a ? Number(a.tinybars) / 1e8 : 0 };
+      return { name, address: w.address.toLowerCase(), publicKey: w.signingKey.compressedPublicKey, accountId: a?.accountId ?? null, hbar: a ? Number(a.tinybars) / 1e8 : 0 };
     }),
   );
 }

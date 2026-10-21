@@ -10,6 +10,7 @@ import { fmtHbar } from "@/lib/queries";
 import { useWallet } from "@/lib/wallet";
 
 const LABEL: Record<string, string> = { split: "Bot wallet (receives all platform fees)", team: "Team wallet (pays staff)", holdout: "Hold Out wallet (holder rewards + contest prize)" };
+const SHORT: Record<string, string> = { split: "bot", team: "team", holdout: "Hold Out" };
 const hb = (t: string | number) => fmtHbar(Number(t) / 1e8);
 
 /** Admin: balances of the three fee wallets and the owner action that points contracts at the split wallet. */
@@ -36,6 +37,22 @@ export function FeeWalletsPanel({ pin }: { pin: string }) {
     }
   }
 
+  // Hedera only lets an address hold HBAR once a real account exists, so this one tap
+  // per wallet is what the hourly job cannot do by itself. One request, never retried.
+  async function create(name: string, publicKey: string) {
+    if (!w.accountId) { await w.connect().catch(() => {}); return; }
+    setBusy(`create:${name}`);
+    try {
+      await w.createFundAccount(publicKey, name);
+      toast.success(`${SHORT[name] ?? name} wallet opened on Hedera — the bot deposits its starting balance automatically`);
+      q.refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Not created — check your wallet history before trying again");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   return (
     <section className="space-y-4">
       <h2 className="text-2xl font-semibold">Fee wallets</h2>
@@ -48,7 +65,16 @@ export function FeeWalletsPanel({ pin }: { pin: string }) {
           <div key={x.name} className="rounded-lg border border-border bg-card p-3">
             <p className="text-xs text-muted-foreground">{LABEL[x.name]}</p>
             <p className="mt-1 font-mono text-xl font-semibold">{fmtHbar(x.hbar)}</p>
-            <p className="break-all font-mono text-xs text-muted-foreground">{x.accountId ?? "Not created yet — the hourly job funds it from the bot"}</p>
+            {x.accountId ? (
+              <p className="break-all font-mono text-xs text-muted-foreground">{x.accountId}</p>
+            ) : (
+              <>
+                <p className="mt-1 text-xs text-muted-foreground">Not on Hedera yet. One tap to open it — your wallet pays only the network fee.</p>
+                <Button size="sm" className="mt-2 w-full" disabled={busy !== null || !x.publicKey} onClick={() => create(x.name, x.publicKey)}>
+                  {busy === `create:${x.name}` ? "Confirm in wallet…" : `Create ${SHORT[x.name] ?? x.name} wallet`}
+                </Button>
+              </>
+            )}
           </div>
         ))}
       </div>
