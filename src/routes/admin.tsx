@@ -62,6 +62,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 const PIN_KEY = "hederaPump.adminPin";
+const ADMIN_IDLE_MS = 60_000;
 
 function Admin() {
   const check = useServerFn(checkAdminPin);
@@ -101,6 +102,22 @@ function Admin() {
     }
     if (saved) check({ data: { pin: saved } }).then((r) => setOk(r.ok)).catch(() => {});
   }, [check]);
+  // Auto log-out after 1 minute without activity on the admin page.
+  useEffect(() => {
+    if (!ok) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const logout = () => {
+      try { sessionStorage.removeItem(PIN_KEY); } catch { /* storage blocked */ }
+      setPin("");
+      setOk(false);
+      setErr("Logged out after 1 minute without activity.");
+    };
+    const reset = () => { clearTimeout(timer); timer = setTimeout(logout, ADMIN_IDLE_MS); };
+    const events = ["pointerdown", "pointermove", "keydown", "scroll", "touchstart", "wheel"] as const;
+    events.forEach((ev) => window.addEventListener(ev, reset, { passive: true }));
+    reset();
+    return () => { clearTimeout(timer); events.forEach((ev) => window.removeEventListener(ev, reset)); };
+  }, [ok]);
   async function unlock(e: React.FormEvent) {
     e.preventDefault();
     // Read the field itself: phone autofill can fill it without React noticing.
