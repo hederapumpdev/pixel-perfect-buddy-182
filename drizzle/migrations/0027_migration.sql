@@ -1,0 +1,1 @@
+UPDATE public.staff_members SET is_admin = true WHERE account_id = '0.0.10923241';
