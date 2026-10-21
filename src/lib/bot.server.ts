@@ -182,7 +182,7 @@ const ERC20 = [
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function botHoldings(db: any) {
   const w = botWallet();
-  const { data: buys } = await db.from("bot_buys").select("token").in("status", ["buy_sent", "sold"]).limit(200);
+  const { data: buys } = await db.from("bot_buys").select("token").in("status", ["buy_sent", "done"]).limit(200);
   const addrs = (buys ?? []).map((b: { token: string }) => b.token);
   if (!addrs.length) return [];
   const { data: tokens } = await db.from("tokens")
