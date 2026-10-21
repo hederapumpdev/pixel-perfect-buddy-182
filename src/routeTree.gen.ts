@@ -34,7 +34,9 @@ import { Route as ApiPublicJobsContestAnnounceRouteImport } from './routes/api/p
 import { Route as ApiPublicJobsDailyXRouteImport } from './routes/api/public/jobs/daily-x'
 import { Route as ApiPublicJobsDiscordCoinsRouteImport } from './routes/api/public/jobs/discord-coins'
 import { Route as ApiPublicJobsDiscordDailyRouteImport } from './routes/api/public/jobs/discord-daily'
+import { Route as ApiPublicJobsFeeSplitRouteImport } from './routes/api/public/jobs/fee-split'
 import { Route as ApiPublicJobsGraduationPromoRouteImport } from './routes/api/public/jobs/graduation-promo'
+import { Route as ApiPublicJobsHoldoutRouteImport } from './routes/api/public/jobs/holdout'
 import { Route as ApiPublicJobsOfficialCoinRouteImport } from './routes/api/public/jobs/official-coin'
 import { Route as ApiPublicJobsPayoutsRouteImport } from './routes/api/public/jobs/payouts'
 import { Route as ApiPublicJobsSpotlightRouteImport } from './routes/api/public/jobs/spotlight'
@@ -175,12 +177,22 @@ const ApiPublicJobsDiscordDailyRoute =
     path: '/api/public/jobs/discord-daily',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsFeeSplitRoute = ApiPublicJobsFeeSplitRouteImport.update({
+  id: '/api/public/jobs/fee-split',
+  path: '/api/public/jobs/fee-split',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicJobsGraduationPromoRoute =
   ApiPublicJobsGraduationPromoRouteImport.update({
     id: '/api/public/jobs/graduation-promo',
     path: '/api/public/jobs/graduation-promo',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsHoldoutRoute = ApiPublicJobsHoldoutRouteImport.update({
+  id: '/api/public/jobs/holdout',
+  path: '/api/public/jobs/holdout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicJobsOfficialCoinRoute =
   ApiPublicJobsOfficialCoinRouteImport.update({
     id: '/api/public/jobs/official-coin',
@@ -248,7 +260,9 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
+  '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/holdout': typeof ApiPublicJobsHoldoutRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
@@ -283,7 +297,9 @@ export interface FileRoutesByTo {
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
+  '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/holdout': typeof ApiPublicJobsHoldoutRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
@@ -319,7 +335,9 @@ export interface FileRoutesById {
   '/api/public/jobs/daily-x': typeof ApiPublicJobsDailyXRoute
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
+  '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/holdout': typeof ApiPublicJobsHoldoutRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
@@ -356,7 +374,9 @@ export interface FileRouteTypes {
     | '/api/public/jobs/daily-x'
     | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/discord-daily'
+    | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/holdout'
     | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/spotlight'
@@ -391,7 +411,9 @@ export interface FileRouteTypes {
     | '/api/public/jobs/daily-x'
     | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/discord-daily'
+    | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/holdout'
     | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/spotlight'
@@ -426,7 +448,9 @@ export interface FileRouteTypes {
     | '/api/public/jobs/daily-x'
     | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/discord-daily'
+    | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/holdout'
     | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/spotlight'
@@ -462,7 +486,9 @@ export interface RootRouteChildren {
   ApiPublicJobsDailyXRoute: typeof ApiPublicJobsDailyXRoute
   ApiPublicJobsDiscordCoinsRoute: typeof ApiPublicJobsDiscordCoinsRoute
   ApiPublicJobsDiscordDailyRoute: typeof ApiPublicJobsDiscordDailyRoute
+  ApiPublicJobsFeeSplitRoute: typeof ApiPublicJobsFeeSplitRoute
   ApiPublicJobsGraduationPromoRoute: typeof ApiPublicJobsGraduationPromoRoute
+  ApiPublicJobsHoldoutRoute: typeof ApiPublicJobsHoldoutRoute
   ApiPublicJobsOfficialCoinRoute: typeof ApiPublicJobsOfficialCoinRoute
   ApiPublicJobsPayoutsRoute: typeof ApiPublicJobsPayoutsRoute
   ApiPublicJobsSpotlightRoute: typeof ApiPublicJobsSpotlightRoute
@@ -649,11 +675,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsDiscordDailyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/fee-split': {
+      id: '/api/public/jobs/fee-split'
+      path: '/api/public/jobs/fee-split'
+      fullPath: '/api/public/jobs/fee-split'
+      preLoaderRoute: typeof ApiPublicJobsFeeSplitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/graduation-promo': {
       id: '/api/public/jobs/graduation-promo'
       path: '/api/public/jobs/graduation-promo'
       fullPath: '/api/public/jobs/graduation-promo'
       preLoaderRoute: typeof ApiPublicJobsGraduationPromoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/holdout': {
+      id: '/api/public/jobs/holdout'
+      path: '/api/public/jobs/holdout'
+      fullPath: '/api/public/jobs/holdout'
+      preLoaderRoute: typeof ApiPublicJobsHoldoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/jobs/official-coin': {
@@ -734,7 +774,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsDailyXRoute: ApiPublicJobsDailyXRoute,
   ApiPublicJobsDiscordCoinsRoute: ApiPublicJobsDiscordCoinsRoute,
   ApiPublicJobsDiscordDailyRoute: ApiPublicJobsDiscordDailyRoute,
+  ApiPublicJobsFeeSplitRoute: ApiPublicJobsFeeSplitRoute,
   ApiPublicJobsGraduationPromoRoute: ApiPublicJobsGraduationPromoRoute,
+  ApiPublicJobsHoldoutRoute: ApiPublicJobsHoldoutRoute,
   ApiPublicJobsOfficialCoinRoute: ApiPublicJobsOfficialCoinRoute,
   ApiPublicJobsPayoutsRoute: ApiPublicJobsPayoutsRoute,
   ApiPublicJobsSpotlightRoute: ApiPublicJobsSpotlightRoute,
