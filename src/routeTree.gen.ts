@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContestRouteImport } from './routes/contest'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as DepositRouteImport } from './routes/deposit'
@@ -50,6 +51,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContestRoute = ContestRouteImport.update({
@@ -219,6 +225,7 @@ const ApiPublicTokenMetaCreatorIndexRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/community': typeof CommunityRoute
   '/contest': typeof ContestRoute
   '/create': typeof CreateRoute
   '/deposit': typeof DepositRoute
@@ -253,6 +260,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/community': typeof CommunityRoute
   '/contest': typeof ContestRoute
   '/create': typeof CreateRoute
   '/deposit': typeof DepositRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/community': typeof CommunityRoute
   '/contest': typeof ContestRoute
   '/create': typeof CreateRoute
   '/deposit': typeof DepositRoute
@@ -324,6 +333,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/community'
     | '/contest'
     | '/create'
     | '/deposit'
@@ -358,6 +368,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/community'
     | '/contest'
     | '/create'
     | '/deposit'
@@ -392,6 +403,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/community'
     | '/contest'
     | '/create'
     | '/deposit'
@@ -427,6 +439,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  CommunityRoute: typeof CommunityRoute
   ContestRoute: typeof ContestRoute
   CreateRoute: typeof CreateRoute
   DepositRoute: typeof DepositRoute
@@ -473,6 +486,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contest': {
@@ -691,6 +711,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  CommunityRoute: CommunityRoute,
   ContestRoute: ContestRoute,
   CreateRoute: CreateRoute,
   DepositRoute: DepositRoute,

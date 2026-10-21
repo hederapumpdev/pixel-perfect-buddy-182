@@ -143,6 +143,63 @@ export type Database = {
         }
         Relationships: []
       }
+      community_blocks: {
+        Row: {
+          author: string
+          created_at: string
+        }
+        Insert: {
+          author: string
+          created_at?: string
+        }
+        Update: {
+          author?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      community_messages: {
+        Row: {
+          author: string
+          body: string
+          created_at: string
+          id: string
+          removed_at: string | null
+        }
+        Insert: {
+          author: string
+          body: string
+          created_at?: string
+          id?: string
+          removed_at?: string | null
+        }
+        Update: {
+          author?: string
+          body?: string
+          created_at?: string
+          id?: string
+          removed_at?: string | null
+        }
+        Relationships: []
+      }
+      community_sessions: {
+        Row: {
+          author: string
+          expires_at: string
+          token_hash: string
+        }
+        Insert: {
+          author: string
+          expires_at: string
+          token_hash: string
+        }
+        Update: {
+          author?: string
+          expires_at?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
       discord_coin_posts: {
         Row: {
           channel_id: string
@@ -712,6 +769,14 @@ export type Database = {
       fee_total_between: {
         Args: { p_from: string; p_network: string; p_to: string }
         Returns: number
+      }
+      moderate_community_author: {
+        Args: { p_author: string; p_block: boolean }
+        Returns: undefined
+      }
+      send_community_message: {
+        Args: { p_body: string; p_token_hash: string }
+        Returns: string
       }
     }
     Enums: {

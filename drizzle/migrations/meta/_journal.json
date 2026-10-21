@@ -204,6 +204,13 @@
       "when": 1792611993607,
       "tag": "0028_admin_log",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792613833844,
+      "tag": "0029_community_chat",
+      "breakpoints": true
     }
   ]
 }
