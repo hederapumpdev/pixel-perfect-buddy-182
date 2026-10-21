@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminPin, walletAdminLogin, getAdminLog, getBotHoldings, sellBotCoin, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/chain.functions";
+import { botHoldingViews } from "@/lib/bot-holdings-view";
 import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
@@ -711,6 +712,8 @@ function BotHoldings() {
     }
   })();
   const q = useQuery({ queryKey: ["bot-holdings"], queryFn: () => load({ data: { pin } }), refetchInterval: 120_000 });
+  const { held, soldOut, total } = botHoldingViews(q.data ?? []);
+
   async function doSell(token: string, symbol: string, pct: number) {
     if (!confirm(`Sell ${pct}% of the bot's ${symbol}?`)) return;
     setBusy(token);
@@ -727,17 +730,13 @@ function BotHoldings() {
   return (
     <section className="space-y-3">
       <h2 className="text-xl font-semibold">Bot coins</h2>
-      <p className="text-sm text-muted-foreground">Every coin the bot bought, with its estimated profit or loss. Selling sends HBAR back to the bot wallet. The first sale of a coin needs a one-time approval tap.</p>
+      <p className="text-sm text-muted-foreground">Every coin the bot still holds, with its estimated profit or loss. Selling sends HBAR back to the bot wallet. The first sale of a coin needs a one-time approval tap.</p>
       {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
       {q.isError && <p className="text-sm text-destructive">Could not load bot coins.</p>}
-      {q.data?.length === 0 && <p className="text-sm text-muted-foreground">The bot holds no coins.</p>}
-      {!!q.data?.length && (() => {
-        const known = q.data.filter((c) => !(c.graduated && c.tokens > 0));
-        const total = known.reduce((a, c) => a + c.profit, 0);
-        return <p className="text-sm">Total estimated result: <span className={total >= 0 ? "text-primary" : "text-destructive"}>{total >= 0 ? "+" : ""}{fmtHbar(total)} {usd(total)}</span> <span className="text-muted-foreground">(sold + current value − bought, incl. fees)</span></p>;
-      })()}
+      {!!q.data?.length && <p className="text-sm">Total estimated result: <span className={total >= 0 ? "text-primary" : "text-destructive"}>{total >= 0 ? "+" : ""}{fmtHbar(total)} {usd(total)}</span> <span className="text-muted-foreground">(sold + current value − bought, incl. fees — counts every coin the bot bought, even the sold-out ones)</span></p>}
+      {!!q.data?.length && !held.length && <p className="text-sm text-muted-foreground">The bot holds no coins.</p>}
       <div className="space-y-2">
-        {q.data?.map((c) => (
+        {held.map((c) => (
           <div key={c.address} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3">
             <div className="min-w-0 flex-1">
               <Link to="/token/$id" params={{ id: c.address }} className="font-semibold hover:underline">{c.name} ({c.symbol})</Link>
@@ -763,6 +762,7 @@ function BotHoldings() {
           </div>
         ))}
       </div>
+      {soldOut > 0 && <p className="text-xs text-muted-foreground">{soldOut} {soldOut === 1 ? "coin" : "coins"} fully sold back to HBAR {soldOut === 1 ? "is" : "are"} not listed here.</p>}
     </section>
   );
 }
