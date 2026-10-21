@@ -6,7 +6,8 @@ const s = (v: bigint) => v.toString();
 
 /** Public: this week's estimated pot per coin, recent weeks and payouts (on-chain data only). */
 export const getHoldoutOverview = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
   const { computePlan, potFor } = await import("./holdout.server");
   const start = periodStart(new Date());
   const pot = await potFor(db, start).catch(() => 0n);
@@ -38,7 +39,8 @@ export const getHoldoutEstimate = createServerFn({ method: "POST" })
       account = r.ok ? (await r.json()).account : "";
     }
     if (!account) return { account: null, estimate: "0", coins: {}, history: [] };
-    const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
     const { computePlan, potFor } = await import("./holdout.server");
     const start = periodStart(new Date());
     const pot = await potFor(db, start).catch(() => 0n);
@@ -64,7 +66,8 @@ export const getFundWalletsAdmin = createServerFn({ method: "POST" })
   .inputValidator((d: { pin: string }) => ({ pin: String(d.pin ?? "").slice(0, 200) }))
   .handler(async ({ data }) => {
     await (await import("./admin-auth.server")).requireAdmin(data.pin);
-    const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
     const { contractFeeStatus, fundWalletsInfo } = await import("./fund-wallets.server");
     const [wallets, contracts] = await Promise.all([fundWalletsInfo(), contractFeeStatus()]);
     const { data: transfers } = await db.from("wallet_transfers").select("*").order("created_at", { ascending: false }).limit(20);

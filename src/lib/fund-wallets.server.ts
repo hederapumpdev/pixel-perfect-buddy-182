@@ -71,7 +71,7 @@ export async function sendOnce(
       value: row.data ? 0n : row.tinybars * WEI,
       data: row.data,
       gasLimit: row.data ? 200_000n : 50_000n,
-      nonce,
+      ...(nonce === undefined ? {} : { nonce }),
       ...(await botFee(w)),
     });
     await db.from("wallet_transfers").update({ status: "sent", tx_hash: tx.hash }).eq("id", row.id);
@@ -85,7 +85,8 @@ export async function sendOnce(
 
 /** Hourly: fund new wallets, collect contract fees, forward split balance 2/7 · 1/7 · 4/7. */
 export async function runFeeSplit() {
-  const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
   const split = fundWallet("split");
 
   // 1) Confirm sent transfers (receipts) — never resend.

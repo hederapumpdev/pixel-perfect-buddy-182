@@ -223,7 +223,8 @@ async function sendPlanned(db: Db, max = 5) {
 
 /** One short step per scheduled call: confirm → snapshot → plan → send. */
 export async function runHoldout() {
-  const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
   const w = fundWallet("holdout");
   const { data: sent } = await db.from("holdout_payouts").select("id,tx_hash,created_at").eq("status", "sent").limit(10);
   for (const p of sent ?? []) {
