@@ -29,6 +29,11 @@ export function fundWalletPublicKey(name: FundWalletName) {
   return fundWallet(name).signingKey.compressedPublicKey;
 }
 
+/** An opened wallet gets the bot's starting deposit once, only while it can't yet cover its own gas. */
+export function needsStartDeposit(tinybars: bigint, alreadyFunded: boolean) {
+  return !alreadyFunded && tinybars < WALLET_RESERVE;
+}
+
 /**
  * A deposit whose receipt says "reverted" is known not to have arrived, so the next attempt may
  * use a fresh id. A deposit whose result is still unknown is never resent.
@@ -138,7 +143,7 @@ export async function sendOnce(
       to: row.recipient,
       value: row.data ? 0n : row.tinybars * WEI,
       ...(row.data ? { data: row.data } : {}),
-      gasLimit: row.data ? 200_000n : row.kind === "fund" ? 600_000n : 50_000n, // opening a new account needs extra gas
+      gasLimit: row.gas ?? (row.data ? 200_000n : 50_000n),
       ...(nonce === undefined ? {} : { nonce }),
       ...(await botFee(w)),
     });
