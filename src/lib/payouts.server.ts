@@ -1,4 +1,4 @@
-// Server-only: bot pays the weekly contest prize and refunds creation fees.
+// Server-only: the Hold Out wallet pays the weekly contest prize; the bot refunds creation fees.
 // One transaction per call; each payout has a unique id so nothing is ever paid twice.
 import { MIRROR_URL, NETWORK, PUMP_CONTRACTS } from "./hedera-config";
 import { encodePump, encodePumpV2, isV2 } from "./curve";
@@ -73,7 +73,9 @@ export async function runPayouts() {
       await db.from("bot_payouts").insert({ id: prizeId, kind: "prize", recipient: "-", status: "no_winner" });
       return { step: "no winner" };
     }
-    return pay(db, w, { id: prizeId, kind: "prize", recipient: creatorOf.get(win.token)!, token: win.token }, BigInt(CONTEST_PRIZE_HBAR) * 100_000_000n);
+    // The weekly contest prize now comes from the Hold Out wallet.
+    const { fundWallet } = await import("./fund-wallets.server");
+    return pay(db, fundWallet("holdout") as never, { id: prizeId, kind: "prize", recipient: creatorOf.get(win.token)!, token: win.token }, BigInt(CONTEST_PRIZE_HBAR) * 100_000_000n);
   }
 
   // 3) Free first coin for the first FREE_COIN_LIMIT new creators.

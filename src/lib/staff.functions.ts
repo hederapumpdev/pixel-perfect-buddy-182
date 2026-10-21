@@ -22,14 +22,15 @@ async function balanceOf(db: any, s: StaffRow) {
   const earned = Number(s.earned_before) + (await earnedSinceRate(db, s));
   const { data: rows } = await db
     .from("bot_payouts")
-    .select("hbar_amount,status")
+    .select("hbar_amount,status,created_at")
     .eq("kind", "staff")
     .eq("recipient", s.wallet);
   // Anything not clearly failed counts as paid, so nothing is paid twice.
   const paid = (rows ?? [])
     .filter((r: { status: string }) => r.status !== "failed")
     .reduce((a: number, r: { hbar_amount: number }) => a + Number(r.hbar_amount), 0);
-  return { earned, paid, claimable: staffClaimable(earned, paid), payouts: rows?.length ?? 0 };
+  const last = (rows ?? []).reduce((m: string, r: { created_at: string }) => (r.created_at > m ? r.created_at : m), "");
+  return { earned, paid, claimable: staffClaimable(earned, paid), payouts: rows?.length ?? 0, lastPayout: last || null };
 }
 
 /** Public team list for the site. */
@@ -54,7 +55,7 @@ export const getStaffBalance = createServerFn({ method: "POST" })
     return { wallet: s.wallet, name: s.name, share_pct: Number(s.share_pct), joined_at: s.joined_at, left_at: s.left_at, ...b };
   });
 
-/** Bot wallet pays the claimable amount to the staff wallet itself (anyone may trigger it safely). */
+/** Team wallet pays the claimable amount to the staff wallet itself (anyone may trigger it safely). */
 export const claimStaff = createServerFn({ method: "POST" })
   .inputValidator((d: { wallet: string }) => ({ wallet: norm(d.wallet) }))
   .handler(async ({ data }) => {
@@ -65,8 +66,8 @@ export const claimStaff = createServerFn({ method: "POST" })
     if (b.claimable < STAFF_MIN_CLAIM_HBAR) throw new Error(`Minimum claim is ${STAFF_MIN_CLAIM_HBAR} HBAR`);
     const tinybars = BigInt(Math.floor(b.claimable * 1e8));
     const { pay } = await import("./payouts.server");
-    const { botWallet } = await import("./bot.server");
-    const r = await pay(db, botWallet(), { id: `staff:${s.wallet}:${b.payouts}`, kind: "staff", recipient: s.wallet, token: "" }, tinybars);
+    const { fundWallet } = await import("./fund-wallets.server");
+    const r = await pay(db, fundWallet("team"), { id: `staff:${s.wallet}:${b.payouts}`, kind: "staff", recipient: s.wallet, token: "" }, tinybars);
     if (r.step === "low balance") throw new Error("Payout wallet is low on HBAR — try again later");
     if (r.step !== "sent") throw new Error("Claim could not be sent — contact support");
     return { ok: true, hbar: Number(tinybars) / 1e8 };
@@ -160,3 +161,19 @@ export const adminRemoveStaff = createServerFn({ method: "POST" })
     if (!removed?.length) throw new Error("Member already removed or not found");
     return { ok: true };
   });
+
+/** Called from the hourly fee-split job: the team wallet pays one member at most once a day. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function autoPayStaff(db: any) {
+  const { data: rows } = await db.from("staff_members").select("*").order("joined_at");
+  for (const s of rows ?? []) {
+    const b = await balanceOf(db, s);
+    if (b.claimable < STAFF_MIN_CLAIM_HBAR) continue;
+    if (b.lastPayout && Date.now() - Date.parse(b.lastPayout) < 86_400_000) continue;
+    const { pay } = await import("./payouts.server");
+    const { fundWallet } = await import("./fund-wallets.server");
+    const tinybars = BigInt(Math.floor(b.claimable * 1e8));
+    return pay(db, fundWallet("team"), { id: `staff:${s.wallet}:${b.payouts}`, kind: "staff", recipient: s.wallet, token: "" }, tinybars);
+  }
+  return { step: "no staff due" };
+}

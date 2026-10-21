@@ -110,7 +110,7 @@ async function takeSnapshots(db: Db, now: number, max = 3) {
         token: tok.address, slot: new Date(s.t).toISOString(), period: s.period, supply: supply.toString(), lots, weights,
       });
       if (!error) taken++;
-      return taken + 0; // one coin per pass keeps calls short and ordered
+      break; // next slot of this coin on the next pass, so lots stay in order
     }
   }
   return taken;
