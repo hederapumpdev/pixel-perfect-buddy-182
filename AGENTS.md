@@ -32,3 +32,4 @@
 - BondingProgress uses synced reserves for a display-only HBAR/USD graduation estimate, including the existing fee; never use it to execute trades.
 - Token logo submission packages are client-side exports of synced coin data; external forms remain manual, with no automatic-submission or approval claims.
 - Admin access = owner PIN or a short-lived HMAC session from a wallet-signed login by an active staff member with is_admin; every admin server fn goes through requireAdmin in admin-auth.server.ts so removal revokes access immediately.
+- Community chat uses wallet-signed, expiring server-verified sessions for the existing WalletConnect/social wallets; public reads exclude removed messages, and transactional per-wallet rate limits and blocks guard every post. Moderation always requires requireAdmin.
