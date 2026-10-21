@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { logoSubmission } from "../lib/token-logo-submission";
-import { PUMP_CONTRACT_V2_ID } from "../lib/hedera-config";
 
 const token = {
   address: `0x${BigInt(10924337).toString(16).padStart(40, "0")}`,
-  contract: PUMP_CONTRACT_V2_ID, name: "HEDERAPUMP", symbol: "HPUMP",
+  contract: "0.0.10924256", name: "HEDERAPUMP", symbol: "HPUMP",
   creator: "0.0.10923241", image_url: "logo-hash", description: null,
   website: null, twitter: null, telegram: null,
 };
