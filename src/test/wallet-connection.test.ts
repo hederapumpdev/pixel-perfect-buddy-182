@@ -146,11 +146,12 @@ describe("wallet connection recovery", () => {
     const mock = mockConnector();
     const onHandoff = vi.fn();
     const result = openWalletPicker(mock.connector, { onHandoff });
+    const assertion = expect(result).rejects.toBeInstanceOf(WalletConnectionCancelled);
     mock.uri();
     mock.emit(true);
     mock.emit(false);
     await vi.advanceTimersByTimeAsync(1);
-    await expect(result).rejects.toBeInstanceOf(WalletConnectionCancelled);
+    await assertion;
     await vi.advanceTimersByTimeAsync(20_000);
     expect(onHandoff).not.toHaveBeenCalled();
   });
