@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Home, Compass, PlusCircle, Wallet, BookOpen, LogOut, LifeBuoy, Send } from "lucide-react";
+import { Home, Compass, PlusCircle, Wallet, LogOut, LifeBuoy, Send, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/wallet";
 import { NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
@@ -14,6 +14,7 @@ const nav = [
   { to: "/create", label: "Create Coin" },
   { to: "/contest", label: "Contest" },
   { to: "/leaderboard", label: "Leaderboard" },
+  { to: "/community", label: "Community" },
   { to: "/deposit", label: "Deposit" },
   { to: "/team", label: "Team" },
   { to: "/how-it-works", label: "How It Works" },
@@ -82,7 +83,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center gap-2 px-4 py-2 lg:flex-nowrap lg:gap-6">
           <Logo />
-          <nav className="hidden gap-1 md:flex">
+          <nav className="hidden flex-wrap gap-1 md:flex">
             {nav.map((n) => (
               <Link
                 key={n.to}
@@ -135,7 +136,7 @@ export function Shell({ children }: { children: ReactNode }) {
           { to: "/", label: "Home", Icon: Home },
           { to: "/explore", label: "Explore", Icon: Compass },
           { to: "/create", label: "Create", Icon: PlusCircle },
-          { to: "/how-it-works", label: "Guide", Icon: BookOpen },
+          { to: "/community", label: "Chat", Icon: MessageCircle },
           { to: "/profile", label: "Profile", Icon: Wallet },
           { to: "/support", label: "Help", Icon: LifeBuoy },
         ].map(({ to, label, Icon }) => (
