@@ -18,13 +18,44 @@ type ModalConnector = {
 
 export class WalletConnectionCancelled extends Error {}
 
-export async function openWalletPicker(connector: ModalConnector): Promise<void> {
+/**
+ * The picker is open and the wallet app was asked to open, but nothing came
+ * back — on iPhone this usually means Safari's "Open in HashPack?" prompt was
+ * missed. The app can re-send the same pairing on a fresh tap.
+ */
+export type WalletHandoff = { uri: string; retry: () => void };
+export type WalletPickerHooks = { onHandoff?: (handoff: WalletHandoff) => void };
+
+const HANDOFF_MS = 12_000;
+
+export async function openWalletPicker(
+  connector: ModalConnector,
+  hooks: WalletPickerHooks = {},
+): Promise<void> {
   let opened = false;
+  let pairingUri = "";
   let unsubscribe = () => {};
   let openingTimer: ReturnType<typeof setTimeout> | undefined;
   let approvalTimer: ReturnType<typeof setTimeout> | undefined;
   let dismissalTimer: ReturnType<typeof setTimeout> | undefined;
+  let handoffTimer: ReturnType<typeof setTimeout> | undefined;
   let active = true;
+
+  const armHandoff = () => {
+    if (!hooks.onHandoff || !opened || !pairingUri) return;
+    clearTimeout(handoffTimer);
+    handoffTimer = setTimeout(() => {
+      if (active) hooks.onHandoff?.({ uri: pairingUri, retry });
+    }, HANDOFF_MS);
+  };
+
+  // Same pairing, new tap: the wallet is asked to open again.
+  const retry = () => {
+    if (!active || !pairingUri) return;
+    connector.walletConnectModal.openModal({ uri: pairingUri }).catch(() => {});
+    armHandoff();
+  };
+
   try {
     await new Promise<void>((resolve, reject) => {
       openingTimer = setTimeout(() => reject(new Error(
@@ -35,6 +66,7 @@ export async function openWalletPicker(connector: ModalConnector): Promise<void>
           opened = true;
           clearTimeout(openingTimer);
           clearTimeout(dismissalTimer);
+          armHandoff();
           if (!approvalTimer) approvalTimer = setTimeout(() => reject(new Error(
             "Wallet connection timed out. Tap WalletConnect to try again.",
           )), 180_000);
@@ -51,11 +83,13 @@ export async function openWalletPicker(connector: ModalConnector): Promise<void>
       // SDK openModal waits for relay pairing before showing UI; time phases separately.
       connector.connect((uri) => {
         if (!active) return;
+        pairingUri = uri;
         clearTimeout(openingTimer);
         openingTimer = setTimeout(() => reject(new Error(
           "The wallet window couldn't open. Check your connection and tap WalletConnect again. If you're inside HashPack or a chat app, try Safari or Chrome.",
         )), 30_000);
         connector.walletConnectModal.openModal({ uri }).catch(reject);
+        armHandoff();
       }).then(() => resolve(), reject);
     });
   } finally {
@@ -63,6 +97,7 @@ export async function openWalletPicker(connector: ModalConnector): Promise<void>
     clearTimeout(openingTimer);
     clearTimeout(approvalTimer);
     clearTimeout(dismissalTimer);
+    clearTimeout(handoffTimer);
     unsubscribe();
     connector.walletConnectModal.closeModal();
   }
