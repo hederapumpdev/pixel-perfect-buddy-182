@@ -197,6 +197,13 @@
       "when": 1792611763825,
       "tag": "0027_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792611993607,
+      "tag": "0028_admin_log",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_log: {
+        Row: {
+          action: string
+          actor: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       bot_buys: {
         Row: {
           created_at: string

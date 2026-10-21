@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
-import { checkAdminPin, walletAdminLogin, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/chain.functions";
+import { checkAdminPin, walletAdminLogin, getAdminLog, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/chain.functions";
 import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
@@ -112,7 +112,7 @@ function Admin() {
     setBusy(true);
     setErr(null);
     try {
-      const r = await check({ data: { pin: value } });
+      const r = await check({ data: { pin: value, login: true } });
       if (!r.ok) {
         setErr("Wrong PIN — check it and try again.");
         return;
@@ -153,6 +153,7 @@ function Admin() {
     <Shell>
       <div className="mx-auto max-w-4xl space-y-10">
         <h1 className="text-3xl font-bold">Admin</h1>
+        <AdminLog />
         <UsersOverview />
         <SupportInbox />
         <XPostingPanel pin={pin || sessionStorage.getItem(PIN_KEY) || ""} />
@@ -642,6 +643,39 @@ function UsersOverview() {
         {!rows.length && <p className="px-4 py-3 text-muted-foreground">{q.isLoading ? "Loading…" : "No users yet."}</p>}
       </div>
       {q.error && <p className="mt-2 text-sm text-destructive">Couldn't load user counts — reopen the admin page with your PIN.</p>}
+    </section>
+  );
+}
+
+function AdminLog() {
+  const load = useServerFn(getAdminLog);
+  const [open, setOpen] = useState(false);
+  const pin = (() => {
+    try {
+      return sessionStorage.getItem(PIN_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  })();
+  const q = useQuery({ queryKey: ["admin-log"], queryFn: () => load({ data: { pin } }), refetchInterval: 60_000 });
+  const rows = q.data ?? [];
+  const lastLogin = rows.find((r) => r.action.startsWith("Logged in"));
+  return (
+    <section className="space-y-3">
+      <h2 className="text-xl font-semibold">Admin activity</h2>
+      <p className="text-sm text-muted-foreground">
+        {lastLogin ? `Last login: ${lastLogin.actor} · ${new Date(lastLogin.created_at).toLocaleString()}` : "No logins recorded yet."}
+      </p>
+      {q.isError && <p className="text-sm text-destructive">Could not load admin activity.</p>}
+      <div className="divide-y divide-border rounded-lg border border-border bg-card">
+        {(open ? rows : rows.slice(0, 5)).map((r) => (
+          <div key={r.id} className="flex flex-wrap justify-between gap-2 p-3 text-sm">
+            <span><span className="font-semibold">{r.actor}</span> · {r.action}</span>
+            <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</span>
+          </div>
+        ))}
+      </div>
+      {rows.length > 5 && <Button variant="outline" size="sm" onClick={() => setOpen(!open)}>{open ? "Show less" : `Show all ${rows.length}`}</Button>}
     </section>
   );
 }

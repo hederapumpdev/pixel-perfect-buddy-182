@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
-const requirePin = async (p: unknown) => (await import("./admin-auth.server")).requireAdmin(p);
+const requirePin = async (p: unknown, action?: string) => (await import("./admin-auth.server")).requireAdmin(p, action);
 
 /** Anyone can send a support request; it lands in the admin page. */
 export const submitSupport = createServerFn({ method: "POST" })
@@ -40,7 +40,7 @@ export const setSupportStatus = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    await requirePin(data.pin);
+    await requirePin(data.pin, `Support request ${data.id.slice(0, 8)} marked ${data.status}`);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("support_requests").update({ status: data.status }).eq("id", data.id);
     if (error) throw new Error("Saving failed");

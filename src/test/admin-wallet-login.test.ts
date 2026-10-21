@@ -7,6 +7,7 @@ vi.mock("@/integrations/supabase/client.server", () => {
   const q: Record<string, unknown> = {};
   for (const k of ["select", "eq", "is"]) q[k] = () => q;
   q["maybeSingle"] = async () => ({ data: staff });
+  q["insert"] = async () => ({ error: null });
   return { supabaseAdmin: { from: () => q } };
 });
 
