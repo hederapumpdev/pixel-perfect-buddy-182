@@ -1,9 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
-function requirePin(pin: unknown) {
-  const real = process.env["ADMIN_PIN"];
-  if (typeof pin !== "string" || !real || pin.trim() !== real.trim()) throw new Error("Wrong PIN");
-}
+const requirePin = async (p: unknown) => (await import("./admin-auth.server")).requireAdmin(p);
 
 /** Anyone can send a support request; it lands in the admin page. */
 export const submitSupport = createServerFn({ method: "POST" })
@@ -26,7 +23,7 @@ export const submitSupport = createServerFn({ method: "POST" })
 export const listSupport = createServerFn({ method: "POST" })
   .inputValidator((d: { pin: string }) => d)
   .handler(async ({ data }) => {
-    requirePin(data.pin);
+    await requirePin(data.pin);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("support_requests")
@@ -43,7 +40,7 @@ export const setSupportStatus = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    requirePin(data.pin);
+    await requirePin(data.pin);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("support_requests").update({ status: data.status }).eq("id", data.id);
     if (error) throw new Error("Saving failed");
