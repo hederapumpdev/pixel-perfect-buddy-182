@@ -53,29 +53,24 @@ export function FeeWalletsPanel({ pin }: { pin: string }) {
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/40 text-left text-xs text-muted-foreground"><tr><th className="p-2">Contract</th><th className="p-2">Fees go to</th><th className="p-2">Unclaimed</th><th className="p-2" /></tr></thead>
-          <tbody>
-            {(q.data?.contracts ?? []).map((c) => {
-              const done = !!split && c.feeRecipient?.toLowerCase() === split.address;
-              return (
-                <tr key={c.contract} className="border-t border-border">
-                  <td className="p-2 font-mono">{c.contract}</td>
-                  <td className="p-2 font-mono text-xs">{done ? "Split wallet ✓" : c.feeRecipient ?? "?"}</td>
-                  <td className="p-2 font-mono">{hb(c.platformFees)}</td>
-                  <td className="p-2 text-right">
-                    {!done && (
-                      <Button size="sm" disabled={!split?.accountId || busy !== null} onClick={() => point(c.contract)}>
-                        {busy === c.contract ? "Confirm in wallet…" : "Send fees to bot wallet"}
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className="space-y-2">
+        {(q.data?.contracts ?? []).map((c) => {
+          const done = !!split && c.feeRecipient?.toLowerCase() === split.address;
+          const to = c.feeRecipient ? (c.feeRecipient.toLowerCase() === "0x" + "a6ace9".padStart(40, "0") ? "0.0.10923241 (your wallet)" : `0.0.${parseInt(c.feeRecipient.slice(-12), 16)}`) : "?";
+          return (
+            <div key={c.contract} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card p-3 text-sm">
+              <div className="min-w-0">
+                <p className="font-mono font-semibold">{c.contract}</p>
+                <p className="text-xs text-muted-foreground">Fees go to: {done ? "Bot wallet ✓" : to} · Unclaimed {hb(c.platformFees)}</p>
+              </div>
+              {!done && (
+                <Button size="sm" className="w-full sm:w-auto" disabled={!split?.accountId || busy !== null} onClick={() => point(c.contract)}>
+                  {busy === c.contract ? "Confirm in wallet…" : "Send fees to bot wallet"}
+                </Button>
+              )}
+            </div>
+          );
+        })}
       </div>
       <p className="text-xs text-muted-foreground">Only the contract owner wallet can approve this change.</p>
 
