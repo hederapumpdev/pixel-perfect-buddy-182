@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminPin, walletAdminLogin, getAdminLog, getBotHoldings, sellBotCoin, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/chain.functions";
+import { botHoldingViews } from "@/lib/bot-holdings-view";
 import {
   NETWORK,
   PUMP_CONTRACT_V3_ID,
@@ -711,11 +712,7 @@ function BotHoldings() {
     }
   })();
   const q = useQuery({ queryKey: ["bot-holdings"], queryFn: () => load({ data: { pin } }), refetchInterval: 120_000 });
-  const rows = q.data ?? [];
-  const held = rows.filter((c) => c.tokens > 0);
-  const soldOut = rows.length - held.length;
-  const known = rows.filter((c) => !(c.graduated && c.tokens > 0));
-  const total = known.reduce((a, c) => a + c.profit, 0);
+  const { held, soldOut, total } = botHoldingViews(q.data ?? []);
 
   async function doSell(token: string, symbol: string, pct: number) {
     if (!confirm(`Sell ${pct}% of the bot's ${symbol}?`)) return;
