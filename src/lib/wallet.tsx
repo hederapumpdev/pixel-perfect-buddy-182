@@ -13,6 +13,7 @@ import { connectionDeadline, openWalletPicker, WalletConnectionCancelled, type W
 import { deployStep, deployProgressOf, findDeployOnMirror, type DeployProgress, type DeployState } from "./hashpack-deploy";
 import { WalletHandoffHelp } from "@/components/WalletHandoffHelp";
 import { MAX_ACCOUNT_WALLETS, adoptLegacyWallet, decryptKey, encryptKey, readAccountWallets, writeAccountWallets, type StoredLocalWallet } from "./local-wallet";
+import { clearSigninReturn, readSigninReturn, saveSigninReturn, takeSigninReturn } from "./signin-return";
 import {
   MIRROR_URL,
   NETWORK,
@@ -87,10 +88,13 @@ const idToEvm = (id: string) =>
 
 type EvmSigner = import("ethers").Signer;
 let web3auth: import("@web3auth/modal").Web3Auth | null = null;
-// Page to return to after same-tab (redirect) sign-in.
-const SIGNIN_RETURN_KEY = "hederaPump.signinReturn";
-async function initWeb3Auth() {
-  if (web3auth) return web3auth;
+let web3authInit: Promise<import("@web3auth/modal").Web3Auth> | null = null;
+function initWeb3Auth(beforeInit?: (w: import("@web3auth/modal").Web3Auth) => void) {
+  if (web3auth) return Promise.resolve(web3auth);
+  if (!web3authInit) web3authInit = createWeb3Auth(beforeInit).catch((e) => { web3authInit = null; throw e; });
+  return web3authInit;
+}
+async function createWeb3Auth(beforeInit?: (w: import("@web3auth/modal").Web3Auth) => void) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const raw = (await import("@web3auth/modal")) as any;
   // Production bundles may nest the exports under `default`.
@@ -147,6 +151,7 @@ async function initWeb3Auth() {
     // Inside a frame (e.g. the editor preview) Google refuses to load in-page, so keep the popup there.
     uiConfig: { uxMode: window.self !== window.top ? "popup" : "redirect" },
   } as never);
+  beforeInit?.(w);
   await w.init();
   web3auth = w;
   return w;
@@ -260,61 +265,88 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   // Restore an email-wallet session on load, including the return from same-tab sign-in.
   useEffect(() => {
     if (!WEB3AUTH_CLIENT_ID) return;
-    const returning = (() => {
-      try { return sessionStorage.getItem(SIGNIN_RETURN_KEY); } catch { return null; }
-    })();
-    const clearReturn = () => { try { sessionStorage.removeItem(SIGNIN_RETURN_KEY); } catch { /* ignore */ } };
+    // Read the sign-in result before the SDK wipes it from the address bar.
+    const back = readSigninReturn(window.location.hash, window.location.search);
+    const savedPath = takeSigninReturn();
+    const returning = back.present || savedPath != null;
+    const TOAST = "signin-return";
     let done = false;
     let stop = () => {};
+    // Defer: the toast area mounts after this provider on first load.
+    // The toast area mounts after this provider on first load; wait for it.
+    const whenToasts = (fn: () => void) => {
+      let tries = 0;
+      const tick = () => document.querySelector('section[aria-label^="Notifications"]') || ++tries > 50
+        ? setTimeout(fn, 50) : setTimeout(tick, 100);
+      tick();
+    };
+    if (returning) whenToasts(() => { if (!done) toast.loading("Finishing sign-in…", { id: TOAST, duration: Infinity }); });
     const fail = (e: unknown) => {
       console.error("Sign-in restore failed", e);
-      if (returning) {
-        clearReturn();
-        toast.error(`Sign-in didn't finish: ${e instanceof Error ? e.message : String(e)}`);
-      }
+      if (!returning || done) return;
+      done = true;
+      clearSigninReturn();
+      stop();
+      const msg = e instanceof Error ? e.message : typeof e === "object" && e && "message" in e ? String((e as { message: unknown }).message) : String(e);
+      whenToasts(() => toast.error(`Sign-in didn't finish: ${msg}`, { id: TOAST, duration: Infinity, closeButton: true }));
     };
+    if (returning && back.error) fail(new Error(back.error));
     const finish = async (w: import("@web3auth/modal").Web3Auth) => {
       if (done || !w.connected || !w.provider) return;
       done = true;
       try {
         await attachEmail(w);
         if (returning) {
-          clearReturn();
-          toast.success("Signed in");
-          if (returning !== window.location.pathname + window.location.search) window.location.replace(returning);
+          clearSigninReturn();
+          stop();
+          toast.success("Signed in", { id: TOAST, duration: 4000 });
+          const target = savedPath ?? window.location.pathname;
+          if (target !== window.location.pathname + window.location.search) window.location.replace(target);
         }
       } catch (e) {
         done = false;
         fail(e);
       }
     };
-    initWeb3Auth()
+    // Covers a sign-in service that never finishes starting, too.
+    const giveUp = setTimeout(() => {
+      if (done || !returning) return;
+      fail(new Error(back.present
+        ? (back.hasSession
+          ? "the sign-in service sent you back but couldn't open your wallet. Please try again."
+          : "the sign-in service sent you back without a login. Please try again.")
+        : "you came back without a login result from Google/e-mail. Please try again, and stay in the same browser tab."));
+    }, 25_000);
+    let poll: ReturnType<typeof setInterval> | undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let ev: any = null;
+    const onConnected = () => ev && void finish(ev);
+    const onConsent = () => ev?.acceptConsent?.().then(() => finish(ev)).catch(fail);
+    const onError = (e: unknown) => fail(e);
+    stop = () => {
+      clearInterval(poll);
+      clearTimeout(giveUp);
+      if (!ev) return;
+      ev.off("connected", onConnected);
+      ev.off("authorized", onConnected);
+      ev.off("consent_requiring", onConsent);
+      ev.off("rehydration_error", onError);
+      ev.off("errored", onError);
+    };
+    // Listen BEFORE init: the SDK reports the redirect result during init.
+    initWeb3Auth((w) => {
+      ev = w;
+      ev.on("connected", onConnected);
+      ev.on("authorized", onConnected);
+      ev.on("consent_requiring", onConsent);
+      ev.on("rehydration_error", onError);
+      ev.on("errored", onError);
+    })
       .then((w) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ev = w as any;
-        const onConnected = () => void finish(w);
-        const onConsent = () => ev.acceptConsent?.().then(() => finish(w)).catch(fail);
-        const onError = (e: unknown) => fail(e);
-        ev.on("connected", onConnected);
-        ev.on("authorized", onConnected);
-        ev.on("consent_requiring", onConsent);
-        ev.on("rehydration_error", onError);
-        ev.on("errored", onError);
+        ev = w;
+        if (done) return;
         // The return from Google can finish a moment after init; keep checking briefly.
-        const poll = setInterval(() => void finish(w), 500);
-        const giveUp = setTimeout(() => {
-          clearInterval(poll);
-          if (!done && returning) fail(new Error("no session came back from the sign-in service. Please try again."));
-        }, 20_000);
-        stop = () => {
-          clearInterval(poll);
-          clearTimeout(giveUp);
-          ev.off("connected", onConnected);
-          ev.off("authorized", onConnected);
-          ev.off("consent_requiring", onConsent);
-          ev.off("rehydration_error", onError);
-          ev.off("errored", onError);
-        };
+        poll = setInterval(() => void finish(w), 500);
         if (ev.status === "consent_requiring") onConsent();
         void finish(w);
       })
@@ -391,12 +423,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     try {
       const w = await initWeb3Auth();
       // Same-tab sign-in leaves this page; remember where to come back to.
-      try { sessionStorage.setItem(SIGNIN_RETURN_KEY, window.location.pathname + window.location.search); } catch { /* ignore */ }
+      saveSigninReturn(window.location.pathname + window.location.search);
       if (!w.connected) await w.connect();
-      if (w.connected) try { sessionStorage.removeItem(SIGNIN_RETURN_KEY); } catch { /* ignore */ }
+      if (w.connected) clearSigninReturn();
       await attachEmail(w);
     } catch (e) {
-      try { sessionStorage.removeItem(SIGNIN_RETURN_KEY); } catch { /* ignore */ }
+      clearSigninReturn();
       toast.error(e instanceof Error ? e.message : "Couldn't sign in");
     } finally {
       setConnecting(false);
