@@ -17,7 +17,7 @@ export function readSigninReturn(hash: string, search = ""): SigninReturn {
     if (p.get("error")) out.error = p.get("error");
     if (b64) {
       try {
-        const d = JSON.parse(decodeB64Url(b64)) as Record<string, unknown>;
+        const d = JSON.parse(decodeB64Url(b64)) as { error?: unknown; sessionId?: unknown };
         if (typeof d.error === "string" && d.error) out.error = d.error;
         if (typeof d.sessionId === "string" && d.sessionId) out.hasSession = true;
       } catch { /* unreadable; treat as present without details */ }
