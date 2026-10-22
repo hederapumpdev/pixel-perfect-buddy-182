@@ -19,7 +19,7 @@ export type MarketTokenInfo = {
 /** Preserve raw integer precision when formatting HTS token quantities. */
 export function formatTokenQuantity(raw: string, decimals: number): string {
   if (!/^\d+$/.test(raw) || !Number.isInteger(decimals) || decimals < 0 || decimals > 18) return "Unknown";
-  const padded = raw["pad"]Start(decimals + 1, "0");
+  const padded = raw.padStart(decimals + 1, "0");
   const whole = decimals ? padded.slice(0, -decimals) : padded;
   const fraction = decimals ? padded.slice(-decimals).replace(/0+$/, "") : "";
   return whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (fraction ? `.${fraction}` : "");
