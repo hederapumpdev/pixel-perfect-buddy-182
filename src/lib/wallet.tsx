@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { connectionDeadline, openWalletPicker, WalletConnectionCancelled, type WalletHandoff } from "./wallet-connection";
 import { deployStep, deployProgressOf, findDeployOnMirror, type DeployProgress, type DeployState } from "./hashpack-deploy";
 import { WalletHandoffHelp } from "@/components/WalletHandoffHelp";
+import { LOCAL_WALLET_KEY, decryptKey, encryptKey, readStoredWallet } from "./local-wallet";
 import {
   MIRROR_URL,
   NETWORK,
@@ -33,7 +34,13 @@ type WalletCtx = {
   connecting: boolean;
   connect: () => Promise<void>;
   connectEmail: () => Promise<void>;
-  mode: "hashpack" | "email" | null;
+  mode: "hashpack" | "email" | "local" | null;
+  /** Account ID of an imported wallet saved in this browser (locked or unlocked). */
+  storedLocal: string | null;
+  /** Imports a private key or recovery phrase; it is encrypted with the PIN and kept in this browser only. */
+  importKey: (opts: { key: string; accountId?: string | undefined; pin: string }) => Promise<void>;
+  unlockLocal: (pin: string) => Promise<void>;
+  forgetLocal: () => void;
   disconnect: () => Promise<void>;
   /** Calls the launchpad contract. calldata = full ABI-encoded call (selector + args). */
   execute: (opts: {
@@ -138,7 +145,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [balanceHbar, setBal] = useState<number | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [tick, setTick] = useState(0);
-  const [mode, setMode] = useState<"hashpack" | "email" | null>(null);
+  const [mode, setMode] = useState<"hashpack" | "email" | "local" | null>(null);
+  const [storedLocal, setStoredLocal] = useState<string | null>(null);
+  // Imported wallet: decrypted key lives only in memory, inside an operator client.
+  const local = useRef<{ client: import("@hiero-ledger/sdk").Client; key: import("@hiero-ledger/sdk").PrivateKey; id: string } | null>(null);
+  useEffect(() => setStoredLocal(readStoredWallet()?.accountId ?? null), []);
   const evmSigner = useRef<EvmSigner | null>(null);
   const [deployProgress, setDeployProgress] = useState<DeployProgress | null>(null);
   // Set when the wallet app was asked to open but never came back.
@@ -290,7 +301,75 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [attachEmail]);
 
+  const attachLocal = useCallback(async (keyText: string, id: string) => {
+    const { sdk } = await loadLibs();
+    const key = sdk.PrivateKey.fromStringDer(keyText);
+    const client = sdk.Client.forMainnet().setOperator(sdk.AccountId.fromString(id), key);
+    await connector.current?.disconnectAll().catch(() => {});
+    if (web3auth?.connected) await web3auth.logout().catch(() => {});
+    evmSigner.current = null;
+    local.current = { client, key, id };
+    setMode("local");
+    setAccountId(id);
+  }, []);
+
+  const importKey: WalletCtx["importKey"] = useCallback(async ({ key, accountId: given, pin }) => {
+    const { sdk } = await loadLibs();
+    const text = key.trim();
+    const cands: import("@hiero-ledger/sdk").PrivateKey[] = [];
+    if (text.split(/\s+/).length >= 12) {
+      const m = await sdk.Mnemonic.fromString(text.toLowerCase());
+      cands.push(await m.toStandardECDSAsecp256k1PrivateKey("", 0), await m.toStandardEd25519PrivateKey("", 0));
+      try { cands.push(await m.toEd25519PrivateKey()); } catch { /* not a legacy phrase */ }
+    } else {
+      const hex = text.replace(/^0x/, "");
+      try { cands.push(sdk.PrivateKey.fromStringDer(hex)); } catch { /* raw key */ }
+      if (!cands.length && /^[0-9a-f]{64}$/i.test(hex)) {
+        cands.push(sdk.PrivateKey.fromStringECDSA(hex), sdk.PrivateKey.fromStringED25519(hex));
+      }
+    }
+    if (!cands.length) throw new Error("That isn't a valid private key or recovery phrase.");
+    const want = given?.trim();
+    let match: { id: string; key: import("@hiero-ledger/sdk").PrivateKey } | null = null;
+    for (const k of cands) {
+      const pub = k.publicKey.toStringRaw().toLowerCase();
+      if (want) {
+        const a = await fetch(`${MIRROR_URL}/api/v1/accounts/${want}?transactions=false`).then((r) => (r.ok ? r.json() : null));
+        if (!a) throw new Error("That account doesn't exist on Hedera.");
+        if (String(a.key?.key ?? "").toLowerCase() === pub) match = { id: a.account, key: k };
+      } else {
+        const j = await fetch(`${MIRROR_URL}/api/v1/accounts?account.publickey=${pub}&limit=1`).then((r) => (r.ok ? r.json() : null));
+        const id = j?.accounts?.[0]?.account;
+        if (id) match = { id, key: k };
+      }
+      if (match) break;
+    }
+    if (!match) throw new Error(want ? "This key doesn't belong to that account." : "No Hedera account found for this key. Enter your account ID too.");
+    const der = match.key.toStringDer();
+    const stored = await encryptKey(match.id, der, pin);
+    localStorage.setItem(LOCAL_WALLET_KEY, JSON.stringify(stored));
+    setStoredLocal(match.id);
+    await attachLocal(der, match.id);
+  }, [attachLocal]);
+
+  const unlockLocal: WalletCtx["unlockLocal"] = useCallback(async (pin) => {
+    const s = readStoredWallet();
+    if (!s) throw new Error("No imported wallet on this device.");
+    await attachLocal(await decryptKey(s, pin), s.accountId);
+  }, [attachLocal]);
+
+  const forgetLocal = useCallback(() => {
+    try { localStorage.removeItem(LOCAL_WALLET_KEY); } catch { /* blocked */ }
+    setStoredLocal(null);
+    if (local.current) {
+      local.current = null;
+      setMode(null);
+      setAccountId(null);
+    }
+  }, []);
+
   const disconnect = useCallback(async () => {
+    local.current = null;
     await connector.current?.disconnectAll().catch(() => {});
     if (web3auth?.connected) await web3auth.logout().catch(() => {});
     evmSigner.current = null;
@@ -299,6 +378,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signer = () => {
+    if (local.current) {
+      const l = local.current;
+      return {
+        getAccountId: () => l.client.operatorAccountId!,
+        sign: async (msgs: Uint8Array[]) => msgs.map((m) => ({ signature: l.key.sign(m) })),
+      } as unknown as NonNullable<Connector["signers"][0]>;
+    }
     const s = connector.current?.signers[0];
     if (!s) throw new Error("Connect your wallet first");
     return s;
@@ -351,7 +437,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       // ("Query.fromBytes() not implemented"), so read the result from the mirror node.
       let res: Awaited<ReturnType<typeof tx.executeWithSigner>>;
       try {
-        res = await tx.executeWithSigner(s as never);
+        res = await (local.current ? tx.execute(local.current.client as never) : tx.executeWithSigner(s as never));
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         // The signer retries a failed transaction as a query, which hides the
@@ -392,6 +478,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setTransactionId: (id: never) => unknown;
       freezeWith: (c: never) => Promise<unknown>;
       executeWithSigner: (s: never) => Promise<{ transactionId: { toString(): string } }>;
+      execute: (c: never) => Promise<{ transactionId: { toString(): string } }>;
     }) => {
       const { sdk } = await loadLibs();
       const s = signer();
@@ -401,7 +488,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       await tx.freezeWith(client as never);
       let res: { transactionId: { toString(): string } };
       try {
-        res = await tx.executeWithSigner(s as never);
+        res = await (local.current ? tx.execute(local.current.client as never) : tx.executeWithSigner(s as never));
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         if (/INSUFFICIENT_PAYER_BALANCE|INSUFFICIENT_ACCOUNT_BALANCE/i.test(msg))
@@ -516,6 +603,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const deploy: WalletCtx["deploy"] = useCallback(async ({ bytecode, constructorParams, gas }) => {
     if (evmSigner.current) throw new Error("Deploy with HashPack, not an email wallet");
     const { sdk } = await loadLibs();
+    if (local.current) throw new Error("Deploy with HashPack, not an imported wallet");
     const s = signer();
     const fp = fingerprint(bytecode.replace(/^0x/, ""));
     const { resume, contractId } = await resolveDeploy(bytecode);
@@ -552,7 +640,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     await tx.freezeWith(client);
     const txId = tx.transactionId?.toString() ?? "";
     try {
-      await tx.executeWithSigner(s as never);
+      await (local.current ? tx.execute(local.current.client as never) : tx.executeWithSigner(s as never));
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (/INSUFFICIENT_PAYER_BALANCE|INSUFFICIENT_ACCOUNT_BALANCE/i.test(msg))
@@ -578,6 +666,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const signText: WalletCtx["signText"] = useCallback(async (text) => {
     if (evmSigner.current) return { evmSignature: await evmSigner.current.signMessage(text) };
+    if (local.current) {
+      const sig = local.current.key.sign(new TextEncoder().encode(`\x19Hedera Signed Message:\n${text.length}${text}`));
+      return { signature: Array.from(sig, (b) => b.toString(16).padStart(2, "0")).join("") };
+    }
     const [r] = await signer().sign([new TextEncoder().encode(text)]);
     if (!r) throw new Error("Wallet did not sign");
     const hex = Array.from(r.signature, (b) => b.toString(16).padStart(2, "0")).join("");
@@ -594,6 +686,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         connect,
         connectEmail,
         mode,
+        storedLocal,
+        importKey,
+        unlockLocal,
+        forgetLocal,
         disconnect,
         execute,
         associateToken,

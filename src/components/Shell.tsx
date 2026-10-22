@@ -1,11 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Home, Compass, PlusCircle, Wallet, LogOut, LifeBuoy, Send, MessageCircle, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useWallet } from "@/lib/wallet";
+import { Home, Compass, PlusCircle, Wallet, LifeBuoy, Send, MessageCircle, TrendingUp } from "lucide-react";
 import { NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
 import { LiveTicker } from "@/components/LiveTicker";
 import { AlertWatcher } from "@/components/PriceAlerts";
+import { WalletMenu } from "@/components/WalletMenu";
 import logo from "@/assets/hederapump-logo.png";
 
 const nav = [
@@ -41,35 +40,6 @@ export function Logo() {
   );
 }
 
-function WalletButton() {
-  const w = useWallet();
-  if (w.accountId)
-    return (
-      <div className="flex items-center gap-2">
-        <span className="hidden font-mono text-xs text-muted-foreground sm:inline">
-          {w.balanceHbar != null ? `${w.balanceHbar.toFixed(2)} ℏ` : ""}
-        </span>
-        <span className="max-w-[9rem] truncate rounded-md bg-secondary px-2 py-1 font-mono text-xs">
-          {w.accountId}
-        </span>
-        <Button size="icon" variant="ghost" aria-label="Disconnect wallet" onClick={w.disconnect}>
-          <LogOut className="h-4 w-4" />
-        </Button>
-      </div>
-    );
-  return (
-    <div className="flex items-center gap-2">
-      <Button size="sm" variant="secondary" onClick={w.connectEmail} disabled={w.connecting}>
-        Sign in
-      </Button>
-      <Button size="sm" onClick={w.connect} disabled={w.connecting}>
-        <Wallet className="h-4 w-4" />
-        {w.connecting ? "…" : "WalletConnect"}
-      </Button>
-    </div>
-  );
-}
-
 export function Shell({ children }: { children: ReactNode }) {
   const live = NETWORK === "mainnet";
   return (
@@ -99,7 +69,7 @@ export function Shell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="ml-auto">
-            <WalletButton />
+            <WalletMenu />
           </div>
         </div>
       </header>
