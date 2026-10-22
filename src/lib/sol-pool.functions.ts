@@ -2,7 +2,7 @@
 // Nothing is sent unless the bot already holds the SOL and enough HBAR for the whole plan.
 import { createServerFn } from "@tanstack/react-start";
 import { MIRROR_URL, SAUCERSWAP_V1_ROUTER_ID } from "./hedera-config";
-import { SOL_DECIMALS, SOL_TOKEN_ID, encodeAddLiquidityETHNewPool, poolCreateFeeTinybars, poolPlan, sodaxHbarToSol, solPoolExists } from "./sol-pool";
+import { SOL_DECIMALS, SOL_TOKEN_ID, encodeAddLiquidityETHNewPool, poolCreateFeeTinybars, poolPlan, solPriceHbar, solPoolExists } from "./sol-pool";
 import { idToEvm } from "./markets";
 
 const checkPin = async (p: unknown, action?: string) => (await import("./admin-auth.server")).requireAdmin(p, action);
@@ -49,7 +49,7 @@ export const getSolPoolAdmin = createServerFn({ method: "POST" })
       hbarUsd().catch(() => 0),
       accountId ? balanceOf(accountId, SOL_TOKEN_ID).catch(() => 0n) : Promise.resolve(0n),
       accountId ? hbarOf(accountId).catch(() => 0n) : Promise.resolve(0n),
-      sodaxHbarToSol(2000),
+      solPriceHbar(),
     ]);
     const exists = await solPoolExists().catch(() => false);
     const sol = Number(solUnits) / 10 ** SOL_DECIMALS;
@@ -64,7 +64,7 @@ export const getSolPoolAdmin = createServerFn({ method: "POST" })
       sol,
       hbar: Number(hbar) / 1e8,
       // HBAR per SOL from SODAX's live quote; 0 when the quote is unavailable.
-      hbarPerSol: quote && quote.sol > 0 ? 2000 / quote.sol : 0,
+      hbarPerSol: quote?.hbarPerSol ?? 0,
       // The bot's HBAR that may actually be spent, after the reserve it needs for gas.
       spendableHbar: Math.max(0, (Number(hbar) - Number(RESERVE_TINYBARS)) / 1e8),
     };
@@ -94,9 +94,9 @@ export const createSolPool = createServerFn({ method: "POST" })
     if (!accountId) throw new Error("The bot wallet has no Hedera account id yet");
 
     const fee = await poolCreateFeeTinybars();
-    const quote = await sodaxHbarToSol(2000);
-    if (!quote || quote.sol <= 0) throw new Error("No live SOL price right now — try again in a minute");
-    const plan = poolPlan({ sol: data.sol, hbarPerSol: 2000 / quote.sol, feeTinybars: fee, hbarUsd: await hbarUsd() });
+    const price = await solPriceHbar();
+    if (!price) throw new Error("No live SOL price right now — try again in a minute");
+    const plan = poolPlan({ sol: data.sol, hbarPerSol: price.hbarPerSol, feeTinybars: fee, hbarUsd: await hbarUsd() });
 
     const held = await balanceOf(accountId, SOL_TOKEN_ID);
     if (held < plan.solUnits)

@@ -138,26 +138,22 @@ export const encodeAddLiquidityETHNewPool = (opts: {
     ],
   } as never);
 
-/** How much SOL one HBAR buys right now, from SODAX's live quote for HBAR → SOL on Hedera. */
-export async function sodaxHbarToSol(hbar: number): Promise<{ sol: number; usd: number } | null> {
+/**
+ * Live SOL/HBAR price from public market data.
+ * Returns null when either price can't be read — the panel then refuses to create anything.
+ */
+export async function solPriceHbar(): Promise<{ hbarPerSol: number; solUsd: number; hbarUsd: number } | null> {
   try {
-    const r = await fetch("https://api.sodax.com/v1/quote", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        source: { chain: "hedera", token: "0x0000000000000000000000000000000000000000" },
-        destination: { chain: "hedera", token: "0x0000000000000000000000000000000000a4e802" },
-        sourceAmount: String(Math.round(hbar * 1e8)),
-        userAddress: "0x0000000000000000000000000000000000000000",
-        slippage: 0.5,
-      }),
-      signal: AbortSignal.timeout(12_000),
-    });
+    const r = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=solana,hedera-hashgraph&vs_currencies=usd",
+      { signal: AbortSignal.timeout(10_000) },
+    );
     if (!r.ok) return null;
-    const j = (await r.json()) as { quotedAmount?: string };
-    const sol = Number(j.quotedAmount ?? 0) / 1e8;
-    if (!(sol > 0)) return null;
-    return { sol, usd: sol * 100 };
+    const j = (await r.json()) as { solana?: { usd: number }; "hedera-hashgraph"?: { usd: number } };
+    const solUsd = Number(j.solana?.usd ?? 0);
+    const hbarUsd = Number(j["hedera-hashgraph"]?.usd ?? 0);
+    if (!(solUsd > 0) || !(hbarUsd > 0)) return null;
+    return { hbarPerSol: solUsd / hbarUsd, solUsd, hbarUsd };
   } catch {
     return null;
   }
