@@ -31,8 +31,12 @@ async function hbarUsd(): Promise<number> {
 
 /** Live picture of the HBAR/SOL pool: does it exist, what it costs, what the bot holds. */
 export const getSolPoolAdmin = createServerFn({ method: "POST" })
-  .inputValidator((d: { pin: unknown }) => checkPin(d.pin, "sol pool status"))
-  .handler(async () => {
+  .inputValidator((d: { pin: unknown }) => {
+    if (typeof d.pin !== "string" && typeof d.pin !== "number") throw new Error("Admin sign-in needed");
+    return d;
+  })
+  .handler(async ({ data }) => {
+    await checkPin(data.pin, "sol pool status");
     const { botWallet } = await import("./bot.server");
     const w = botWallet();
     const acc = await fetch(`${MIRROR_URL}/api/v1/accounts/${w.address}`, { signal: AbortSignal.timeout(10_000) })
@@ -71,11 +75,12 @@ export const getSolPoolAdmin = createServerFn({ method: "POST" })
  */
 export const createSolPool = createServerFn({ method: "POST" })
   .inputValidator((d: { pin: unknown; sol: string }) => {
-    checkPin(d.pin, "create HBAR/SOL pool");
+    if (typeof d.pin !== "string" && typeof d.pin !== "number") throw new Error("Admin sign-in needed");
     if (!/^\d+(?:\.\d{1,8})?$/.test(String(d.sol).trim())) throw new Error("Enter a SOL amount");
-    return { sol: String(d.sol).trim() };
+    return { pin: d.pin, sol: String(d.sol).trim() };
   })
   .handler(async ({ data }) => {
+    await checkPin(data.pin, "create HBAR/SOL pool");
     const { botWallet, botFee } = await import("./bot.server");
     const { ethers } = await import("ethers");
     if (await solPoolExists()) throw new Error("This pool already exists — nothing was sent");
