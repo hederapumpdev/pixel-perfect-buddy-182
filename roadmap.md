@@ -88,3 +88,10 @@
 
 - [x] Deposit page with SODAX swap widget (HBAR on Hedera locked as destination)
 - [ ] SODAX 0.5% partner fee — blocked: SODAX must set it up on their side; needs an EVM fee address from owner
+
+## Markets (all Hedera coins, 1% fee)
+- [x] /markets list + /markets/0.0.x detail with chart (SaucerSwap data, display-only)
+- [x] HederaPumpRouter contract (1% cap, fee to bot wallet) + local tests
+- [ ] Deploy router on mainnet (owner wallet approval, unlimited auto-associations) and set MARKET_ROUTER_ID
+- [ ] Buy/Sell box through the router (association + allowance steps)
+- [ ] Announce Markets on X/Telegram/Discord after user confirms

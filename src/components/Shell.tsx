@@ -11,6 +11,7 @@ import logo from "@/assets/hederapump-logo.png";
 const nav = [
   { to: "/", label: "Home" },
   { to: "/explore", label: "Explore" },
+  { to: "/markets", label: "Markets" },
   { to: "/create", label: "Create Coin" },
   { to: "/contest", label: "Contest" },
   { to: "/leaderboard", label: "Leaderboard" },

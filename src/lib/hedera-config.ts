@@ -97,3 +97,11 @@ export const FEE_WALLET_EVM = "0x" + (10923241).toString(16).padStart(40, "0");
 // Platform bot: buys this many US dollars of every coin created after BOT_START.
 export const BOT_BUY_USD = 2;
 export const BOT_START = "2026-10-16T19:00:00Z";
+
+// Markets (all SaucerSwap HBAR pairs). Router contract takes a visible 1% fee.
+export const SAUCERSWAP_API = "https://api.saucerswap.finance";
+export const WHBAR_TOKEN_ID = "0.0.1456986";
+export const SAUCERSWAP_V1_ROUTER_ID = "0.0.3045981";
+// Null until HederaPumpRouter is deployed and verified on mainnet; trading stays off until then.
+export const MARKET_ROUTER_ID: string | null = null;
+export const MARKET_FEE_BPS = 100;
