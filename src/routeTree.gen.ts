@@ -23,6 +23,8 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TeamRouteImport } from './routes/team'
+import { Route as MarketsIndexRouteImport } from './routes/markets.index'
+import { Route as MarketsIdRouteImport } from './routes/markets.$id'
 import { Route as TokenIdRouteImport } from './routes/token.$id'
 import { Route as ApiPublicSupportChatRouteImport } from './routes/api/public/support-chat'
 import { Route as ApiPublicDexscreenerAssetRouteImport } from './routes/api/public/dexscreener/asset'
@@ -115,6 +117,16 @@ const SupportRoute = SupportRouteImport.update({
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsIndexRoute = MarketsIndexRouteImport.update({
+  id: '/markets/',
+  path: '/markets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsIdRoute = MarketsIdRouteImport.update({
+  id: '/markets/$id',
+  path: '/markets/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TokenIdRoute = TokenIdRouteImport.update({
@@ -262,7 +274,9 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/team': typeof TeamRoute
+  '/markets/$id': typeof MarketsIdRoute
   '/token/$id': typeof TokenIdRoute
+  '/markets/': typeof MarketsIndexRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
   '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
   '/api/public/dexscreener/events': typeof ApiPublicDexscreenerEventsRoute
@@ -301,7 +315,9 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/team': typeof TeamRoute
+  '/markets/$id': typeof MarketsIdRoute
   '/token/$id': typeof TokenIdRoute
+  '/markets': typeof MarketsIndexRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
   '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
   '/api/public/dexscreener/events': typeof ApiPublicDexscreenerEventsRoute
@@ -341,7 +357,9 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/team': typeof TeamRoute
+  '/markets/$id': typeof MarketsIdRoute
   '/token/$id': typeof TokenIdRoute
+  '/markets/': typeof MarketsIndexRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
   '/api/public/dexscreener/asset': typeof ApiPublicDexscreenerAssetRoute
   '/api/public/dexscreener/events': typeof ApiPublicDexscreenerEventsRoute
@@ -382,7 +400,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/support'
     | '/team'
+    | '/markets/$id'
     | '/token/$id'
+    | '/markets/'
     | '/api/public/support-chat'
     | '/api/public/dexscreener/asset'
     | '/api/public/dexscreener/events'
@@ -421,7 +441,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/support'
     | '/team'
+    | '/markets/$id'
     | '/token/$id'
+    | '/markets'
     | '/api/public/support-chat'
     | '/api/public/dexscreener/asset'
     | '/api/public/dexscreener/events'
@@ -460,7 +482,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/support'
     | '/team'
+    | '/markets/$id'
     | '/token/$id'
+    | '/markets/'
     | '/api/public/support-chat'
     | '/api/public/dexscreener/asset'
     | '/api/public/dexscreener/events'
@@ -500,7 +524,9 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
   TeamRoute: typeof TeamRoute
+  MarketsIdRoute: typeof MarketsIdRoute
   TokenIdRoute: typeof TokenIdRoute
+  MarketsIndexRoute: typeof MarketsIndexRoute
   ApiPublicSupportChatRoute: typeof ApiPublicSupportChatRoute
   ApiPublicDexscreenerAssetRoute: typeof ApiPublicDexscreenerAssetRoute
   ApiPublicDexscreenerEventsRoute: typeof ApiPublicDexscreenerEventsRoute
@@ -623,6 +649,20 @@ declare module '@tanstack/react-router' {
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/': {
+      id: '/markets/'
+      path: '/markets'
+      fullPath: '/markets/'
+      preLoaderRoute: typeof MarketsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/$id': {
+      id: '/markets/$id'
+      path: '/markets/$id'
+      fullPath: '/markets/$id'
+      preLoaderRoute: typeof MarketsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/token/$id': {
@@ -804,7 +844,9 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
   TeamRoute: TeamRoute,
+  MarketsIdRoute: MarketsIdRoute,
   TokenIdRoute: TokenIdRoute,
+  MarketsIndexRoute: MarketsIndexRoute,
   ApiPublicSupportChatRoute: ApiPublicSupportChatRoute,
   ApiPublicDexscreenerAssetRoute: ApiPublicDexscreenerAssetRoute,
   ApiPublicDexscreenerEventsRoute: ApiPublicDexscreenerEventsRoute,
