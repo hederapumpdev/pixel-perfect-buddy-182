@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { connectionDeadline, openWalletPicker, WalletConnectionCancelled, type WalletHandoff } from "./wallet-connection";
 import { deployStep, deployProgressOf, findDeployOnMirror, type DeployProgress, type DeployState } from "./hashpack-deploy";
 import { WalletHandoffHelp } from "@/components/WalletHandoffHelp";
-import { LOCAL_WALLET_KEY, decryptKey, encryptKey, readStoredWallet } from "./local-wallet";
+import { MAX_ACCOUNT_WALLETS, adoptLegacyWallet, decryptKey, encryptKey, readAccountWallets, writeAccountWallets, type StoredLocalWallet } from "./local-wallet";
 import {
   MIRROR_URL,
   NETWORK,
@@ -35,14 +35,19 @@ type WalletCtx = {
   connect: () => Promise<void>;
   connectEmail: () => Promise<void>;
   mode: "hashpack" | "email" | "local" | null;
-  /** Account ID of an imported wallet saved in this browser (locked or unlocked). */
-  storedLocal: string | null;
+  /** The signed-in account (HashPack or email); extra wallets belong to it. */
+  owner: { id: string; mode: "hashpack" | "email" } | null;
+  /** Extra wallets saved in this account on this device (max 10). */
+  accountWallets: string[];
   /** Imports a private key or recovery phrase; it is encrypted with the PIN and kept in this browser only. */
   importKey: (opts: { key: string; accountId?: string | undefined; pin: string }) => Promise<void>;
-  unlockLocal: (pin: string) => Promise<void>;
+  /** Makes an extra wallet the active one (PIN unlocks it). */
+  activateLocal: (id: string, pin: string) => Promise<void>;
+  /** Switches back to the account's own wallet. */
+  activateOwner: () => void;
+  removeLocal: (id: string) => void;
   /** Makes a brand-new wallet in this browser; returns the 24 recovery words to write down. */
   createLocal: (pin: string) => Promise<string[]>;
-  forgetLocal: () => void;
   disconnect: () => Promise<void>;
   /** Calls the launchpad contract. calldata = full ABI-encoded call (selector + args). */
   execute: (opts: {
@@ -165,10 +170,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [connecting, setConnecting] = useState(false);
   const [tick, setTick] = useState(0);
   const [mode, setMode] = useState<"hashpack" | "email" | "local" | null>(null);
-  const [storedLocal, setStoredLocal] = useState<string | null>(null);
+  const [owner, setOwnerState] = useState<{ key: string; id: string; mode: "hashpack" | "email" } | null>(null);
+  const ownerRef = useRef<typeof owner>(null);
+  const ownerEvm = useRef<EvmSigner | null>(null);
+  const [accountWallets, setAccountWallets] = useState<StoredLocalWallet[]>([]);
+  const setOwner = useCallback((o: typeof owner) => {
+    ownerRef.current = o;
+    setOwnerState(o);
+    setAccountWallets(o ? adoptLegacyWallet(o.key) : []);
+  }, []);
   // Imported wallet: decrypted key lives only in memory, inside an operator client.
   const local = useRef<{ client: import("@hiero-ledger/sdk").Client; key: import("@hiero-ledger/sdk").PrivateKey; id: string } | null>(null);
-  useEffect(() => setStoredLocal(readStoredWallet()?.accountId ?? null), []);
   const evmSigner = useRef<EvmSigner | null>(null);
   const [deployProgress, setDeployProgress] = useState<DeployProgress | null>(null);
   // Set when the wallet app was asked to open but never came back.
@@ -186,7 +198,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     // Hedera creates the account on first HBAR deposit; until then show the address.
     const a = await fetch(`${MIRROR_URL}/api/v1/accounts/${addr}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
     setAccountId(a?.account ?? addr);
-  }, []);
+    setOwner({ key: addr, id: a?.account ?? addr, mode: "email" });
+  }, [setOwner]);
 
   const initPromise = useRef<Promise<Connector> | null>(null);
   const init = useCallback(() => {
@@ -232,9 +245,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const syncAccount = useCallback(() => {
     const s = connector.current?.signers[0];
+    const id = s ? s.getAccountId().toString() : null;
     if (s) setMode("hashpack");
-    setAccountId(s ? s.getAccountId().toString() : null);
-  }, []);
+    setAccountId(id);
+    setOwner(id ? { key: id, id, mode: "hashpack" } : null);
+  }, [setOwner]);
 
   // Restore an email-wallet session on load.
   useEffect(() => {
@@ -760,7 +775,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         connect,
         connectEmail,
         mode,
-        owner,
+        owner: owner && { id: owner.id, mode: owner.mode },
         accountWallets: accountWallets.map((s) => s.accountId),
         importKey,
         createLocal,
