@@ -281,7 +281,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       clearSigninReturn();
       stop();
       const msg = e instanceof Error ? e.message : typeof e === "object" && e && "message" in e ? String((e as { message: unknown }).message) : String(e);
-      toast.error(`Sign-in didn't finish: ${msg}`, { id: TOAST, duration: Infinity, closeButton: true });
+      setTimeout(() => toast.error(`Sign-in didn't finish: ${msg}`, { id: TOAST, duration: Infinity, closeButton: true }), 60);
     };
     if (returning && back.error) fail(new Error(back.error));
     const finish = async (w: import("@web3auth/modal").Web3Auth) => {
