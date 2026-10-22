@@ -10,6 +10,7 @@ import { HASHSCAN_URL, MARKET_ROUTER_ID } from "@/lib/hedera-config";
 import { tokensQuery } from "@/lib/queries";
 import { marketsQuery, Change } from "./markets.index";
 import { MarketTrade } from "@/components/MarketTrade";
+import { MarketTokenInformation } from "@/components/MarketTokenInformation";
 
 const historyQuery = (id: string) => queryOptions({ queryKey: ["market-history", id], queryFn: () => marketHistory({ data: { id } }), staleTime: 300_000 });
 
@@ -40,11 +41,12 @@ const evmOf = (id: string) => `0x${BigInt(id.split(".")[2] ?? "0").toString(16).
 function MarketToken() {
   const { id } = Route.useParams();
   const { data } = useSuspenseQuery(marketsQuery);
-  const t = data.find((x) => x.id === id)!;
+  const t = data.find((x) => x.id === id);
   const history = useQuery(historyQuery(id));
   const ours = useQuery(tokensQuery).data?.find((c) => c.address.toLowerCase() === evmOf(id));
   const points = (history.data ?? []).map((p) => ({ ...p, label: new Date(p.t * 1000).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit" }) }));
   const vol24 = (history.data ?? []).slice(-24).reduce((s, p) => s + p.volumeUsd, 0);
+  if (!t) return <Shell><p>Token unavailable.</p></Shell>;
   return (
     <Shell>
       <Link to="/markets" className="text-sm text-muted-foreground">← Markets</Link>
@@ -79,6 +81,7 @@ function MarketToken() {
           <Button asChild variant="ghost"><a href={`${HASHSCAN_URL}/token/${t.id}`} target="_blank" rel="noreferrer">HashScan <ExternalLink className="size-4" /></a></Button>
         </div>
       </section>
+      <MarketTokenInformation id={id} priceUsd={t.priceUsd} />
     </Shell>
   );
 }
