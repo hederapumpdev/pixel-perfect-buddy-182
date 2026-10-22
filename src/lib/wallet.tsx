@@ -116,8 +116,8 @@ async function initWeb3Auth() {
         "base-account": { label: "Base Account", showOnModal: false },
       },
     },
-    // Trades sign instantly in the app (pump.fun-style quick trading), no confirm popup.
-    walletServicesConfig: { confirmationStrategy: "auto-approve" },
+    // No walletServicesConfig: the sign-in service's free plan rejects wallet services
+    // (403 "not available on base plan"), which blocks every email/Google sign-in.
   } as never);
   await w.init();
   web3auth = w;
