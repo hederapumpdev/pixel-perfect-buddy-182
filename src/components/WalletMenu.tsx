@@ -152,14 +152,13 @@ export function ImportWalletDialog({ open, onOpenChange }: { open: boolean; onOp
 /** Balance at the top of every page; tap to see everything in the wallet. */
 export function WalletMenu() {
   const w = useWallet();
-  const usd = useUsd();
-  const rate = useHbarUsd().data;
   const [importing, setImporting] = useState(false);
   const id = w.accountId;
-  const addrs = id ? [...new Set([profileWalletAddress(id), w.evmAddress].filter(Boolean) as string[])] : [];
 
-  if (!id)
-    return (
+  return (
+    <>
+      <ImportWalletDialog open={importing} onOpenChange={setImporting} />
+      {id ? <Connected id={id} /> : (
       <div className="flex items-center gap-2">
         <Button size="sm" variant="ghost" onClick={() => setImporting(true)} aria-label="Import wallet">
           {w.storedLocal ? <Lock className="h-4 w-4" /> : <KeyRound className="h-4 w-4" />}
@@ -172,10 +171,17 @@ export function WalletMenu() {
           <Wallet className="h-4 w-4" />
           {w.connecting ? "…" : "WalletConnect"}
         </Button>
-        <ImportWalletDialog open={importing} onOpenChange={setImporting} />
       </div>
-    );
+      )}
+    </>
+  );
+}
 
+function Connected({ id }: { id: string }) {
+  const w = useWallet();
+  const usd = useUsd();
+  const rate = useHbarUsd().data;
+  const addrs = [...new Set([profileWalletAddress(id), w.evmAddress].filter(Boolean) as string[])];
   return (
     <Popover>
       <PopoverTrigger asChild>
