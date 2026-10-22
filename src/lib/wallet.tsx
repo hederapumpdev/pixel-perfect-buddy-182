@@ -478,6 +478,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setTransactionId: (id: never) => unknown;
       freezeWith: (c: never) => Promise<unknown>;
       executeWithSigner: (s: never) => Promise<{ transactionId: { toString(): string } }>;
+      execute: (c: never) => Promise<{ transactionId: { toString(): string } }>;
     }) => {
       const { sdk } = await loadLibs();
       const s = signer();
