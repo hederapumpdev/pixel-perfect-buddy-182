@@ -47,7 +47,7 @@ async function setup() {
   };
   const t = await deploy(tok);
   const m = await deploy(mock, encodeAbiParameters([{ type: "address" }], [t.toString() as `0x${string}`]));
-  await vm.stateManager.putAccount(m, new Account(1n, 10_000_000_000n));
+  { const acc = await vm.stateManager.getAccount(m); if (!acc) throw new Error("no mock"); acc.balance = 10_000_000_000n; await vm.stateManager.putAccount(m, acc); }
   const r = await deploy(router, encodeAbiParameters([{ type: "address" }, { type: "address" }, { type: "address" }], [m.toString() as `0x${string}`, whbar, fee.toString() as `0x${string}`]));
   const call = (to: typeof r, abi: Abi, fn: string, args: unknown[], value = 0n) =>
     vm.evm.runCall({ caller: user, to, gasLimit: 5_000_000n, value, data: hexToBytes(encodeFunctionData({ abi, functionName: fn, args })) });
