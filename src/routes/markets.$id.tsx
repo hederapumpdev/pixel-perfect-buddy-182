@@ -13,6 +13,7 @@ import { marketsQuery, Change } from "./markets.index";
 const historyQuery = (id: string) => queryOptions({ queryKey: ["market-history", id], queryFn: () => marketHistory({ data: { id } }), staleTime: 300_000 });
 
 export const Route = createFileRoute("/markets/$id")({
+  staticData: { sitemap: false },
   loader: async ({ context, params }) => {
     const all = await context.queryClient.ensureQueryData(marketsQuery);
     const t = all.find((x) => x.id === params.id);
