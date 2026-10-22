@@ -84,7 +84,7 @@
 - [x] Staff payouts: user chose bot wallet top-ups (no fee-wallet access)
 - [x] Points leaderboard (/leaderboard) + "Show animations" toggle on Explore
 - [ ] 2% burn at graduation + trading after graduation — needs a new paid contract deployment; waiting for user go-ahead
-- [ ] NSFW filter / "promoted" sort — waiting for user decision (NSFW flag at creation; what "promoted" means)
+- [x] Name display decision: coins with ordinary swear words are listed like any other coin; only hate speech (slurs, Nazi and child-abuse words) stays hidden. No NSFW toggle needed.
 
 - [x] Deposit page with SODAX swap widget (HBAR on Hedera locked as destination)
 - [ ] SODAX 0.5% partner fee — blocked: SODAX must set it up on their side; needs an EVM fee address from owner
@@ -95,4 +95,4 @@
 - [ ] Deploy router on mainnet (owner wallet approval, unlimited auto-associations) and set MARKET_ROUTER_ID
 - [ ] Buy/Sell box through the router (association + allowance steps)
 - [ ] Announce Markets on X/Telegram/Discord after user confirms
-- [x] Markets: sort buttons raised to a 44px touch target with a clear active state (24h gainers/losers were hard to press); added a "New" sort (Hedera entity number = creation order) and a 1h/24h/7d time-frame picker that drives gainers/losers and adds a 7d column; our 13 bonding-curve coins now appear in their own block above the pool list; offensive names are kept off the display list. Eight tests pass, phone-sized taps verified.
+- [x] Markets: sort buttons raised to a 44px touch target with a clear active state (24h gainers/losers were hard to press); added a "New" sort (Hedera entity number = creation order) and a 1h/24h/7d time-frame picker that drives gainers/losers and adds a 7d column; our 13 bonding-curve coins now appear in their own block above the pool list; only hate speech is kept off the display list, swear words are shown. Eight tests pass, phone-sized taps verified.

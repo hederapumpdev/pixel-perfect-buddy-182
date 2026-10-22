@@ -17,15 +17,21 @@ export type RawChange = { id: string; priceChangeHour?: number; priceChangeDay?:
 /** Below this USD liquidity a coin gets a clear low-liquidity warning. */
 export const LOW_LIQUIDITY_USD = 1_000;
 
+/**
+ * Only hate speech stays off our own pages: racial, ethnic and homophobic slurs,
+ * Nazi words and child-abuse words. Ordinary swear words (shit, fuck, bitch, ...)
+ * are listed like any other coin — they are real coins with real pools.
+ * The chain and SaucerSwap are untouched either way.
+ */
 const BLOCKED_WORDS = new Set([
   "nigger", "nigga", "niga", "nig", "niggers", "faggot", "faggots", "fag", "fags",
   "kike", "kikes", "spic", "spics", "coon", "coons", "retard", "retards", "tranny",
-  "chink", "gook", "gooks", "rape", "rapist", "nazi", "nazis", "hitler", "jihad", "pedo",
+  "chink", "gook", "gooks", "rape", "rapist", "nazi", "nazis", "hitler", "pedo",
 ]);
 
 const words = (s: string) => s.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
 
-/** Slurs and hate words are kept off our own pages; the chain and SaucerSwap are untouched. */
+/** True unless the name or symbol is hate speech; ordinary profanity passes. */
 export function isListable(name: string, symbol: string): boolean {
   return ![...words(name), ...words(symbol)].some(
     (w) => BLOCKED_WORDS.has(w) || w.startsWith("nigg") || w.startsWith("fagg"),
