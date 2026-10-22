@@ -38,7 +38,7 @@ type WalletCtx = {
   /** Account ID of an imported wallet saved in this browser (locked or unlocked). */
   storedLocal: string | null;
   /** Imports a private key or recovery phrase; it is encrypted with the PIN and kept in this browser only. */
-  importKey: (opts: { key: string; accountId?: string; pin: string }) => Promise<void>;
+  importKey: (opts: { key: string; accountId?: string | undefined; pin: string }) => Promise<void>;
   unlockLocal: (pin: string) => Promise<void>;
   forgetLocal: () => void;
   disconnect: () => Promise<void>;
