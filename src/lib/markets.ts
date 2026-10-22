@@ -164,7 +164,7 @@ export function toTokenUnits(amount: string, decimals: number): bigint {
   const m = /^(\d+)(?:\.(\d+))?$/.exec(amount.trim());
   if (!m) throw new Error("Enter a valid amount");
   const frac = (m[2] ?? "").padEnd(decimals, "0").slice(0, decimals);
-  const units = BigInt(m[1]) * 10n ** BigInt(decimals) + BigInt(frac || 0);
+  const units = BigInt(m[1] ?? "0") * 10n ** BigInt(decimals) + BigInt(frac || 0);
   if (units <= 0n) throw new Error("Enter an amount above zero");
   return units;
 }
