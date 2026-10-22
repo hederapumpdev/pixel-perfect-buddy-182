@@ -33,3 +33,4 @@
 - Token logo submission packages are client-side exports of synced coin data; external forms remain manual, with no automatic-submission or approval claims.
 - Admin access = owner PIN or a short-lived HMAC session from a wallet-signed login by an active staff member with is_admin; every admin server fn goes through requireAdmin in admin-auth.server.ts so removal revokes access immediately.
 - Community chat uses wallet-signed, expiring server-verified sessions for the existing WalletConnect/social wallets; public reads exclude removed messages, and transactional per-wallet rate limits and blocks guard every post. Moderation always requires requireAdmin.
+- Markets rows come only from SaucerSwap pools plus our own chain-synced coins; bonding-curve coins carry no liquidity or price-change figure, link to the coin page, and never claim SaucerSwap data; "New" sorts by Hedera entity number (creation order) and offensive names are filtered from the display list only.
