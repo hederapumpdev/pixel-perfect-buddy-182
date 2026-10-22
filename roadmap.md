@@ -97,3 +97,6 @@
 - [ ] Announce Markets on X/Telegram/Discord after user confirms
 - [x] Markets: sort buttons raised to a 44px touch target with a clear active state (24h gainers/losers were hard to press); added a "New" sort (Hedera entity number = creation order) and a 1h/24h/7d time-frame picker that drives gainers/losers and adds a 7d column; our 13 bonding-curve coins now appear in their own block above the pool list; only hate speech is kept off the display list, swear words are shown. Eight tests pass, phone-sized taps verified.
 - [x] Fix email/Google sign-in loop (sign-in service free plan refused wallet embed)
+
+- [x] Account wallets (max 10, import/create, active select)
+- [ ] Sign in: blocked — owner must whitelist hederapump.dev in Web3Auth dashboard
