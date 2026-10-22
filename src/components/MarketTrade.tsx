@@ -88,7 +88,9 @@ export function MarketTrade({ t }: { t: MarketToken }) {
         }
         const quotedHbar = await quoteAmountsOut(units, [tokenEvm, idToEvm(WHBAR_TOKEN_ID)]);
         const net = quotedHbar - marketFee(quotedHbar);
-        const minHbarWeibar = minAfterSlippage(net) * 10_000_000_000n; // contract compares in weibar
+        // The contract compares against address(this).balance, which Hedera reports
+        // in tinybars — verified live on mainnet (weibar minimums revert).
+        const minHbarOut = minAfterSlippage(net);
         await w.execute({
           calldata: encodeMarketRouter("sell", [tokenEvm, units, minHbarWeibar, deadline]),
           gas: MARKET_GAS.sell,
