@@ -87,6 +87,8 @@ const idToEvm = (id: string) =>
 
 type EvmSigner = import("ethers").Signer;
 let web3auth: import("@web3auth/modal").Web3Auth | null = null;
+// Page to return to after same-tab (redirect) sign-in.
+const SIGNIN_RETURN_KEY = "hederaPump.signinReturn";
 async function initWeb3Auth() {
   if (web3auth) return web3auth;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -391,9 +393,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       // Same-tab sign-in leaves this page; remember where to come back to.
       try { sessionStorage.setItem(SIGNIN_RETURN_KEY, window.location.pathname + window.location.search); } catch { /* ignore */ }
       if (!w.connected) await w.connect();
-      try { sessionStorage.removeItem(SIGNIN_RETURN_KEY); } catch { /* ignore */ }
+      if (w.connected) try { sessionStorage.removeItem(SIGNIN_RETURN_KEY); } catch { /* ignore */ }
       await attachEmail(w);
     } catch (e) {
+      try { sessionStorage.removeItem(SIGNIN_RETURN_KEY); } catch { /* ignore */ }
       toast.error(e instanceof Error ? e.message : "Couldn't sign in");
     } finally {
       setConnecting(false);
