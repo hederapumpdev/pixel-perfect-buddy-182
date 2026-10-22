@@ -14,5 +14,5 @@ export function telegramAppSlot(now: Date) {
   return TELEGRAM_APP_HOURS.some(h => h === hour) ? `${get('year')}-${get('month')}-${get('day')}-${hour}` : null;
 }
 export function telegramAppMessage(index: number) {
-  return `${appTopics[index % appTopics.length]}\n\n🌐 https://hederapump.dev\n𝕏 https://x.com/hederapumpdev\n\nMeme coins are highly speculative. You can lose your entire investment. Not financial advice.`;
+  return `${appTopics[index % appTopics.length]}\n\n🌐 https://hederapump.dev\n𝕏 https://x.com/hederapumpdev\n🎵 https://www.tiktok.com/@hederapump\n\nMeme coins are highly speculative. You can lose your entire investment. Not financial advice.`;
 }

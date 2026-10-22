@@ -129,6 +129,14 @@ export function Shell({ children }: { children: ReactNode }) {
           >
             <DiscordIcon className="h-4 w-4 text-primary" /> Discord
           </a>
+          <a
+            href="https://www.tiktok.com/@hederapump"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:border-primary"
+          >
+            <span className="text-base leading-none">♪</span> TikTok
+          </a>
         </div>
         Meme coins are highly speculative. Nothing here is financial advice. © 2026 HederaPump
       </footer>
