@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Home, Compass, PlusCircle, Wallet, LogOut, LifeBuoy, Send, MessageCircle } from "lucide-react";
+import { Home, Compass, PlusCircle, Wallet, LogOut, LifeBuoy, Send, MessageCircle, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/lib/wallet";
 import { NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
@@ -141,10 +141,11 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
         Meme coins are highly speculative. Nothing here is financial advice. © 2026 HederaPump
       </footer>
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-background/95 backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 border-t border-border bg-background/95 backdrop-blur md:hidden">
         {[
           { to: "/", label: "Home", Icon: Home },
           { to: "/explore", label: "Explore", Icon: Compass },
+          { to: "/markets", label: "Markets", Icon: TrendingUp },
           { to: "/create", label: "Create", Icon: PlusCircle },
           { to: "/community", label: "Chat", Icon: MessageCircle },
           { to: "/profile", label: "Profile", Icon: Wallet },
