@@ -43,11 +43,14 @@ describe("markets", () => {
     expect(hbarUsdFrom([])).toBe(0);
   });
 
-  it("keeps slurs off our pages but leaves normal names alone", () => {
-    expect(isListable("NIGGER", "NIGGER")).toBe(false);
-    expect(isListable("Niga Coin", "NIGA")).toBe(false);
+  it("lists ordinary swear words but keeps hate speech off our pages", () => {
+    expect(isListable("Shit Coin", "SHIT")).toBe(true);
+    expect(isListable("Fuck Money", "FUCK")).toBe(true);
+    expect(isListable("Bitter Bitch", "BITCH")).toBe(true);
     expect(isListable("Grape Finance", "GRAPE")).toBe(true);
     expect(isListable("HederaPump", "HEDERAPUMP")).toBe(true);
+    expect(isListable("NIGGER", "NIGGER")).toBe(false);
+    expect(isListable("Niga Coin", "NIGA")).toBe(false);
     const rows = buildMarkets(
       [pool, { contractId: "p9", tokenA: hbar, tokenB: { ...cat, id: "0.0.7", name: "NIGGER", symbol: "NIGGER" }, tokenReserveA: String(9000e8), tokenReserveB: String(2000e6) }],
       [], 0.08,
