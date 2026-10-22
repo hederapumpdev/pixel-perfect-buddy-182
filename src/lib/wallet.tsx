@@ -80,7 +80,7 @@ const Ctx = (g.__hpWalletCtx ??= createContext<WalletCtx | null>(null));
 const idToEvm = (id: string) =>
   "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
-type EvmSigner = import("ethers").JsonRpcSigner;
+type EvmSigner = import("ethers").Signer;
 let web3auth: import("@web3auth/modal").Web3Auth | null = null;
 async function initWeb3Auth() {
   if (web3auth) return web3auth;

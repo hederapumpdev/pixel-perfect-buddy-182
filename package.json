@@ -64,6 +64,7 @@
     "@walletconnect/types": "^2.26.0",
     "@walletconnect/utils": "^2.26.0",
     "@web3auth/modal": "^11.4.3",
+    "@web3auth/no-modal": "11.4.3",
     "ai": "^7.0.142",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
