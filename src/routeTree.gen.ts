@@ -43,6 +43,7 @@ import { Route as ApiPublicJobsHoldoutRouteImport } from './routes/api/public/jo
 import { Route as ApiPublicJobsHoldoutAnnounceRouteImport } from './routes/api/public/jobs/holdout-announce'
 import { Route as ApiPublicJobsOfficialCoinRouteImport } from './routes/api/public/jobs/official-coin'
 import { Route as ApiPublicJobsPayoutsRouteImport } from './routes/api/public/jobs/payouts'
+import { Route as ApiPublicJobsSigninAnnounceRouteImport } from './routes/api/public/jobs/signin-announce'
 import { Route as ApiPublicJobsSpotlightRouteImport } from './routes/api/public/jobs/spotlight'
 import { Route as ApiPublicJobsTelegramAppRouteImport } from './routes/api/public/jobs/telegram-app'
 import { Route as ApiPublicJobsTelegramTopRouteImport } from './routes/api/public/jobs/telegram-top'
@@ -229,6 +230,12 @@ const ApiPublicJobsPayoutsRoute = ApiPublicJobsPayoutsRouteImport.update({
   path: '/api/public/jobs/payouts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsSigninAnnounceRoute =
+  ApiPublicJobsSigninAnnounceRouteImport.update({
+    id: '/api/public/jobs/signin-announce',
+    path: '/api/public/jobs/signin-announce',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsSpotlightRoute = ApiPublicJobsSpotlightRouteImport.update({
   id: '/api/public/jobs/spotlight',
   path: '/api/public/jobs/spotlight',
@@ -294,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
+  '/api/public/jobs/signin-announce': typeof ApiPublicJobsSigninAnnounceRoute
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
@@ -335,6 +343,7 @@ export interface FileRoutesByTo {
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
+  '/api/public/jobs/signin-announce': typeof ApiPublicJobsSigninAnnounceRoute
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
@@ -377,6 +386,7 @@ export interface FileRoutesById {
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
+  '/api/public/jobs/signin-announce': typeof ApiPublicJobsSigninAnnounceRoute
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
@@ -420,6 +430,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
+    | '/api/public/jobs/signin-announce'
     | '/api/public/jobs/spotlight'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
@@ -461,6 +472,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
+    | '/api/public/jobs/signin-announce'
     | '/api/public/jobs/spotlight'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
@@ -502,6 +514,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
+    | '/api/public/jobs/signin-announce'
     | '/api/public/jobs/spotlight'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
@@ -544,6 +557,7 @@ export interface RootRouteChildren {
   ApiPublicJobsHoldoutAnnounceRoute: typeof ApiPublicJobsHoldoutAnnounceRoute
   ApiPublicJobsOfficialCoinRoute: typeof ApiPublicJobsOfficialCoinRoute
   ApiPublicJobsPayoutsRoute: typeof ApiPublicJobsPayoutsRoute
+  ApiPublicJobsSigninAnnounceRoute: typeof ApiPublicJobsSigninAnnounceRoute
   ApiPublicJobsSpotlightRoute: typeof ApiPublicJobsSpotlightRoute
   ApiPublicJobsTelegramAppRoute: typeof ApiPublicJobsTelegramAppRoute
   ApiPublicJobsTelegramTopRoute: typeof ApiPublicJobsTelegramTopRoute
@@ -791,6 +805,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsPayoutsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/signin-announce': {
+      id: '/api/public/jobs/signin-announce'
+      path: '/api/public/jobs/signin-announce'
+      fullPath: '/api/public/jobs/signin-announce'
+      preLoaderRoute: typeof ApiPublicJobsSigninAnnounceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/spotlight': {
       id: '/api/public/jobs/spotlight'
       path: '/api/public/jobs/spotlight'
@@ -864,6 +885,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsHoldoutAnnounceRoute: ApiPublicJobsHoldoutAnnounceRoute,
   ApiPublicJobsOfficialCoinRoute: ApiPublicJobsOfficialCoinRoute,
   ApiPublicJobsPayoutsRoute: ApiPublicJobsPayoutsRoute,
+  ApiPublicJobsSigninAnnounceRoute: ApiPublicJobsSigninAnnounceRoute,
   ApiPublicJobsSpotlightRoute: ApiPublicJobsSpotlightRoute,
   ApiPublicJobsTelegramAppRoute: ApiPublicJobsTelegramAppRoute,
   ApiPublicJobsTelegramTopRoute: ApiPublicJobsTelegramTopRoute,
