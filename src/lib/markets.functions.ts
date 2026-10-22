@@ -38,7 +38,7 @@ export const marketHistory = createServerFn({ method: "GET" })
       const rows = await getJson<{ timestampSeconds?: number; startTimestampSeconds?: number; closeUsd: number; volumeUsd?: number }[]>(
         `/tokens/prices/${data.id}?interval=HOUR&from=${to - 7 * 86_400}&to=${to}`,
       );
-      return rows.map((r) => ({ t: r.timestampSeconds ?? r.startTimestampSeconds ?? 0, usd: r.closeUsd, volumeUsd: r.volumeUsd ?? 0 }));
+      return rows.map((r) => ({ t: r.timestampSeconds ?? r.startTimestampSeconds ?? 0, usd: Number(r.closeUsd), volumeUsd: Number(r.volumeUsd ?? 0) || 0 }));
     } catch (e) {
       console.error("History load failed", e);
       return [];
