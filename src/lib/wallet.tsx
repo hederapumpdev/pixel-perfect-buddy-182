@@ -273,7 +273,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     let done = false;
     let stop = () => {};
     // Defer: the toast area mounts after this provider on first load.
-    const showLoading = setTimeout(() => { if (returning && !done) toast.loading("Finishing sign-in…", { id: TOAST, duration: Infinity }); }, 50);
+    // The toast area mounts after this provider on first load; wait for it.
+    const whenToasts = (fn: () => void) => {
+      let tries = 0;
+      const tick = () => document.querySelector('section[aria-label^="Notifications"]') || ++tries > 50
+        ? setTimeout(fn, 50) : setTimeout(tick, 100);
+      tick();
+    };
+    if (returning) whenToasts(() => { if (!done) toast.loading("Finishing sign-in…", { id: TOAST, duration: Infinity }); });
     const fail = (e: unknown) => {
       console.error("Sign-in restore failed", e);
       if (!returning || done) return;
@@ -281,7 +288,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       clearSigninReturn();
       stop();
       const msg = e instanceof Error ? e.message : typeof e === "object" && e && "message" in e ? String((e as { message: unknown }).message) : String(e);
-      setTimeout(() => toast.error(`Sign-in didn't finish: ${msg}`, { id: TOAST, duration: Infinity, closeButton: true }), 60);
+      whenToasts(() => toast.error(`Sign-in didn't finish: ${msg}`, { id: TOAST, duration: Infinity, closeButton: true }));
     };
     if (returning && back.error) fail(new Error(back.error));
     const finish = async (w: import("@web3auth/modal").Web3Auth) => {
