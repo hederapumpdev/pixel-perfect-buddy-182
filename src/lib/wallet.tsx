@@ -142,7 +142,8 @@ async function initWeb3Auth() {
     // (403 "not available on base plan"), which blocks every email/Google sign-in.
     // Same-tab sign-in: phone browsers block the login popup ("popup window is blocked")
     // because it opens after async work, not directly from the tap.
-    uiConfig: { uxMode: "redirect" },
+    // Inside a frame (e.g. the editor preview) Google refuses to load in-page, so keep the popup there.
+    uiConfig: { uxMode: window.self !== window.top ? "popup" : "redirect" },
   } as never);
   await w.init();
   web3auth = w;
