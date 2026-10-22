@@ -96,3 +96,4 @@
 - [x] Buy/Sell box through the router (association + allowance steps) — verified with real mainnet trades: 1 HBAR buy of SAUCE (tx 0.0.10927104@1792678115.233130308) and the full sell-back (0.0.10927104@1792678172.126818936); sell minimum is in tinybars because Hedera reports contract balances in tinybars
 - [ ] Announce Markets on X/Telegram/Discord after user confirms
 - [x] Markets: sort buttons raised to a 44px touch target with a clear active state (24h gainers/losers were hard to press); added a "New" sort (Hedera entity number = creation order) and a 1h/24h/7d time-frame picker that drives gainers/losers and adds a 7d column; our 13 bonding-curve coins now appear in their own block above the pool list; only hate speech is kept off the display list, swear words are shown. Eight tests pass, phone-sized taps verified.
+- [x] Fix email/Google sign-in loop (sign-in service free plan refused wallet embed)
