@@ -92,7 +92,7 @@
 ## Markets (all Hedera coins, 1% fee)
 - [x] /markets list + /markets/0.0.x detail with chart (SaucerSwap data, display-only)
 - [x] HederaPumpRouter contract (1% cap, fee to bot wallet) + local tests
-- [ ] Deploy router on mainnet (owner wallet approval, unlimited auto-associations) and set MARKET_ROUTER_ID
-- [ ] Buy/Sell box through the router (association + allowance steps)
+- [x] Deploy router on mainnet (owner wallet approval, unlimited auto-associations) and set MARKET_ROUTER_ID — 0.0.10929855, verified on-chain 2026-10-22
+- [x] Buy/Sell box through the router (association + allowance steps) — verified with real mainnet trades: 1 HBAR buy of SAUCE (tx 0.0.10927104@1792678115.233130308) and the full sell-back (0.0.10927104@1792678172.126818936); sell minimum is in tinybars because Hedera reports contract balances in tinybars
 - [ ] Announce Markets on X/Telegram/Discord after user confirms
 - [x] Markets: sort buttons raised to a 44px touch target with a clear active state (24h gainers/losers were hard to press); added a "New" sort (Hedera entity number = creation order) and a 1h/24h/7d time-frame picker that drives gainers/losers and adds a 7d column; our 13 bonding-curve coins now appear in their own block above the pool list; only hate speech is kept off the display list, swear words are shown. Eight tests pass, phone-sized taps verified.
