@@ -51,3 +51,32 @@ export function readStoredWallet(): StoredLocalWallet | null {
     return null;
   }
 }
+
+/** Extra wallets live inside a signed-in account (HashPack or email): at most this many per account. */
+export const MAX_ACCOUNT_WALLETS = 10;
+const walletsKey = (owner: string) => `hederaPump.accountWallets.v1.${owner.toLowerCase()}`;
+
+export function readAccountWallets(owner: string): StoredLocalWallet[] {
+  try {
+    const list = JSON.parse(localStorage.getItem(walletsKey(owner)) ?? "[]");
+    return Array.isArray(list) ? list.filter((s) => s?.accountId && s.data) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function writeAccountWallets(owner: string, list: StoredLocalWallet[]) {
+  localStorage.setItem(walletsKey(owner), JSON.stringify(list.slice(0, MAX_ACCOUNT_WALLETS)));
+}
+
+/** Moves a wallet imported before accounts existed into the first account that signs in. */
+export function adoptLegacyWallet(owner: string): StoredLocalWallet[] {
+  const list = readAccountWallets(owner);
+  const legacy = readStoredWallet();
+  if (legacy && list.length < MAX_ACCOUNT_WALLETS && !list.some((w) => w.accountId === legacy.accountId)) {
+    list.push(legacy);
+    writeAccountWallets(owner, list);
+  }
+  if (legacy) localStorage.removeItem(LOCAL_WALLET_KEY);
+  return list;
+}
