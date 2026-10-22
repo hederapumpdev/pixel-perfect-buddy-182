@@ -263,7 +263,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         const onConnected = () => attachEmail(w).catch((e) => console.error("Sign-in attach failed", e));
         w.on("connected" as never, onConnected as never);
         off = () => w.off("connected" as never, onConnected as never);
-        if (w.connected) return attachEmail(w);
+        return w.connected ? attachEmail(w) : undefined;
       })
       .catch((e) => console.error("Sign-in restore failed", e));
     return () => off();
