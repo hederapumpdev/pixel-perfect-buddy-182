@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { connectionDeadline, openWalletPicker, WalletConnectionCancelled, type WalletHandoff } from "./wallet-connection";
 import { deployStep, deployProgressOf, findDeployOnMirror, type DeployProgress, type DeployState } from "./hashpack-deploy";
 import { WalletHandoffHelp } from "@/components/WalletHandoffHelp";
-import { MAX_ACCOUNT_WALLETS, adoptLegacyWallet, decryptKey, encryptKey, readAccountWallets, writeAccountWallets, type StoredLocalWallet } from "./local-wallet";
+import { MAX_ACCOUNT_WALLETS, adoptLegacyWallet, decryptKey, encryptKey, readAccountWallets, revealStoredWallet, writeAccountWallets, type StoredLocalWallet } from "./local-wallet";
 import { clearSigninReturn, readSigninReturn, saveSigninReturn, takeSigninReturn } from "./signin-return";
 import {
   MIRROR_URL,
@@ -44,6 +44,8 @@ type WalletCtx = {
   importKey: (opts: { key: string; accountId?: string | undefined; pin: string }) => Promise<void>;
   /** Makes an extra wallet the active one (PIN unlocks it). */
   activateLocal: (id: string, pin: string) => Promise<void>;
+  /** Shows an extra wallet's own private key after its PIN is confirmed. This browser only. */
+  revealLocal: (id: string, pin: string) => Promise<string>;
   /** Switches back to the account's own wallet. */
   activateOwner: () => void;
   removeLocal: (id: string) => void;
@@ -564,6 +566,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (!s) throw new Error("That wallet isn't in your account.");
     await attachLocal(await decryptKey(s, pin), s.accountId);
   }, [attachLocal]);
+
+  const revealLocal: WalletCtx["revealLocal"] = useCallback(async (id, pin) => {
+    const o = ownerRef.current;
+    if (!o) throw new Error("Sign in to your account first.");
+    return revealStoredWallet(o.key, id, pin);
+  }, []);
 
   const activateOwner = useCallback(() => {
     const o = ownerRef.current;
