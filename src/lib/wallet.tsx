@@ -272,7 +272,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const TOAST = "signin-return";
     let done = false;
     let stop = () => {};
-    if (returning) toast.loading("Finishing sign-in…", { id: TOAST, duration: Infinity });
+    // Defer: the toast area mounts after this provider on first load.
+    const showLoading = setTimeout(() => { if (returning && !done) toast.loading("Finishing sign-in…", { id: TOAST, duration: Infinity }); }, 50);
     const fail = (e: unknown) => {
       console.error("Sign-in restore failed", e);
       if (!returning || done) return;
