@@ -9,6 +9,7 @@ import { formatUsd, LOW_LIQUIDITY_USD } from "@/lib/markets";
 import { HASHSCAN_URL, MARKET_ROUTER_ID } from "@/lib/hedera-config";
 import { tokensQuery } from "@/lib/queries";
 import { marketsQuery, Change } from "./markets.index";
+import { MarketTrade } from "@/components/MarketTrade";
 
 const historyQuery = (id: string) => queryOptions({ queryKey: ["market-history", id], queryFn: () => marketHistory({ data: { id } }), staleTime: 300_000 });
 
@@ -72,7 +73,7 @@ function MarketToken() {
       </div>
       <section className="mt-4 rounded-lg border border-border bg-card p-4">
         <h2 className="font-semibold">Buy / Sell</h2>
-        {MARKET_ROUTER_ID ? null : <p className="mt-1 text-sm text-muted-foreground">Trading through HederaPump (1% fee, shown before you confirm) opens soon. Until then you can trade on SaucerSwap.</p>}
+        {MARKET_ROUTER_ID ? <MarketTrade t={t} /> : <p className="mt-1 text-sm text-muted-foreground">Trading through HederaPump (1% fee, shown before you confirm) opens soon. Until then you can trade on SaucerSwap.</p>}
         <div className="mt-3 flex flex-wrap gap-2">
           <Button asChild variant="outline"><a href={`https://www.saucerswap.finance/swap/HBAR/${t.id}`} target="_blank" rel="noreferrer">SaucerSwap <ExternalLink className="size-4" /></a></Button>
           <Button asChild variant="ghost"><a href={`${HASHSCAN_URL}/token/${t.id}`} target="_blank" rel="noreferrer">HashScan <ExternalLink className="size-4" /></a></Button>

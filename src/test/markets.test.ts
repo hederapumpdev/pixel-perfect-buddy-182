@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildMarkets, entityNum, hbarUsdFrom, isListable, marketFee, mergeOwnCoins } from "../lib/markets";
+import { buildMarkets, entityNum, hbarUsdFrom, idToEvm, isListable, marketDeadline, marketFee, mergeOwnCoins, minAfterSlippage, toTokenUnits } from "../lib/markets";
 
 const hbar = { id: "0.0.1456986", name: "WHBAR", symbol: "HBAR", decimals: 8, priceUsd: 0.08 };
 const cat = { id: "0.0.5", name: "Cat", symbol: "CAT", decimals: 6, priceUsd: 0 };
@@ -84,5 +84,31 @@ describe("markets", () => {
       { address: "0.0.77", name: "Pump", symbol: "PUMP", icon: null, graduated: false, virtualHbar: 100, virtualTokens: 1000 },
     ], hbarUsdFrom(rows));
     expect(merged.map((m) => m.id)).toEqual(["0.0.5"]);
+  });
+});
+
+describe("markets trading", () => {
+  it("parses decimal amounts into token units and rejects bad input", () => {
+    expect(toTokenUnits("12.5", 8)).toBe(1_250_000_000n);
+    expect(toTokenUnits("0.000001", 6)).toBe(1n);
+    expect(toTokenUnits("2.345", 2)).toBe(234n);
+    expect(() => toTokenUnits("0", 8)).toThrow("above zero");
+    expect(() => toTokenUnits("abc", 8)).toThrow("valid amount");
+    expect(() => toTokenUnits("-5", 8)).toThrow("valid amount");
+  });
+
+  it("takes the 1% fee off a 3%-slippage minimum for sells", () => {
+    const quoted = 10_000_000_000n; // 100 HBAR in tinybars
+    const net = quoted - marketFee(quoted);
+    expect(minAfterSlippage(net)).toBe((9_900_000_000n * 9_700n) / 10_000n);
+  });
+
+  it("turns Hedera ids into long-zero EVM addresses", () => {
+    expect(idToEvm("0.0.10929855")).toBe("0x0000000000000000000000000000000000a6c6bf");
+    expect(idToEvm("0.0.1456986")).toBe("0x0000000000000000000000000000000000163b5a");
+  });
+
+  it("gives every signed trade a 20-minute deadline", () => {
+    expect(marketDeadline(1_000_000)).toBe(1_001_200n);
   });
 });
