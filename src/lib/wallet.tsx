@@ -415,12 +415,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     try {
       const w = await initWeb3Auth();
       // Same-tab sign-in leaves this page; remember where to come back to.
-      try { sessionStorage.setItem(SIGNIN_RETURN_KEY, window.location.pathname + window.location.search); } catch { /* ignore */ }
+      saveSigninReturn(window.location.pathname + window.location.search);
       if (!w.connected) await w.connect();
-      if (w.connected) try { sessionStorage.removeItem(SIGNIN_RETURN_KEY); } catch { /* ignore */ }
+      if (w.connected) clearSigninReturn();
       await attachEmail(w);
     } catch (e) {
-      try { sessionStorage.removeItem(SIGNIN_RETURN_KEY); } catch { /* ignore */ }
+      clearSigninReturn();
       toast.error(e instanceof Error ? e.message : "Couldn't sign in");
     } finally {
       setConnecting(false);
