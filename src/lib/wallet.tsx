@@ -40,6 +40,8 @@ type WalletCtx = {
   /** Imports a private key or recovery phrase; it is encrypted with the PIN and kept in this browser only. */
   importKey: (opts: { key: string; accountId?: string | undefined; pin: string }) => Promise<void>;
   unlockLocal: (pin: string) => Promise<void>;
+  /** Makes a brand-new wallet in this browser; returns the 24 recovery words to write down. */
+  createLocal: (pin: string) => Promise<string[]>;
   forgetLocal: () => void;
   disconnect: () => Promise<void>;
   /** Calls the launchpad contract. calldata = full ABI-encoded call (selector + args). */
@@ -304,7 +306,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const attachLocal = useCallback(async (keyText: string, id: string) => {
     const { sdk } = await loadLibs();
     const key = sdk.PrivateKey.fromStringDer(keyText);
-    const client = sdk.Client.forMainnet().setOperator(sdk.AccountId.fromString(id), key);
+    // A new wallet starts as an address; Hedera opens the 0.0.x account on its first HBAR deposit.
+    if (id.startsWith("0x")) {
+      const a = await fetch(`${MIRROR_URL}/api/v1/accounts/${id}?transactions=false`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+      if (a?.account) {
+        const s = readStoredWallet();
+        if (s) localStorage.setItem(LOCAL_WALLET_KEY, JSON.stringify({ ...s, accountId: a.account }));
+        setStoredLocal(a.account);
+        id = a.account;
+      }
+    }
+    const acct = id.startsWith("0x") ? sdk.AccountId.fromEvmAddress(0, 0, id) : sdk.AccountId.fromString(id);
+    const client = sdk.Client.forMainnet().setOperator(acct, key);
     await connector.current?.disconnectAll().catch(() => {});
     if (web3auth?.connected) await web3auth.logout().catch(() => {});
     evmSigner.current = null;
@@ -350,6 +363,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(LOCAL_WALLET_KEY, JSON.stringify(stored));
     setStoredLocal(match.id);
     await attachLocal(der, match.id);
+  }, [attachLocal]);
+
+  const createLocal: WalletCtx["createLocal"] = useCallback(async (pin) => {
+    const { sdk } = await loadLibs();
+    const m = await sdk.Mnemonic.generate();
+    const key = await m.toStandardECDSAsecp256k1PrivateKey("", 0);
+    const addr = ("0x" + key.publicKey.toEvmAddress()).toLowerCase();
+    const der = key.toStringDer();
+    localStorage.setItem(LOCAL_WALLET_KEY, JSON.stringify(await encryptKey(addr, der, pin)));
+    setStoredLocal(addr);
+    await attachLocal(der, addr);
+    return m.toString().split(/\s+/);
   }, [attachLocal]);
 
   const unlockLocal: WalletCtx["unlockLocal"] = useCallback(async (pin) => {
@@ -689,6 +714,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         storedLocal,
         importKey,
         unlockLocal,
+        createLocal,
         forgetLocal,
         disconnect,
         execute,
