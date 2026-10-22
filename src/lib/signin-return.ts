@@ -1,6 +1,6 @@
 // What the sign-in service put in the address bar when it sent the user back.
 // Read before the SDK starts, because the SDK wipes the address bar during init.
-export type SigninReturn = { present: boolean; error: string | null; hasSession: boolean };
+export type SigninReturn = { present: boolean; error: string | null; hasSession: boolean; hasNonce: boolean };
 
 function decodeB64Url(s: string): string {
   const b64 = s.replace(/-/g, "+").replace(/_/g, "/");
@@ -8,16 +8,18 @@ function decodeB64Url(s: string): string {
 }
 
 export function readSigninReturn(hash: string, search = ""): SigninReturn {
-  const out: SigninReturn = { present: false, error: null, hasSession: false };
+  const out: SigninReturn = { present: false, error: null, hasSession: false, hasNonce: false };
   for (const raw of [search.replace(/^\?/, ""), hash.replace(/^#/, "")]) {
     const p = new URLSearchParams(raw);
     const b64 = p.get("b64Params");
     if (!b64 && !p.get("sessionNamespace") && !p.get("error")) continue;
     out.present = true;
     if (p.get("error")) out.error = p.get("error");
+    if (p.get("nonce")) out.hasNonce = true;
     if (b64) {
       try {
-        const d = JSON.parse(decodeB64Url(b64)) as { error?: unknown; sessionId?: unknown };
+        const d = JSON.parse(decodeB64Url(b64)) as { error?: unknown; sessionId?: unknown; nonce?: unknown };
+        if (typeof d.nonce === "string" && d.nonce) out.hasNonce = true;
         if (typeof d.error === "string" && d.error) out.error = d.error;
         if (typeof d.sessionId === "string" && d.sessionId) out.hasSession = true;
       } catch { /* unreadable; treat as present without details */ }

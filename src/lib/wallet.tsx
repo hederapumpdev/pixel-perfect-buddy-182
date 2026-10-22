@@ -311,13 +311,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     // Covers a sign-in service that never finishes starting, too.
     const giveUp = setTimeout(() => {
       if (done || !returning) return;
+      // Short code so a screenshot tells us exactly which step stalled.
+      const code = `R${back.present ? 1 : 0}N${back.hasNonce ? 1 : 0}S${back.hasSession ? 1 : 0}I${initState}-${String(ev?.status ?? "none")}`;
       fail(new Error(back.present
-        ? (back.hasSession
-          ? "the sign-in service sent you back but couldn't open your wallet. Please try again."
-          : "the sign-in service sent you back without a login. Please try again.")
-        : "you came back without a login result from Google/e-mail. Please try again, and stay in the same browser tab."));
+        ? (initState === 0
+          ? `the sign-in service didn't finish opening your wallet. Please try again. (${code})`
+          : `the sign-in service sent you back without a login. Please try again. (${code})`)
+        : `you came back without a login result from Google/e-mail. Please try again, and stay in the same browser tab. (${code})`));
     }, 25_000);
     let poll: ReturnType<typeof setInterval> | undefined;
+    let initState = 0; // 0 starting, 1 ready, 2 failed
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let ev: any = null;
     const onConnected = () => ev && void finish(ev);
@@ -344,6 +347,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     })
       .then((w) => {
         ev = w;
+        initState = 1;
         if (done) return;
         // The return from Google can finish a moment after init; keep checking briefly.
         poll = setInterval(() => void finish(w), 500);
