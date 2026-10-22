@@ -6,6 +6,7 @@ import { encodeToken, isV2 } from "@/lib/curve";
 import { MIRROR_URL, NETWORK } from "@/lib/hedera-config";
 import { fmtHbar, priceOf } from "@/lib/queries";
 import { useHbarUsd, useUsd } from "@/lib/usd";
+import { listMarkets } from "@/lib/markets.functions";
 
 const idToEvm = (id: string) => "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
@@ -38,17 +39,21 @@ export function WalletHoldings({
       const acc = await fetch(`${MIRROR_URL}/api/v1/accounts/${accountId}?transactions=false`).then((r) => r.json());
       const hbar = Number(acc?.balance?.balance ?? 0) / 1e8;
       const hts = new Map<string, number>();
+      const raw: { id: string; balance: number }[] = [];
       let next: string | null = `/api/v1/accounts/${accountId}/tokens?limit=100`;
       for (let i = 0; next && i < 5; i++) {
         const j: { tokens?: { token_id: string; balance: number }[]; links?: { next: string | null } } = await fetch(
           MIRROR_URL + next,
         ).then((r) => r.json());
-        for (const t of j.tokens ?? []) if (t.balance > 0) hts.set(idToEvm(t.token_id), t.balance / 1e8);
+        for (const t of j.tokens ?? []) if (t.balance > 0) {
+          hts.set(idToEvm(t.token_id), t.balance / 1e8);
+          raw.push({ id: t.token_id, balance: t.balance });
+        }
         next = j.links?.next ?? null;
       }
       const { data: traded } = await supabase.from("trades").select("token, is_buy, hbar_amount, token_amount").in("trader", addrs).limit(1000);
       const cand = [...new Set([...hts.keys(), ...(traded ?? []).map((r) => r.token.toLowerCase())])];
-      if (!cand.length) return { hbar, rows: [] };
+      if (!cand.length) return { hbar, rows: [], raw };
       const { data: coins } = await supabase.from("tokens").select("*").eq("network", NETWORK).in("address", cand);
       const rows = await Promise.all(
         (coins ?? []).map(async (c) => {
@@ -71,12 +76,23 @@ export function WalletHoldings({
           return { c, amt, value, pnl: cost === null ? null : value - cost, pct: cost ? ((value - cost) / cost) * 100 : null };
         }),
       );
-      return { hbar, rows: rows.filter((r) => r.amt > 0).sort((a, b) => b.value - a.value) };
+      return { hbar, raw, ours: new Set((coins ?? []).map((c) => c.address.toLowerCase())), rows: rows.filter((r) => r.amt > 0).sort((a, b) => b.value - a.value) };
     },
   });
 
+  // Coins bought elsewhere (SaucerSwap etc.): priced from Markets, sold through our router.
+  const markets = useQuery({ queryKey: ["markets"], queryFn: () => listMarkets(), staleTime: 120_000 });
+  const others = (q.data?.raw ?? [])
+    .filter((t) => !q.data?.ours?.has(idToEvm(t.id)))
+    .map((t) => {
+      const m = markets.data?.find((x) => x.id === t.id && x.source === "dex");
+      return m ? { m, amt: t.balance / 10 ** m.decimals } : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => !!x)
+    .map((x) => ({ ...x, value: x.amt * x.m.priceHbar }))
+    .sort((a, b) => b.value - a.value);
   const hbar = q.data?.hbar ?? balanceHbar ?? 0;
-  const total = (q.data?.rows ?? []).reduce((a, r) => a + r.value, 0);
+  const total = (q.data?.rows ?? []).reduce((a, r) => a + r.value, 0) + others.reduce((a, r) => a + r.value, 0);
   const pnlAll = (q.data?.rows ?? []).reduce((a, r) => a + (r.pnl ?? 0), 0);
   return (
     <div className="mt-6 rounded-lg border border-border bg-card">
@@ -137,6 +153,34 @@ export function WalletHoldings({
           <p className="px-4 py-6 text-center text-sm text-muted-foreground">No HederaPump coins yet.</p>
         )}
       </div>
+      {others.length > 0 && (
+        <>
+          <p className="border-t border-border px-4 pt-3 text-sm font-semibold">Other Hedera coins</p>
+          <p className="px-4 text-xs text-muted-foreground">Bought elsewhere — tap one to sell it here.</p>
+          <div className="divide-y divide-border">
+            {others.map(({ m, amt, value }) => (
+              <Link key={m.id} to="/markets/$id" params={{ id: m.id }} className="flex items-center gap-3 px-4 py-3 hover:bg-secondary">
+                {m.icon ? (
+                  <img src={m.icon} alt="" className="h-10 w-10 rounded-full object-cover" loading="lazy" />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-xs font-bold">{m.symbol.slice(0, 3)}</div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold">{m.name}</p>
+                  <p className="font-mono text-xs text-muted-foreground">
+                    {amt.toLocaleString(undefined, { maximumFractionDigits: amt < 1 ? 4 : 0 })} ${m.symbol}
+                  </p>
+                </div>
+                <div className="text-right font-mono">
+                  <p className="text-sm">{fmtHbar(value)}</p>
+                  {rate && <p className="text-xs text-muted-foreground">{usd(value)}</p>}
+                  <p className="text-xs text-primary">Sell →</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
