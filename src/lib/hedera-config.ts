@@ -102,6 +102,8 @@ export const BOT_START = "2026-10-16T19:00:00Z";
 export const SAUCERSWAP_API = "https://api.saucerswap.finance";
 export const WHBAR_TOKEN_ID = "0.0.1456986";
 export const SAUCERSWAP_V1_ROUTER_ID = "0.0.3045981";
+// V1 factory: tells whether a pair exists and what a brand-new pool costs to open.
+export const SAUCERSWAP_V1_FACTORY_ID = "0.0.1062784";
 // HederaPumpRouter on mainnet (deployed 2026-10-22 from the bot wallet, verified on-chain:
 // SaucerSwap V1 router, WHBAR, 1% fee to the bot wallet, unlimited auto-associations).
 export const MARKET_ROUTER_ID: string | null = "0.0.10929855";
