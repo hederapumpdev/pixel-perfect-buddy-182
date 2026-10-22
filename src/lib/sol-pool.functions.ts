@@ -7,6 +7,7 @@ import { idToEvm } from "./markets";
 
 const checkPin = async (p: unknown, action?: string) => (await import("./admin-auth.server")).requireAdmin(p, action);
 const RESERVE_TINYBARS = 5n * 100_000_000n; // gas money the bot must always keep
+const hbarText = (t: bigint) => (Number(t) / 1e8).toFixed(2);
 
 async function balanceOf(accountId: string, tokenId: string): Promise<bigint> {
   const r = await fetch(`${MIRROR_URL}/api/v1/accounts/${accountId}/tokens?token.id=${tokenId}&limit=1`, {
@@ -106,7 +107,7 @@ export const createSolPool = createServerFn({ method: "POST" })
     const hbar = await hbarOf(accountId);
     if (hbar < plan.totalTinybars + RESERVE_TINYBARS)
       throw new Error(
-        `This pool needs ${(plan.totalTinybars / 100_000_000n).toFixed(2)} HBAR (liquidity + creation fee) plus gas. ` +
+        `This pool needs ${hbarText(plan.totalTinybars)} HBAR (liquidity + creation fee) plus gas. ` +
           `The bot has ${(Number(hbar) / 1e8).toFixed(2)} HBAR — top it up, nothing was sent.`,
       );
 
@@ -145,7 +146,7 @@ export const createSolPool = createServerFn({ method: "POST" })
     const rec = await tx.wait();
     return {
       step: "created",
-      message: `Pool created — ${(plan.totalTinybars / 100_000_000n).toFixed(2)} HBAR used (fee included).`,
+      message: `Pool created — ${hbarText(plan.totalTinybars)} HBAR used (fee included).`,
       hash: rec?.hash ?? tx.hash,
     };
   });
