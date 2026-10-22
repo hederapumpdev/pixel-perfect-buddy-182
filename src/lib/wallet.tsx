@@ -157,6 +157,18 @@ async function createWeb3Auth(beforeInit?: (w: import("@web3auth/modal").Web3Aut
   return w;
 }
 
+// SDK v11 has no `web3auth.provider`; the key provider lives on the signed-in connector.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function signinProvider(w: any): { request: (a: { method: string }) => Promise<unknown> } | null {
+  const fromConnector = w?.primaryConnector?.provider;
+  if (fromConnector?.request) return fromConnector;
+  try {
+    const c = w?.connection?.ethereumProvider;
+    if (c?.request) return c;
+  } catch { /* connection not ready yet */ }
+  return w?.provider?.request ? w.provider : null;
+}
+
 const hexToBytes = (h: string) =>
   Uint8Array.from((h.replace(/^0x/, "").match(/.{2}/g) ?? []).map((b) => parseInt(b, 16)));
 
@@ -198,9 +210,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [handoff, setHandoff] = useState<WalletHandoff | null>(null);
 
   const attachEmail = useCallback(async (w: import("@web3auth/modal").Web3Auth) => {
-    if (!w.provider) return;
+    const p = signinProvider(w);
+    if (!p) return;
     const { Wallet, JsonRpcProvider } = await import("ethers");
-    const pk = (await w.provider.request({ method: "private_key" })) as string;
+    const pk = (await p.request({ method: "private_key" })) as string;
+    if (!pk) throw new Error("the sign-in service didn't hand over your wallet. Please try again.");
     const signer = new Wallet(pk.startsWith("0x") ? pk : "0x" + pk, new JsonRpcProvider(EVM_RPC_URL));
     evmSigner.current = signer;
     const addr = (await signer.getAddress()).toLowerCase();
