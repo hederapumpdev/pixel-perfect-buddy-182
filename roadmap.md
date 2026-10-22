@@ -100,3 +100,4 @@
 
 - [x] Account wallets (max 10, import/create, active select)
 - [ ] Sign in: blocked — owner must whitelist hederapump.dev in Web3Auth dashboard
+- [x] Let people get their own private key from their account: key icon per added wallet, PIN-checked reveal on screen for 60s with share warnings, copy button, never sent anywhere. Three tests pass; a real signed-in reveal on a device not yet exercised.

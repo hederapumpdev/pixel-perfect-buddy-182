@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Check, ChevronDown, LogOut, Plus, Trash2, Wallet } from "lucide-react";
+import { Check, ChevronDown, KeyRound, LogOut, Plus, Trash2, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -156,6 +156,102 @@ function UnlockDialog({ id, onClose }: { id: string | null; onClose: () => void 
   );
 }
 
+/** Shows one of your own wallets' private key after its PIN is confirmed. */
+function RevealKeyDialog({ id, onClose }: { id: string | null; onClose: () => void }) {
+  const w = useWallet();
+  const [pin, setPin] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [key, setKey] = useState<string | null>(null);
+  const [left, setLeft] = useState(0);
+
+  useEffect(() => {
+    if (!id) {
+      setKey(null);
+      setLeft(0);
+      setPin("");
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (!key) return;
+    if (left <= 0) {
+      setKey(null);
+      return;
+    }
+    const t = setTimeout(() => setLeft((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+  }, [key, left]);
+
+  async function go() {
+    if (!id) return;
+    setBusy(true);
+    try {
+      setKey(await w.revealLocal(id, pin));
+      setLeft(60);
+      setPin("");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't unlock");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open={!!id} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{key ? "Your private key" : `Show the key for ${id ?? ""}`}</DialogTitle>
+          <DialogDescription>
+            {key
+              ? "This key controls the wallet. Anyone who sees it can move everything in it."
+              : "Enter this wallet's PIN. The key stays on this device and is never sent anywhere."}
+          </DialogDescription>
+        </DialogHeader>
+        {key ? (
+          <div className="space-y-3">
+            <p className="rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs">
+              Never share this key or type it into any website. HederaPump staff will never ask for it.
+            </p>
+            <p className="break-all rounded-md border bg-muted p-2 font-mono text-xs">{key}</p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigator.clipboard.writeText(key).then(
+                    () => toast.success("Key copied. Clear your clipboard when you're done."),
+                    () => toast.error("Copy blocked by your browser."),
+                  )
+                }
+              >
+                Copy
+              </Button>
+              <Button size="sm" onClick={onClose}>
+                Hide
+              </Button>
+              <span className="ml-auto text-xs text-muted-foreground">Hides in {left}s</span>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Input
+              type="password"
+              inputMode="numeric"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              placeholder="PIN"
+              onKeyDown={(e) => e.key === "Enter" && go()}
+            />
+            <Button onClick={go} disabled={busy || pin.length < MIN_PIN}>
+              {busy ? "Checking…" : "Show key"}
+            </Button>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /** Balance at the top of every page; tap to see everything in the wallet. */
 export function WalletMenu() {
   const w = useWallet();
@@ -179,12 +275,14 @@ function Connected({ id }: { id: string }) {
   const rate = useHbarUsd().data;
   const [adding, setAdding] = useState(false);
   const [unlocking, setUnlocking] = useState<string | null>(null);
+  const [revealing, setRevealing] = useState<string | null>(null);
   const addrs = [...new Set([profileWalletAddress(id), w.evmAddress].filter(Boolean) as string[])];
   const active = w.mode === "local" ? id : null;
   return (
     <>
       <ImportWalletDialog open={adding} onOpenChange={setAdding} />
       <UnlockDialog id={unlocking} onClose={() => setUnlocking(null)} />
+      <RevealKeyDialog id={revealing} onClose={() => setRevealing(null)} />
       <Popover>
         <PopoverTrigger asChild>
           <Button size="sm" variant="secondary" className="gap-2 font-mono">
@@ -213,6 +311,12 @@ function Connected({ id }: { id: string }) {
                         {own ? (w.owner?.mode === "email" ? "Account · Instant" : "Account · HashPack") : "Added"}
                       </span>
                     </button>
+                    {!own && (
+                      <button type="button" aria-label="Show private key" className="text-muted-foreground"
+                        onClick={() => setRevealing(wid)}>
+                        <KeyRound className="h-4 w-4" />
+                      </button>
+                    )}
                     {!own && (
                       <button type="button" aria-label="Remove wallet" className="text-muted-foreground"
                         onClick={() => confirm("Remove this wallet from your account on this device? Make sure you have its key or 24 words.") && w.removeLocal(wid)}>

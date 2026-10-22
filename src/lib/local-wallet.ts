@@ -80,3 +80,13 @@ export function adoptLegacyWallet(owner: string): StoredLocalWallet[] {
   if (legacy) localStorage.removeItem(LOCAL_WALLET_KEY);
   return list;
 }
+
+/**
+ * Reveals a wallet's own private key after its PIN is confirmed.
+ * The key stays in this browser only — it is never sent to the server.
+ */
+export async function revealStoredWallet(owner: string, id: string, pin: string): Promise<string> {
+  const stored = readAccountWallets(owner).find((s) => s.accountId === id);
+  if (!stored) throw new Error("That wallet isn't in your account.");
+  return decryptKey(stored, pin);
+}
