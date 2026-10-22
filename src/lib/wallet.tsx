@@ -140,6 +140,9 @@ async function initWeb3Auth() {
     },
     // No walletServicesConfig: the sign-in service's free plan rejects wallet services
     // (403 "not available on base plan"), which blocks every email/Google sign-in.
+    // Same-tab sign-in: phone browsers block the login popup ("popup window is blocked")
+    // because it opens after async work, not directly from the tap.
+    uiConfig: { uxMode: "redirect" },
   } as never);
   await w.init();
   web3auth = w;
@@ -251,12 +254,19 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setOwner(id ? { key: id, id, mode: "hashpack" } : null);
   }, [setOwner]);
 
-  // Restore an email-wallet session on load.
+  // Restore an email-wallet session on load, including the return from same-tab sign-in.
   useEffect(() => {
     if (!WEB3AUTH_CLIENT_ID) return;
+    let off = () => {};
     initWeb3Auth()
-      .then((w) => (w.connected ? attachEmail(w) : undefined))
-      .catch(() => {});
+      .then((w) => {
+        const onConnected = () => attachEmail(w).catch((e) => console.error("Sign-in attach failed", e));
+        w.on("connected" as never, onConnected as never);
+        off = () => w.off("connected" as never, onConnected as never);
+        if (w.connected) return attachEmail(w);
+      })
+      .catch((e) => console.error("Sign-in restore failed", e));
+    return () => off();
   }, [attachEmail]);
 
   // Restore an existing session on load.
