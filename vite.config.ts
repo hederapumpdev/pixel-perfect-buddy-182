@@ -14,7 +14,7 @@ const browserPolyfills = {
   process: require.resolve("process/browser.js"),
 };
 const SERVER_STUBBED =
-  /^(@hashgraph\/hedera-wallet-connect|@hiero-ledger\/sdk|@web3auth\/modal|@grpc\/grpc-js)(\/.*)?$/;
+  /^(@hashgraph\/hedera-wallet-connect|@hiero-ledger\/sdk|@web3auth\/modal|@web3auth\/no-modal|@grpc\/grpc-js)(\/.*)?$/;
 
 export default defineConfig({
   tanstackStart: {
