@@ -8,7 +8,7 @@ afterEach(() => clearSigninReturn());
 describe("return from Google/e-mail sign-in", () => {
   it("sees a login result in the address bar", () => {
     const r = readSigninReturn(`#b64Params=${b64({ sessionId: "abc" })}&sessionNamespace=x`);
-    expect(r).toEqual({ present: true, error: null, hasSession: true });
+    expect(r).toEqual({ present: true, error: null, hasSession: true, hasNonce: false });
   });
 
   it("reports the error the sign-in service sent back", () => {
