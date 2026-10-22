@@ -95,4 +95,4 @@
 - [ ] Deploy router on mainnet (owner wallet approval, unlimited auto-associations) and set MARKET_ROUTER_ID
 - [ ] Buy/Sell box through the router (association + allowance steps)
 - [ ] Announce Markets on X/Telegram/Discord after user confirms
-- [ ] Markets: add a "New" sort button and a pickable time frame for the change column
+- [x] Markets: sort buttons raised to a 44px touch target with a clear active state (24h gainers/losers were hard to press); added a "New" sort (Hedera entity number = creation order) and a 1h/24h/7d time-frame picker that drives gainers/losers and adds a 7d column; our 13 bonding-curve coins now appear in their own block above the pool list; offensive names are kept off the display list. Eight tests pass, phone-sized taps verified.
