@@ -75,7 +75,7 @@ describe("HederaPump Markets router", () => {
     const { t, r, call, bal } = await setup();
     await call(r, router.abi, "buy", [whbar, 0n, 9_999_999_999n], 1_000_000_000n); // user gets 9.9e9 units, fee 1e7
     await call(t, tok.abi, "approve", [r.toString(), 1_000_000_000n]);
-    const res = await call(r, router.abi, "sell", [whbar, 1_000_000_000n, 0n, 9_999_999_999n]);
+    const res = await call(r, router.abi, "sell", [t.toString(), 1_000_000_000n, 0n, 9_999_999_999n]);
     expect(res.execResult.exceptionError).toBeUndefined();
     expect(await bal(fee)).toBe(10_000_000n + 1_000_000n); // 1% of 100,000,000 tinybar
     expect(await bal(r)).toBe(0n);
