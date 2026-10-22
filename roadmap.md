@@ -95,3 +95,4 @@
 - [ ] Deploy router on mainnet (owner wallet approval, unlimited auto-associations) and set MARKET_ROUTER_ID
 - [ ] Buy/Sell box through the router (association + allowance steps)
 - [ ] Announce Markets on X/Telegram/Discord after user confirms
+- [ ] Markets: add a "New" sort button and a pickable time frame for the change column
