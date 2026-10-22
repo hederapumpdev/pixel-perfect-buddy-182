@@ -169,6 +169,25 @@ function signinProvider(w: any): { request: (a: { method: string }) => Promise<u
   return w?.provider?.request ? w.provider : null;
 }
 
+// Key from the signed-in connector. Falls back to the connector's own key when the
+// provider isn't wired yet or refuses export, so a finished Google login always attaches.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function signinKey(w: any): Promise<string | null> {
+  const p = signinProvider(w);
+  if (p) {
+    try {
+      const k = (await p.request({ method: "private_key" })) as string;
+      if (k) return k;
+    } catch (e) { console.warn("private_key request failed, using connector key", e); }
+  }
+  const c = w?.primaryConnector ?? w?.getConnector?.("auth");
+  try {
+    const k = c?._getFinalPrivKey?.() ?? c?.authInstance?.privKey;
+    if (typeof k === "string" && k.replace(/^0x/, "").length >= 32) return k;
+  } catch { /* not signed in */ }
+  return null;
+}
+
 const hexToBytes = (h: string) =>
   Uint8Array.from((h.replace(/^0x/, "").match(/.{2}/g) ?? []).map((b) => parseInt(b, 16)));
 
@@ -210,10 +229,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [handoff, setHandoff] = useState<WalletHandoff | null>(null);
 
   const attachEmail = useCallback(async (w: import("@web3auth/modal").Web3Auth) => {
-    const p = signinProvider(w);
-    if (!p) return;
+    const pk = await signinKey(w);
+    if (!pk && !w.connected) return;
     const { Wallet, JsonRpcProvider } = await import("ethers");
-    const pk = (await p.request({ method: "private_key" })) as string;
     if (!pk) throw new Error("the sign-in service didn't hand over your wallet. Please try again.");
     const signer = new Wallet(pk.startsWith("0x") ? pk : "0x" + pk, new JsonRpcProvider(EVM_RPC_URL));
     evmSigner.current = signer;
@@ -306,7 +324,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
     if (returning && back.error) fail(new Error(back.error));
     const finish = async (w: import("@web3auth/modal").Web3Auth) => {
-      if (done || !w.connected || !signinProvider(w)) return;
+      if (done || !w.connected) return;
+      if (!signinProvider(w) && !(await signinKey(w))) return;
+      if (done) return;
       done = true;
       try {
         await attachEmail(w);
