@@ -16,6 +16,21 @@ export type RawChange = { id: string; priceChangeHour?: number; priceChangeDay?:
 /** Below this USD liquidity a coin gets a clear low-liquidity warning. */
 export const LOW_LIQUIDITY_USD = 1_000;
 
+const BLOCKED_WORDS = new Set([
+  "nigger", "nigga", "niga", "nig", "niggers", "faggot", "faggots", "fag", "fags",
+  "kike", "kikes", "spic", "spics", "coon", "coons", "retard", "retards", "tranny",
+  "chink", "gook", "gooks", "rape", "rapist", "nazi", "nazis", "hitler", "jihad", "pedo",
+]);
+
+const words = (s: string) => s.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+
+/** Slurs and hate words are kept off our own pages; the chain and SaucerSwap are untouched. */
+export function isListable(name: string, symbol: string): boolean {
+  return ![...words(name), ...words(symbol)].some(
+    (w) => BLOCKED_WORDS.has(w) || w.startsWith("nigg") || w.startsWith("fagg"),
+  );
+}
+
 /** One row per token with an HBAR (new WHBAR) pool; deepest pool wins. */
 export function buildMarkets(pools: RawPool[], changes: RawChange[], hbarUsd: number): MarketToken[] {
   const ch = new Map(changes.map((c) => [c.id, c]));
@@ -24,6 +39,7 @@ export function buildMarkets(pools: RawPool[], changes: RawChange[], hbarUsd: nu
     const hbarIsA = p.tokenA.id === WHBAR_TOKEN_ID;
     if (!hbarIsA && p.tokenB.id !== WHBAR_TOKEN_ID) continue;
     const t = hbarIsA ? p.tokenB : p.tokenA;
+    if (!isListable(t.name, t.symbol)) continue;
     const hbarReserve = Number(hbarIsA ? p.tokenReserveA : p.tokenReserveB) / 1e8;
     const tokReserve = Number(hbarIsA ? p.tokenReserveB : p.tokenReserveA) / 10 ** t.decimals;
     if (!(hbarReserve > 0) || !(tokReserve > 0)) continue;
@@ -57,7 +73,7 @@ export function mergeOwnCoins(rows: MarketToken[], coins: OwnCoin[], hbarUsd: nu
   const seen = new Set(rows.map((r) => r.id));
   const extra: MarketToken[] = [];
   for (const c of coins) {
-    if (c.graduated || seen.has(c.address)) continue;
+    if (c.graduated || seen.has(c.address) || !isListable(c.name, c.symbol)) continue;
     if (!(c.virtualHbar > 0) || !(c.virtualTokens > 0)) continue;
     const priceHbar = c.virtualHbar / c.virtualTokens;
     extra.push({

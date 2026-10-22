@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildMarkets, hbarUsdFrom, marketFee, mergeOwnCoins } from "../lib/markets";
+import { buildMarkets, hbarUsdFrom, isListable, marketFee, mergeOwnCoins } from "../lib/markets";
 
 const hbar = { id: "0.0.1456986", name: "WHBAR", symbol: "HBAR", decimals: 8, priceUsd: 0.08 };
 const cat = { id: "0.0.5", name: "Cat", symbol: "CAT", decimals: 6, priceUsd: 0 };
@@ -29,6 +29,18 @@ describe("markets", () => {
     const rows = buildMarkets([pool], [], 0.08);
     expect(hbarUsdFrom(rows)).toBeCloseTo(0.08);
     expect(hbarUsdFrom([])).toBe(0);
+  });
+
+  it("keeps slurs off our pages but leaves normal names alone", () => {
+    expect(isListable("NIGGER", "NIGGER")).toBe(false);
+    expect(isListable("Niga Coin", "NIGA")).toBe(false);
+    expect(isListable("Grape Finance", "GRAPE")).toBe(true);
+    expect(isListable("HederaPump", "HEDERAPUMP")).toBe(true);
+    const rows = buildMarkets(
+      [pool, { contractId: "p9", tokenA: hbar, tokenB: { ...cat, id: "0.0.7", name: "NIGGER", symbol: "NIGGER" }, tokenReserveA: String(9000e8), tokenReserveB: String(2000e6) }],
+      [], 0.08,
+    );
+    expect(rows.map((r) => r.id)).toEqual(["0.0.5"]);
   });
 
   it("adds HederaPump coins without a SaucerSwap pool, once, as curve rows", () => {

@@ -61,21 +61,23 @@ function Markets() {
   }));
   const all = mergeOwnCoins(data, own, hbarUsdFrom(data));
   const term = q.trim().toLowerCase();
-  // Tokens without a 24h figure (our bonding-curve coins) always end up last.
+  const match = (t: MarketToken) => !term || `${t.name} ${t.symbol} ${t.id}`.toLowerCase().includes(term);
+  // Our bonding-curve coins get their own block: they have no SaucerSwap pool to rank by.
+  const curveRows = all.filter((t) => t.source === "curve" && match(t));
+  // Tokens without a 24h figure always end up last, whichever way you sort.
   const key = (t: MarketToken) => t.change24h ?? (sort === "gainers" ? -Infinity : Infinity);
   const list = all
-    .filter((t) => !term || `${t.name} ${t.symbol} ${t.id}`.toLowerCase().includes(term))
+    .filter((t) => t.source === "dex" && match(t))
     .sort((a, b) =>
       sort === "liquidity" ? b.liquidityUsd - a.liquidityUsd
       : sort === "gainers" ? key(b) - key(a)
       : key(a) - key(b));
-  const curveCount = all.filter((t) => t.source === "curve").length;
   return (
     <Shell>
       <h1 className="text-3xl font-bold">Hedera Markets</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Every token with an HBAR pool on SaucerSwap, plus our {curveCount} HederaPump coins still on the bonding curve
-        ({all.length} total). Not verified by HederaPump — always do your own research.
+        Every token with an HBAR pool on SaucerSwap ({list.length}), plus our {curveRows.length} HederaPump coins
+        still on the bonding curve. Not verified by HederaPump — always do your own research.
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, ticker or 0.0.x" className="h-11 max-w-xs" />
@@ -95,6 +97,20 @@ function Markets() {
           ))}
         </div>
       </div>
+      {curveRows.length > 0 && (
+        <section className="mt-6">
+          <h2 className="font-display text-lg font-bold">HederaPump coins on the bonding curve</h2>
+          <p className="mt-1 text-xs text-muted-foreground">Bought and sold on HederaPump. Graduates to SaucerSwap automatically at 800M tokens sold.</p>
+          <div className="mt-2 overflow-x-auto rounded-lg border border-border">
+            <table className="w-full text-sm">
+              <thead className="bg-card text-left text-muted-foreground">
+                <tr><th className="p-3">#</th><th className="p-3">Token</th><th className="p-3 text-right">Price</th><th className="p-3 text-right">1h</th><th className="p-3 text-right">24h</th><th className="p-3 text-right">Liquidity</th></tr>
+              </thead>
+              <tbody>{curveRows.map((t, i) => <Row key={t.id} t={t} i={i} />)}</tbody>
+            </table>
+          </div>
+        </section>
+      )}
       <div className="mt-4 overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">
           <thead className="bg-card text-left text-muted-foreground">
