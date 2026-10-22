@@ -23,7 +23,7 @@ export const Route = createFileRoute("/markets/")({
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(marketsQuery),
   component: Markets,
-  errorComponent: ({ error }) => <Shell><p role="alert" className="text-destructive">{error.message}</p></Shell>,
+  errorComponent: ({ error }) => <Shell><p role="alert" className="text-destructive">{error instanceof Error ? error.message : String(error)}</p></Shell>,
   notFoundComponent: () => <Shell><p>No markets found.</p></Shell>,
 });
 

@@ -30,7 +30,7 @@ export const Route = createFileRoute("/markets/$id")({
     ] };
   },
   component: MarketToken,
-  errorComponent: ({ error }) => <Shell><p role="alert" className="text-destructive">{error.message}</p></Shell>,
+  errorComponent: ({ error }) => <Shell><p role="alert" className="text-destructive">{error instanceof Error ? error.message : String(error)}</p></Shell>,
   notFoundComponent: () => <Shell><p>This token has no HBAR pool on SaucerSwap.</p><Link to="/markets" className="text-primary">Back to Markets</Link></Shell>,
 });
 
