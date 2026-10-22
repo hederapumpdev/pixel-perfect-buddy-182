@@ -115,6 +115,68 @@ export function marketFee(tinybars: bigint, bps = BigInt(MARKET_FEE_BPS)): bigin
   return (tinybars * bps) / 10_000n;
 }
 
+// --- Trading through HederaPumpRouter (visible 1% fee, swaps on SaucerSwap V1) ---
+
+import { encodeFunctionData, type Abi } from "viem";
+import routerArtifact from "./contract-artifact-router.json";
+import { MIRROR_URL, SAUCERSWAP_V1_ROUTER_ID } from "./hedera-config";
+
+/** Slippage tolerance on Markets trades (3%), same as the bonding-curve trade box. */
+export const MARKET_SLIPPAGE_BPS = 300n;
+/** Seconds a signed Markets trade stays valid. */
+export const MARKET_DEADLINE_SECS = 1_200;
+
+/** 0.0.N entity id -> its long-zero EVM address. */
+export const idToEvm = (id: string) => `0x${BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0")}`;
+
+/** Encodes a call on HederaPumpRouter (buy or sell). */
+export const encodeMarketRouter = (functionName: string, args: unknown[] = []) =>
+  encodeFunctionData({ abi: routerArtifact.abi as Abi, functionName, args } as never);
+
+const SAUCER_ROUTER_ABI = [
+  { name: "getAmountsOut", type: "function", stateMutability: "view",
+    inputs: [{ name: "amountIn", type: "uint256" }, { name: "path", type: "address[]" }],
+    outputs: [{ name: "amounts", type: "uint256[]" }] },
+] as const;
+
+/** SaucerSwap V1 quote: how much comes out for amountIn along [from, to]. */
+export async function quoteAmountsOut(amountIn: bigint, path: [string, string]): Promise<bigint> {
+  const r = await fetch(`${MIRROR_URL}/api/v1/contracts/call`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      to: idToEvm(SAUCERSWAP_V1_ROUTER_ID),
+      data: encodeFunctionData({ abi: SAUCER_ROUTER_ABI as unknown as Abi, functionName: "getAmountsOut", args: [amountIn, path] } as never),
+      estimate: false,
+    }),
+  });
+  if (!r.ok) throw new Error("Couldn't get a price quote from SaucerSwap");
+  const hex = ((await r.json()).result as string).replace(/^0x/, "");
+  const words = (hex.match(/.{64}/g) ?? []).map((w) => BigInt(`0x${w}`));
+  // uint256[] abi encoding: offset, length, values… — the last value is the output amount.
+  const out = words[Number(words[1]) + 1];
+  if (out === undefined) throw new Error("SaucerSwap returned an empty quote");
+  return out;
+}
+
+/** Parses a decimal input like "12.5" into token units; throws on bad or non-positive input. */
+export function toTokenUnits(amount: string, decimals: number): bigint {
+  const m = /^(\d+)(?:\.(\d+))?$/.exec(amount.trim());
+  if (!m) throw new Error("Enter a valid amount");
+  const frac = (m[2] ?? "").padEnd(decimals, "0").slice(0, decimals);
+  const units = BigInt(m[1]) * 10n ** BigInt(decimals) + BigInt(frac || 0);
+  if (units <= 0n) throw new Error("Enter an amount above zero");
+  return units;
+}
+
+/** A quote reduced by the slippage tolerance — the minimum the contract must deliver. */
+export function minAfterSlippage(quoted: bigint, bps = MARKET_SLIPPAGE_BPS): bigint {
+  return (quoted * (10_000n - bps)) / 10_000n;
+}
+
+/** Trade deadline timestamp for a transaction signed now. */
+export const marketDeadline = (nowSecs = Math.floor(Date.now() / 1000)) => BigInt(nowSecs + MARKET_DEADLINE_SECS);
+
 export function formatUsd(v: number): string {
   if (!Number.isFinite(v)) return "—";
   if (v >= 1) return `$${v.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;

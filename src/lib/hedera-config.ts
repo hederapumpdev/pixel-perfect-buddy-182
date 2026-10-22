@@ -102,6 +102,11 @@ export const BOT_START = "2026-10-16T19:00:00Z";
 export const SAUCERSWAP_API = "https://api.saucerswap.finance";
 export const WHBAR_TOKEN_ID = "0.0.1456986";
 export const SAUCERSWAP_V1_ROUTER_ID = "0.0.3045981";
-// Null until HederaPumpRouter is deployed and verified on mainnet; trading stays off until then.
-export const MARKET_ROUTER_ID: string | null = null;
+// HederaPumpRouter on mainnet (deployed 2026-10-22 from the bot wallet, verified on-chain:
+// SaucerSwap V1 router, WHBAR, 1% fee to the bot wallet, unlimited auto-associations).
+export const MARKET_ROUTER_ID: string | null = "0.0.10929855";
 export const MARKET_FEE_BPS = 100;
+// Gas for router trades. A real mainnet buy measured ~940k gas (mirror estimate);
+// sell adds transferFrom + approve + the router's first-time auto-association of the
+// token, so it gets more headroom. Unused gas is refunded on success.
+export const MARKET_GAS = { buy: 2_000_000, sell: 4_000_000 };
