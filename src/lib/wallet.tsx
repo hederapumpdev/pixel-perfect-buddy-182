@@ -306,7 +306,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
     if (returning && back.error) fail(new Error(back.error));
     const finish = async (w: import("@web3auth/modal").Web3Auth) => {
-      if (done || !w.connected || !w.provider) return;
+      if (done || !w.connected || !signinProvider(w)) return;
       done = true;
       try {
         await attachEmail(w);
