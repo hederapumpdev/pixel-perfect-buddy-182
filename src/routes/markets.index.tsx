@@ -121,7 +121,7 @@ function Markets() {
           <div className="mt-2 overflow-x-auto rounded-lg border border-border">
             <table className="w-full text-sm">
               {tableHead}
-              <tbody>{curveRows.map((t, i) => <Row key={t.id} t={t} i={i} changeOf={changeOf} />)}</tbody>
+              <tbody>{curveRows.map((t, i) => <Row key={t.id} t={t} i={i} />)}</tbody>
             </table>
           </div>
         </section>
@@ -129,7 +129,7 @@ function Markets() {
       <div className="mt-4 overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">
           {tableHead}
-          <tbody>{list.slice(0, 300).map((t, i) => <Row key={t.id} t={t} i={i} changeOf={changeOf} />)}</tbody>
+          <tbody>{list.slice(0, 300).map((t, i) => <Row key={t.id} t={t} i={i} />)}</tbody>
         </table>
       </div>
       {list.length > 300 && <p className="mt-2 text-xs text-muted-foreground">Showing top 300 — search to find others.</p>}
@@ -137,7 +137,7 @@ function Markets() {
   );
 }
 
-function Row({ t, i, changeOf }: { t: MarketToken; i: number; changeOf: (t: MarketToken) => number | null }) {
+function Row({ t, i }: { t: MarketToken; i: number }) {
   const inner = (
     <>
       {t.icon ? <img src={t.icon} alt="" width={24} height={24} loading="lazy" className="size-6 rounded-full" /> : <span className="size-6 rounded-full bg-muted" />}

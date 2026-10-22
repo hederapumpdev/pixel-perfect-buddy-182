@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildMarkets, hbarUsdFrom, isListable, marketFee, mergeOwnCoins } from "../lib/markets";
+import { buildMarkets, entityNum, hbarUsdFrom, isListable, marketFee, mergeOwnCoins } from "../lib/markets";
 
 const hbar = { id: "0.0.1456986", name: "WHBAR", symbol: "HBAR", decimals: 8, priceUsd: 0.08 };
 const cat = { id: "0.0.5", name: "Cat", symbol: "CAT", decimals: 6, priceUsd: 0 };
@@ -23,6 +23,18 @@ describe("markets", () => {
     expect(rows[0]?.liquidityUsd).toBeCloseTo(160);
     expect(rows[0]?.change24h).toBe(4);
     expect(rows[0]?.source).toBe("dex");
+  });
+
+  it("carries the 7-day change from SaucerSwap and null when it is missing", () => {
+    const rows = buildMarkets([pool], [{ id: "0.0.5", priceChangeWeek: 12.5 }], 0.08);
+    expect(rows[0]?.change7d).toBe(12.5);
+    expect(buildMarkets([pool], [], 0.08)[0]?.change7d).toBeNull();
+  });
+
+  it("treats a higher Hedera entity number as the newer token", () => {
+    expect(entityNum("0.0.10924337")).toBeGreaterThan(entityNum("0.0.731861"));
+    expect(entityNum("0.0.10924337")).toBe(10924337);
+    expect(entityNum("not-an-id")).toBe(0);
   });
 
   it("reads the HBAR/USD rate back out of a priced row", () => {
@@ -57,9 +69,10 @@ describe("markets", () => {
     expect(pump?.priceHbar).toBe(0.1);
     expect(pump?.priceUsd).toBeCloseTo(0.008);
     expect(pump?.icon).toBe("/api/public/img/ab");
-    // No SaucerSwap pool exists, so no liquidity figure is claimed.
+    // No SaucerSwap pool exists, so no liquidity or price-change figure is claimed.
     expect(pump?.liquidityUsd).toBe(0);
     expect(pump?.change24h).toBeNull();
+    expect(pump?.change7d).toBeNull();
   });
 
   it("adds nothing when no HBAR/USD rate is known", () => {
