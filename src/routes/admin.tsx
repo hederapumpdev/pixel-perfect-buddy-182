@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet } from "@/lib/wallet";
 import { FeeWalletsPanel } from "@/components/FeeWalletsPanel";
+import { SolPoolPanel } from "@/components/SolPoolPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminPin, walletAdminLogin, getAdminLog, getBotHoldings, sellBotCoin, getBotInfo, saveBotSettings, getBotAdmin } from "@/lib/chain.functions";
 import { botHoldingViews } from "@/lib/bot-holdings-view";
@@ -179,6 +180,7 @@ function Admin() {
         <CommunityModeration pin={pin || sessionStorage.getItem(PIN_KEY) || ""} />
         <XPostingPanel pin={pin || sessionStorage.getItem(PIN_KEY) || ""} />
         <FeeWalletsPanel pin={pin || sessionStorage.getItem(PIN_KEY) || ""} />
+        <SolPoolPanel pin={pin || sessionStorage.getItem(PIN_KEY) || ""} />
         <FeeOverview />
         <TopCoins />
         <LegacyTokenInfo />
