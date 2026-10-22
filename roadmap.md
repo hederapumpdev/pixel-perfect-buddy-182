@@ -90,7 +90,7 @@
 - [ ] SODAX 0.5% partner fee — blocked: SODAX must set it up on their side; needs an EVM fee address from owner
 
 ## Markets (all Hedera coins, 1% fee)
-- [ ] Add verified token information (supply, holders, pools, token controls and liquidity lock/burn status); investigate SODAX as an additional information source without changing trading.
+- [x] Markets token information: Mirror Node supply, control keys, bounded positive-balance account scan and sampled largest balances; all returned SaucerSwap V1 pools/reserves; live SODAX supported-asset check. LP burn/lock remain explicitly unknown. 20 focused tests pass; real SAUCE readback verified with no horizontal overflow or runtime errors. Trading unchanged; not published.
 - [x] /markets list + /markets/0.0.x detail with chart (SaucerSwap data, display-only)
 - [x] HederaPumpRouter contract (1% cap, fee to bot wallet) + local tests
 - [x] Deploy router on mainnet (owner wallet approval, unlimited auto-associations) and set MARKET_ROUTER_ID — 0.0.10929855, verified on-chain 2026-10-22
