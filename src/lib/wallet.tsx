@@ -321,6 +321,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [attachEmail]);
 
+  const saveWallets = useCallback((list: StoredLocalWallet[]) => {
+    const o = ownerRef.current;
+    if (!o) return;
+    writeAccountWallets(o.key, list);
+    setAccountWallets(list);
+  }, []);
+
   const attachLocal = useCallback(async (keyText: string, id: string) => {
     const { sdk } = await loadLibs();
     const key = sdk.PrivateKey.fromStringDer(keyText);
@@ -328,23 +335,33 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (id.startsWith("0x")) {
       const a = await fetch(`${MIRROR_URL}/api/v1/accounts/${id}?transactions=false`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
       if (a?.account) {
-        const s = readStoredWallet();
-        if (s) localStorage.setItem(LOCAL_WALLET_KEY, JSON.stringify({ ...s, accountId: a.account }));
-        setStoredLocal(a.account);
+        const o = ownerRef.current;
+        if (o) saveWallets(readAccountWallets(o.key).map((s) => (s.accountId === id ? { ...s, accountId: a.account } : s)));
         id = a.account;
       }
     }
     const acct = id.startsWith("0x") ? sdk.AccountId.fromEvmAddress(0, 0, id) : sdk.AccountId.fromString(id);
     const client = sdk.Client.forMainnet().setOperator(acct, key);
-    await connector.current?.disconnectAll().catch(() => {});
-    if (web3auth?.connected) await web3auth.logout().catch(() => {});
+    // Keep the account session; park its email signer while an extra wallet is active.
+    if (evmSigner.current) ownerEvm.current = evmSigner.current;
     evmSigner.current = null;
     local.current = { client, key, id };
     setMode("local");
     setAccountId(id);
-  }, []);
+  }, [saveWallets]);
+
+  const addWallet = useCallback(async (id: string, der: string, pin: string) => {
+    const o = ownerRef.current;
+    if (!o) throw new Error("Sign in to your account first (HashPack or email).");
+    const list = readAccountWallets(o.key).filter((s) => s.accountId !== id);
+    if (list.length >= MAX_ACCOUNT_WALLETS) throw new Error(`An account can hold at most ${MAX_ACCOUNT_WALLETS} wallets. Remove one first.`);
+    if (id === o.id) throw new Error("That is already your account wallet.");
+    saveWallets([...list, await encryptKey(id, der, pin)]);
+    await attachLocal(der, id);
+  }, [attachLocal, saveWallets]);
 
   const importKey: WalletCtx["importKey"] = useCallback(async ({ key, accountId: given, pin }) => {
+    if (!ownerRef.current) throw new Error("Sign in to your account first (HashPack or email).");
     const { sdk } = await loadLibs();
     const text = key.trim();
     const cands: import("@hiero-ledger/sdk").PrivateKey[] = [];
@@ -376,43 +393,57 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       if (match) break;
     }
     if (!match) throw new Error(want ? "This key doesn't belong to that account." : "No Hedera account found for this key. Enter your account ID too.");
-    const der = match.key.toStringDer();
-    const stored = await encryptKey(match.id, der, pin);
-    localStorage.setItem(LOCAL_WALLET_KEY, JSON.stringify(stored));
-    setStoredLocal(match.id);
-    await attachLocal(der, match.id);
-  }, [attachLocal]);
+    await addWallet(match.id, match.key.toStringDer(), pin);
+  }, [addWallet]);
 
   const createLocal: WalletCtx["createLocal"] = useCallback(async (pin) => {
+    if (!ownerRef.current) throw new Error("Sign in to your account first (HashPack or email).");
     const { sdk } = await loadLibs();
     const m = await sdk.Mnemonic.generate();
     const key = await m.toStandardECDSAsecp256k1PrivateKey("", 0);
     const addr = ("0x" + key.publicKey.toEvmAddress()).toLowerCase();
-    const der = key.toStringDer();
-    localStorage.setItem(LOCAL_WALLET_KEY, JSON.stringify(await encryptKey(addr, der, pin)));
-    setStoredLocal(addr);
-    await attachLocal(der, addr);
+    await addWallet(addr, key.toStringDer(), pin);
     return m.toString().split(/\s+/);
-  }, [attachLocal]);
+  }, [addWallet]);
 
-  const unlockLocal: WalletCtx["unlockLocal"] = useCallback(async (pin) => {
-    const s = readStoredWallet();
-    if (!s) throw new Error("No imported wallet on this device.");
+  const activateLocal: WalletCtx["activateLocal"] = useCallback(async (id, pin) => {
+    const o = ownerRef.current;
+    const s = o && readAccountWallets(o.key).find((x) => x.accountId === id);
+    if (!s) throw new Error("That wallet isn't in your account.");
     await attachLocal(await decryptKey(s, pin), s.accountId);
   }, [attachLocal]);
 
-  const forgetLocal = useCallback(() => {
-    try { localStorage.removeItem(LOCAL_WALLET_KEY); } catch { /* blocked */ }
-    setStoredLocal(null);
-    if (local.current) {
-      local.current = null;
+  const activateOwner = useCallback(() => {
+    const o = ownerRef.current;
+    local.current = null;
+    if (!o) {
       setMode(null);
       setAccountId(null);
+      return;
+    }
+    if (o.mode === "email") {
+      evmSigner.current = ownerEvm.current ?? evmSigner.current;
+      setMode("email");
+      setAccountId(o.id);
+    } else {
+      setMode("hashpack");
+      setAccountId(o.id);
     }
   }, []);
 
+  const removeLocal = useCallback((id: string) => {
+    const o = ownerRef.current;
+    if (!o) return;
+    saveWallets(readAccountWallets(o.key).filter((s) => s.accountId !== id));
+    if (local.current?.id === id) activateOwner();
+  }, [activateOwner, saveWallets]);
+
   const disconnect = useCallback(async () => {
     local.current = null;
+    ownerEvm.current = null;
+    ownerRef.current = null;
+    setOwner(null);
+    setAccountWallets([]);
     await connector.current?.disconnectAll().catch(() => {});
     if (web3auth?.connected) await web3auth.logout().catch(() => {});
     evmSigner.current = null;
@@ -729,11 +760,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         connect,
         connectEmail,
         mode,
-        storedLocal,
+        owner,
+        accountWallets: accountWallets.map((s) => s.accountId),
         importKey,
-        unlockLocal,
         createLocal,
-        forgetLocal,
+        activateLocal,
+        activateOwner,
+        removeLocal,
         disconnect,
         execute,
         associateToken,
