@@ -73,3 +73,19 @@ https://hederapump.dev
   const discord = `🫂 **Hold Out**\n\nWeekly HBAR rewards for HederaPump holders.\n\nHold at least 7 days — the longer you hold, the bigger your share, up to 2× after 60 days. Every coin has its own weekly pot, funded by a slice of trading fees.\n\nFirst pot counts from Monday 26 October.\n\nhttps://hederapump.dev\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+/** One-off Google sign-in announcement: one post per channel, ever. */
+export const signInSlot = "signin:announce";
+
+export function signInMessages() {
+  const x = `🔑 Signing in with Google now works on HederaPump.
+
+One tap — no wallet app to open, no code to copy. Your wallet is ready the moment you're in.
+
+Try it: https://hederapump.dev
+
+#Hedera #HederaPump`;
+  const telegram = `<b>🔑 Google sign-in now works</b>\n\nSign in to <a href="https://hederapump.dev">HederaPump</a> with your Google account — no wallet app to open, no codes to copy. Your wallet is ready the moment you're in.\n\nYou can also keep signing in with email, and add or import up to 10 wallets inside your account.\n\n${RISK}`;
+  const discord = `🔑 **Google sign-in now works**\n\nSign in to HederaPump with your Google account — no wallet app to open, no codes to copy. Your wallet is ready the moment you're in.\n\nYou can also keep signing in with email, and add or import up to 10 wallets inside your account.\n\nhttps://hederapump.dev\n\n${RISK}`;
+  return { x, telegram, discord };
+}
