@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decryptKey, encryptKey } from "@/lib/local-wallet";
+import { decryptKey, encryptKey, revealStoredWallet, writeAccountWallets } from "@/lib/local-wallet";
 
 describe("imported wallet encryption", () => {
   it("only the right PIN unlocks the key", async () => {

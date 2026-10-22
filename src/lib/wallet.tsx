@@ -925,6 +925,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         importKey,
         createLocal,
         activateLocal,
+        revealLocal,
         activateOwner,
         removeLocal,
         disconnect,
