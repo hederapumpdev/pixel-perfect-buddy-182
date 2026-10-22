@@ -89,12 +89,29 @@ async function initWeb3Auth() {
   // Production bundles may nest the exports under `default`.
   const m = (raw.Web3Auth ? raw : raw.default?.Web3Auth ? raw.default : raw.default?.default ?? raw) as typeof import("@web3auth/modal");
   if (typeof m.Web3Auth !== "function") throw new Error("Sign-in service failed to load. Please refresh and try again.");
+  // Free plan: the EVM wallet-services embed is refused (403), so sign-in never completes.
+  // Use the plain key provider and sign locally with ethers instead.
+  const chain = {
+    chainNamespace: "other",
+    chainId: "0x" + EVM_CHAIN_ID.toString(16),
+    rpcTarget: EVM_RPC_URL,
+    displayName: NETWORK === "mainnet" ? "Hedera Mainnet" : "Hedera Testnet",
+    blockExplorerUrl: HASHSCAN_URL,
+    ticker: "HBAR",
+    tickerName: "HBAR",
+    decimals: 18,
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nm = (await import("@web3auth/no-modal")) as any;
+  const PK = nm.CommonPrivateKeyProvider ?? nm.default?.CommonPrivateKeyProvider;
+  const privateKeyProvider = new PK({ config: { chain, chains: [chain], keyExportEnabled: true } });
   const w = new m.Web3Auth({
+    privateKeyProvider,
     clientId: WEB3AUTH_CLIENT_ID,
     web3AuthNetwork: m.WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
     chains: [
       {
-        chainNamespace: m.CHAIN_NAMESPACES.EIP155,
+        chainNamespace: "other",
         chainId: "0x" + EVM_CHAIN_ID.toString(16),
         rpcTarget: EVM_RPC_URL,
         displayName: NETWORK === "mainnet" ? "Hedera Mainnet" : "Hedera Testnet",
@@ -159,8 +176,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const attachEmail = useCallback(async (w: import("@web3auth/modal").Web3Auth) => {
     if (!w.provider) return;
-    const { BrowserProvider } = await import("ethers");
-    const signer = await new BrowserProvider(w.provider as never).getSigner();
+    const { Wallet, JsonRpcProvider } = await import("ethers");
+    const pk = (await w.provider.request({ method: "private_key" })) as string;
+    const signer = new Wallet(pk.startsWith("0x") ? pk : "0x" + pk, new JsonRpcProvider(EVM_RPC_URL));
     evmSigner.current = signer;
     const addr = (await signer.getAddress()).toLowerCase();
     setMode("email");
