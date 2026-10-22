@@ -36,6 +36,17 @@ function useTokenAccount(tokenId: string, accountId: string | null) {
   });
 }
 
+async function readBalance(tokenId: string, accountId: string): Promise<bigint | null> {
+  try {
+    const r = await fetch(`${MIRROR_URL}/api/v1/accounts/${accountId}/tokens?token.id=${tokenId}&limit=1`, { cache: "no-store" });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return BigInt(j?.tokens?.[0]?.balance ?? 0);
+  } catch {
+    return null;
+  }
+}
+
 async function allowance(tokenId: string, accountId: string, spenderId: string): Promise<bigint> {
   const r = await fetch(
     `${MIRROR_URL}/api/v1/accounts/${accountId}/allowances/tokens?token.id=${tokenId}&spender.id=${spenderId}&limit=1`,
@@ -58,6 +69,26 @@ export function MarketTrade({ t }: { t: MarketToken }) {
     if (!w.accountId) return w.connect();
     if (!MARKET_ROUTER_ID) return;
     setBusy(true);
+    const accountId = w.accountId;
+    const start = (await readBalance(t.id, accountId)) ?? acct.data?.balance ?? 0n;
+    // On phones the browser often misses HashPack's reply while backgrounded, so the
+    // wallet promise never settles. Also watch the balance on Hedera and finish as soon
+    // as the trade shows up there. Never resends anything.
+    const confirmed = (p: Promise<unknown>, moved: (b: bigint) => boolean) =>
+      new Promise<void>((resolve, reject) => {
+        let settled = false;
+        const finish = (err?: unknown) => {
+          if (settled) return;
+          settled = true;
+          clearInterval(timer);
+          if (err) reject(err); else resolve();
+        };
+        p.then(() => finish(), (e) => finish(e));
+        const timer = setInterval(async () => {
+          const b = await readBalance(t.id, accountId);
+          if (b !== null && moved(b)) finish();
+        }, 3000);
+      });
     try {
       const tokenEvm = idToEvm(t.id);
       const deadline = marketDeadline();
@@ -70,12 +101,15 @@ export function MarketTrade({ t }: { t: MarketToken }) {
           toast("One-time step: adding the coin to your wallet…");
           await w.associateToken(t.id);
         }
-        await w.execute({
-          calldata: encodeMarketRouter("buy", [tokenEvm, minOut, deadline]),
-          gas: MARKET_GAS.buy,
-          payableTinybars: tinybars,
-          contractId: MARKET_ROUTER_ID,
-        });
+        await confirmed(
+          w.execute({
+            calldata: encodeMarketRouter("buy", [tokenEvm, minOut, deadline]),
+            gas: MARKET_GAS.buy,
+            payableTinybars: tinybars,
+            contractId: MARKET_ROUTER_ID,
+          }),
+          (b) => b > start,
+        );
       } else {
         const units = toTokenUnits(amt, t.decimals);
         if (acct.data && units > acct.data.balance) throw new Error(`You don't hold that many ${t.symbol}`);
@@ -91,11 +125,14 @@ export function MarketTrade({ t }: { t: MarketToken }) {
         // The contract compares against address(this).balance, which Hedera reports
         // in tinybars — verified live on mainnet (weibar minimums revert).
         const minHbarOut = minAfterSlippage(net);
-        await w.execute({
-          calldata: encodeMarketRouter("sell", [tokenEvm, units, minHbarWeibar, deadline]),
-          gas: MARKET_GAS.sell,
-          contractId: MARKET_ROUTER_ID,
-        });
+        await confirmed(
+          w.execute({
+            calldata: encodeMarketRouter("sell", [tokenEvm, units, minHbarOut, deadline]),
+            gas: MARKET_GAS.sell,
+            contractId: MARKET_ROUTER_ID,
+          }),
+          (b) => b < start,
+        );
       }
       toast.success(`${side === "buy" ? "Bought" : "Sold"} — confirmed on Hedera`);
       setAmt("");
