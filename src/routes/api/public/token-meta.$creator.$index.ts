@@ -1,4 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { resolveCreatorAlias } from "@/lib/token-meta";
+
+async function findToken(creator: string, index: number) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("tokens")
+    .select("name,symbol,description,image_url,website,twitter,telegram")
+    .ilike("creator", creator)
+    .order("created_at", { ascending: true })
+    .range(index, index);
+  return data?.[0] ?? null;
+}
 
 // HIP-405 token metadata for v4 coins. The contract stores
 // https://hederapump.dev/api/public/token-meta/<creatorEvm>/<index> on each token at
