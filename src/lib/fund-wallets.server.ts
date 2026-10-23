@@ -2,7 +2,7 @@
 // Keys are derived from BOT_SEED with a per-wallet label, so no key is ever stored, logged
 // or shown. Each account is created on Hedera by the bot's first HBAR deposit to its address.
 import { ethers } from "ethers";
-import { EVM_CHAIN_ID, EVM_RPC_URL, FEE_WALLET_EVM, MIRROR_URL, PUMP_CONTRACTS } from "./hedera-config";
+import { EVM_CHAIN_ID, EVM_RPC_URL, FEE_WALLET_EVM, MIRROR_URL, MARKET_ROUTER_ID, PUMP_CONTRACTS } from "./hedera-config";
 import { encodePump } from "./curve";
 import { botFee, botWallet } from "./bot.server";
 import { splitAmounts } from "./holdout";
@@ -70,6 +70,9 @@ async function recordFeeInflows(db: Db, botId: string) {
   if (!r.ok) return;
   const j = await r.json();
   const contracts = new Set(PUMP_CONTRACTS);
+  // The Markets router's 1% fee also arrives as a credit from a contract — recognize it too,
+  // otherwise graduated-coin trades on our site are never forwarded to the fee split.
+  if (MARKET_ROUTER_ID) contracts.add(MARKET_ROUTER_ID);
   for (const t of j.transactions ?? []) {
     if (t.result !== "SUCCESS") continue;
     const payer = String(t.transaction_id ?? "").split("-")[0];
