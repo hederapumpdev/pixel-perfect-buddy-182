@@ -7,6 +7,27 @@ import { MIRROR_URL } from "./hedera-config";
 
 export const isLongZero = (addr: string) => /^0x0{24}[0-9a-f]{16}$/.test(addr);
 
+/** True when an on-chain token memo points at exactly this metadata URL (creator + index). */
+export const memoMatches = (memo: string, creator: string, index: number) =>
+  memo.toLowerCase().endsWith(`/token-meta/${creator}/${index}`);
+
+/** Reads a token's memo from the mirror node; null when unavailable. */
+export async function readTokenMemo(
+  tokenAddress: string,
+  fetcher: typeof fetch = fetch,
+): Promise<string | null> {
+  try {
+    const r = await fetcher(`${MIRROR_URL}/api/v1/tokens/${tokenAddress}`, {
+      signal: AbortSignal.timeout(8_000),
+    });
+    if (!r.ok) return null;
+    const t = (await r.json()) as { memo?: string | null };
+    return typeof t.memo === "string" ? t.memo : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function resolveCreatorAlias(
   creator: string,
   fetcher: typeof fetch = fetch,
