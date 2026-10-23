@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ethers } from "ethers";
-import { FUND_WALLETS, fundWallet, fundWalletPublicKey, needsStartDeposit } from "@/lib/fund-wallets.server";
+import { FUND_WALLETS, feeSourceContracts, fundWallet, fundWalletPublicKey, needsStartDeposit } from "@/lib/fund-wallets.server";
+import { MARKET_ROUTER_ID, PUMP_CONTRACTS } from "@/lib/hedera-config";
 
 // The keys are derived from a secret at runtime; a fixed seed keeps this test offline.
 process.env["BOT_SEED"] = "unit-test-seed";
