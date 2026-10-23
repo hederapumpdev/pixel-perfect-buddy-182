@@ -26,14 +26,12 @@ export const Route = createFileRoute("/api/public/token-meta/$creator/$index")({
         if (!/^0x[a-f0-9]{40}$/.test(creator) || !Number.isInteger(index) || index < 0 || index > 10_000)
           return new Response("Not found", { status: 404 });
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data } = await supabaseAdmin
-          .from("tokens")
-          .select("name,symbol,description,image_url,website,twitter,telegram")
-          .ilike("creator", creator)
-          .order("created_at", { ascending: true })
-          .range(index, index);
-        const t = data?.[0];
+        let t = await findToken(creator, index);
+        if (!t) {
+          // The memo URL may use the creator's long-zero address while sync stored the alias.
+          const alias = await resolveCreatorAlias(creator);
+          if (alias) t = await findToken(alias, index);
+        }
         if (!t) return new Response("Not found", { status: 404 });
 
         const body = {
