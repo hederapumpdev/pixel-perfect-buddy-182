@@ -103,3 +103,4 @@
 - [ ] Sign in: blocked — owner must whitelist hederapump.dev in Web3Auth dashboard
 - [x] Let people get their own private key from their account: key icon per added wallet, PIN-checked reveal on screen for 60s with share warnings, copy button, never sent anywhere. Three tests pass; a real signed-in reveal on a device not yet exercised.
 - [x] Verified-account news posted on X, Telegram and Discord from one one-off slot (X 2113644449934827576, Telegram 42, Discord 1563203186662055986); three message tests pass. X could not be re-read independently (401), so the id X returned on send is the confirmation.
+- [ ] HEDERAPUMP copy (same name) on a separate low-graduation contract (~$1,500): needs new contract deployment + paid coin creation; waits for user approval of the spend.
