@@ -24,6 +24,15 @@ describe("fee wallet keys", () => {
   });
 });
 
+describe("recognized fee sources", () => {
+  it("the Markets router's 1% fee counts as fee money after graduation", () => {
+    const sources = feeSourceContracts();
+    expect(PUMP_CONTRACTS.every((c) => sources.has(c))).toBe(true);
+    // Without the router, post-graduation trades through our site would never reach the split.
+    expect(MARKET_ROUTER_ID && sources.has(MARKET_ROUTER_ID)).toBe(true);
+  });
+});
+
 describe("starting deposit for opened fee wallets", () => {
   it("an opened wallet with 0 HBAR gets the deposit", () => {
     expect(needsStartDeposit(0n, false)).toBe(true);
