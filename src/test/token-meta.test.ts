@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { isLongZero, resolveCreatorAlias } from "../lib/token-meta";
+import { isLongZero, memoMatches, resolveCreatorAlias } from "../lib/token-meta";
 
 describe("token metadata creator resolution", () => {
   it("recognizes long-zero EVM addresses only", () => {
