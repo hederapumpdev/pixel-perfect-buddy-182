@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ethers } from "ethers";
-import { FUND_WALLETS, fundWallet, fundWalletPublicKey, needsStartDeposit } from "@/lib/fund-wallets.server";
+import { FUND_WALLETS, feeSourceContracts, fundWallet, fundWalletPublicKey, needsStartDeposit } from "@/lib/fund-wallets.server";
+import { MARKET_ROUTER_ID, PUMP_CONTRACTS } from "@/lib/hedera-config";
 
 // The keys are derived from a secret at runtime; a fixed seed keeps this test offline.
 process.env["BOT_SEED"] = "unit-test-seed";
@@ -20,6 +21,15 @@ describe("fee wallet keys", () => {
   it("the three fee wallets are separate accounts", () => {
     const addrs = FUND_WALLETS.map((n) => fundWallet(n).address.toLowerCase());
     expect(new Set(addrs).size).toBe(3);
+  });
+});
+
+describe("recognized fee sources", () => {
+  it("the Markets router's 1% fee counts as fee money after graduation", () => {
+    const sources = feeSourceContracts();
+    expect(PUMP_CONTRACTS.every((c) => sources.has(c))).toBe(true);
+    // Without the router, post-graduation trades through our site would never reach the split.
+    expect(MARKET_ROUTER_ID && sources.has(MARKET_ROUTER_ID)).toBe(true);
   });
 });
 

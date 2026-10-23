@@ -2,7 +2,7 @@
 // Keys are derived from BOT_SEED with a per-wallet label, so no key is ever stored, logged
 // or shown. Each account is created on Hedera by the bot's first HBAR deposit to its address.
 import { ethers } from "ethers";
-import { EVM_CHAIN_ID, EVM_RPC_URL, FEE_WALLET_EVM, MIRROR_URL, PUMP_CONTRACTS } from "./hedera-config";
+import { EVM_CHAIN_ID, EVM_RPC_URL, FEE_WALLET_EVM, MIRROR_URL, MARKET_ROUTER_ID, PUMP_CONTRACTS } from "./hedera-config";
 import { encodePump } from "./curve";
 import { botFee, botWallet } from "./bot.server";
 import { splitAmounts } from "./holdout";
@@ -57,6 +57,14 @@ async function fundAttempt(db: Db, name: FundWalletName) {
  * transaction (per-trade fee pushes). The bot's own buys/sells are excluded so its trading
  * budget is never forwarded. Unique `fee:<timestamp>` ids make each inflow count once.
  */
+/** Accounts whose outgoing HBAR credits to the bot count as fee money: the launchpad contracts
+ * plus the Markets router (its 1% fee on graduated-coin trades is the post-graduation income). */
+export function feeSourceContracts(): Set<string> {
+  const contracts = new Set(PUMP_CONTRACTS);
+  if (MARKET_ROUTER_ID) contracts.add(MARKET_ROUTER_ID);
+  return contracts;
+}
+
 async function recordFeeInflows(db: Db, botId: string) {
   const { data: last } = await db.from("wallet_transfers").select("tx_hash").eq("kind", "fee_in").order("tx_hash", { ascending: false }).limit(1);
   const since = last?.[0]?.tx_hash as string | undefined;
@@ -69,7 +77,7 @@ async function recordFeeInflows(db: Db, botId: string) {
   const r = await fetch(`${MIRROR_URL}/api/v1/transactions?account.id=${botId}&timestamp=gt:${since}&order=asc&limit=100`);
   if (!r.ok) return;
   const j = await r.json();
-  const contracts = new Set(PUMP_CONTRACTS);
+  const contracts = feeSourceContracts();
   for (const t of j.transactions ?? []) {
     if (t.result !== "SUCCESS") continue;
     const payer = String(t.transaction_id ?? "").split("-")[0];
