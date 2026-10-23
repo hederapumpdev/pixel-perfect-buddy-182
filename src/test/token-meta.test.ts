@@ -16,6 +16,13 @@ describe("token metadata creator resolution", () => {
     expect(fetcher.mock.calls[0]?.[0]).toContain("/api/v1/accounts/0.0.10927104");
   });
 
+  it("matches a memo to its exact metadata URL, case-insensitively", () => {
+    const memo = "https://hederapump.dev/api/public/token-meta/0x0000000000000000000000000000000000A6BC00/0";
+    expect(memoMatches(memo, "0x0000000000000000000000000000000000a6bc00", 0)).toBe(true);
+    expect(memoMatches(memo, "0x0000000000000000000000000000000000a6bc00", 1)).toBe(false);
+    expect(memoMatches("HederaPump", "0x0000000000000000000000000000000000a6bc00", 0)).toBe(false);
+  });
+
   it("never rewrites alias addresses or failed lookups", async () => {
     expect(await resolveCreatorAlias("0xd14adf40256c7fdab669ec2a5eee25afaa755392")).toBeNull();
     const failing = vi.fn().mockResolvedValue(new Response("", { status: 404 }));
