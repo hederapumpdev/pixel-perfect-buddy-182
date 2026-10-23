@@ -1,4 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { memoMatches, readTokenMemo, resolveCreatorAlias } from "@/lib/token-meta";
+
+type TokenRow = {
+  address: string; name: string; symbol: string; description: string | null;
+  image_url: string | null; website: string | null; twitter: string | null; telegram: string | null;
+};
+
+async function listCreatorTokens(creator: string): Promise<TokenRow[]> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("tokens")
+    .select("address,name,symbol,description,image_url,website,twitter,telegram")
+    .ilike("creator", creator)
+    .order("created_at", { ascending: true })
+    .range(0, 50);
+  return data ?? [];
+}
+
+// The memo URL is immutable once a coin exists, and some memos were written with a
+// long-zero creator address plus a per-contract index. When the plain creator+index
+// lookup would hit a different coin, trust the memo itself: return the creator's token
+// whose on-chain memo points at exactly this URL.
+async function findToken(creator: string, index: number): Promise<TokenRow | null> {
+  let tokens = await listCreatorTokens(creator);
+  if (tokens.length === 0) {
+    const alias = await resolveCreatorAlias(creator);
+    if (alias) tokens = await listCreatorTokens(alias);
+  }
+  if (tokens.length === 0) return null;
+  const byIndex = tokens[index] ?? null;
+  if (tokens.length > 1) {
+    for (const t of tokens) {
+      const memo = await readTokenMemo(t.address);
+      if (memo && memoMatches(memo, creator, index)) return t;
+    }
+  }
+  return byIndex;
+}
 
 // HIP-405 token metadata for v4 coins. The contract stores
 // https://hederapump.dev/api/public/token-meta/<creatorEvm>/<index> on each token at
@@ -14,14 +52,7 @@ export const Route = createFileRoute("/api/public/token-meta/$creator/$index")({
         if (!/^0x[a-f0-9]{40}$/.test(creator) || !Number.isInteger(index) || index < 0 || index > 10_000)
           return new Response("Not found", { status: 404 });
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data } = await supabaseAdmin
-          .from("tokens")
-          .select("name,symbol,description,image_url,website,twitter,telegram")
-          .ilike("creator", creator)
-          .order("created_at", { ascending: true })
-          .range(index, index);
-        const t = data?.[0];
+        const t = await findToken(creator, index);
         if (!t) return new Response("Not found", { status: 404 });
 
         const body = {
