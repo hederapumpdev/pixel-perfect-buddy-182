@@ -89,3 +89,20 @@ Try it: https://hederapump.dev
   const discord = `🔑 **Google sign-in now works**\n\nSign in to HederaPump with your Google account — no wallet app to open, no codes to copy. Your wallet is ready the moment you're in.\n\nYou can also keep signing in with email, and add or import up to 10 wallets inside your account.\n\nhttps://hederapump.dev\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+/** One-off verified-account announcement: one post per channel, ever. */
+export const verifiedSlot = "verified:announce";
+
+export function verifiedMessages() {
+  const x = `✅ HederaPump is now a verified account on X.
+
+The blue check next to @hederapumpdev means X has confirmed this is the official HederaPump account.
+
+Follow for new coins, graduations and weekly rewards:
+https://x.com/hederapumpdev
+
+#Hedera #HederaPump`;
+  const telegram = `<b>✅ HederaPump is verified on X</b>\n\nOur X account <a href="https://x.com/hederapumpdev">@hederapumpdev</a> now carries the blue check — X has confirmed it as the official HederaPump account.\n\nFollow for new coins, graduations and weekly rewards. If an account or DM looks like us without the check, it isn't us.\n\n${RISK}`;
+  const discord = `✅ **HederaPump is verified on X**\n\nOur X account @hederapumpdev now carries the blue check — X has confirmed it as the official HederaPump account.\n\nFollow: https://x.com/hederapumpdev\nWebsite: https://hederapump.dev\n\nIf an account or DM looks like us without the check, it isn't us.\n\n${RISK}`;
+  return { x, telegram, discord };
+}

@@ -47,6 +47,7 @@ import { Route as ApiPublicJobsSigninAnnounceRouteImport } from './routes/api/pu
 import { Route as ApiPublicJobsSpotlightRouteImport } from './routes/api/public/jobs/spotlight'
 import { Route as ApiPublicJobsTelegramAppRouteImport } from './routes/api/public/jobs/telegram-app'
 import { Route as ApiPublicJobsTelegramTopRouteImport } from './routes/api/public/jobs/telegram-top'
+import { Route as ApiPublicJobsVerifiedAnnounceRouteImport } from './routes/api/public/jobs/verified-announce'
 import { Route as ApiPublicJobsWeeklySummaryRouteImport } from './routes/api/public/jobs/weekly-summary'
 import { Route as ApiPublicTokenMetaCreatorIndexRouteImport } from './routes/api/public/token-meta.$creator.$index'
 
@@ -253,6 +254,12 @@ const ApiPublicJobsTelegramTopRoute =
     path: '/api/public/jobs/telegram-top',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsVerifiedAnnounceRoute =
+  ApiPublicJobsVerifiedAnnounceRouteImport.update({
+    id: '/api/public/jobs/verified-announce',
+    path: '/api/public/jobs/verified-announce',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsWeeklySummaryRoute =
   ApiPublicJobsWeeklySummaryRouteImport.update({
     id: '/api/public/jobs/weekly-summary',
@@ -305,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
+  '/api/public/jobs/verified-announce': typeof ApiPublicJobsVerifiedAnnounceRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
 }
@@ -347,6 +355,7 @@ export interface FileRoutesByTo {
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
+  '/api/public/jobs/verified-announce': typeof ApiPublicJobsVerifiedAnnounceRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
 }
@@ -390,6 +399,7 @@ export interface FileRoutesById {
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
   '/api/public/jobs/telegram-app': typeof ApiPublicJobsTelegramAppRoute
   '/api/public/jobs/telegram-top': typeof ApiPublicJobsTelegramTopRoute
+  '/api/public/jobs/verified-announce': typeof ApiPublicJobsVerifiedAnnounceRoute
   '/api/public/jobs/weekly-summary': typeof ApiPublicJobsWeeklySummaryRoute
   '/api/public/token-meta/$creator/$index': typeof ApiPublicTokenMetaCreatorIndexRoute
 }
@@ -434,6 +444,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/spotlight'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
+    | '/api/public/jobs/verified-announce'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/token-meta/$creator/$index'
   fileRoutesByTo: FileRoutesByTo
@@ -476,6 +487,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/spotlight'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
+    | '/api/public/jobs/verified-announce'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/token-meta/$creator/$index'
   id:
@@ -518,6 +530,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/spotlight'
     | '/api/public/jobs/telegram-app'
     | '/api/public/jobs/telegram-top'
+    | '/api/public/jobs/verified-announce'
     | '/api/public/jobs/weekly-summary'
     | '/api/public/token-meta/$creator/$index'
   fileRoutesById: FileRoutesById
@@ -561,6 +574,7 @@ export interface RootRouteChildren {
   ApiPublicJobsSpotlightRoute: typeof ApiPublicJobsSpotlightRoute
   ApiPublicJobsTelegramAppRoute: typeof ApiPublicJobsTelegramAppRoute
   ApiPublicJobsTelegramTopRoute: typeof ApiPublicJobsTelegramTopRoute
+  ApiPublicJobsVerifiedAnnounceRoute: typeof ApiPublicJobsVerifiedAnnounceRoute
   ApiPublicJobsWeeklySummaryRoute: typeof ApiPublicJobsWeeklySummaryRoute
   ApiPublicTokenMetaCreatorIndexRoute: typeof ApiPublicTokenMetaCreatorIndexRoute
 }
@@ -833,6 +847,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsTelegramTopRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/verified-announce': {
+      id: '/api/public/jobs/verified-announce'
+      path: '/api/public/jobs/verified-announce'
+      fullPath: '/api/public/jobs/verified-announce'
+      preLoaderRoute: typeof ApiPublicJobsVerifiedAnnounceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/weekly-summary': {
       id: '/api/public/jobs/weekly-summary'
       path: '/api/public/jobs/weekly-summary'
@@ -889,6 +910,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsSpotlightRoute: ApiPublicJobsSpotlightRoute,
   ApiPublicJobsTelegramAppRoute: ApiPublicJobsTelegramAppRoute,
   ApiPublicJobsTelegramTopRoute: ApiPublicJobsTelegramTopRoute,
+  ApiPublicJobsVerifiedAnnounceRoute: ApiPublicJobsVerifiedAnnounceRoute,
   ApiPublicJobsWeeklySummaryRoute: ApiPublicJobsWeeklySummaryRoute,
   ApiPublicTokenMetaCreatorIndexRoute: ApiPublicTokenMetaCreatorIndexRoute,
 }

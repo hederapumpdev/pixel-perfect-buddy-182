@@ -234,7 +234,7 @@ export async function postWeeklySummary(now = new Date()) {
 }
 
 /** One-off feature announcement (owner-triggered); same slot claims, one send per call. */
-export async function announceFeature(slot: string, texts: Partial<Record<Channel, string>>) {
+export async function announceFeature(slot: string, texts: Partial<Record<Channel, string>>, imageIndex = 4) {
   const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
-  return sendNext(db, slot, texts, "app", 4);
+  return sendNext(db, slot, texts, "app", imageIndex);
 }
