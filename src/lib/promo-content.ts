@@ -106,3 +106,21 @@ https://x.com/hederapumpdev
   const discord = `✅ **HederaPump is verified on X**\n\nOur X account @hederapumpdev now carries the blue check — X has confirmed it as the official HederaPump account.\n\nFollow: https://x.com/hederapumpdev\nWebsite: https://hederapump.dev\n\nIf an account or DM looks like us without the check, it isn't us.\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+export const fastGradSlot = "fastgrad:hederapump";
+
+/** One-time announcement: fast-graduation HEDERAPUMP (0.0.10931033) reached SaucerSwap. */
+export function fastGradMessages() {
+  const id = "0.0.10931033";
+  const x = `🎓 HEDERAPUMP (fast edition) graduated!
+
+Token ${id} filled its bonding curve and is now live on SaucerSwap with liquidity locked forever.
+
+Check the token ID — the original HEDERAPUMP is a different coin.
+https://hederapump.dev/markets
+
+#Hedera #HederaPump`;
+  const telegram = `<b>🎓 HEDERAPUMP fast edition graduated</b>\n\nToken <code>${id}</code> filled its bonding curve and now trades on SaucerSwap. The pool's liquidity is locked in the contract forever.\n\nAlways check the token ID: the original HEDERAPUMP (still on its bonding curve) is a different coin.\n\nTrade: https://hederapump.dev/markets\n\n${RISK}`;
+  const discord = `🎓 **HEDERAPUMP fast edition graduated**\n\nToken \`${id}\` filled its bonding curve and now trades on SaucerSwap. Liquidity is locked in the contract forever.\n\nAlways check the token ID — the original HEDERAPUMP (still on its bonding curve) is a different coin.\n\nTrade: https://hederapump.dev/markets\n\n${RISK}`;
+  return { x, telegram, discord };
+}
