@@ -6,6 +6,8 @@ import {
   graduationDiscordMessage,
   graduationSlot,
   graduationXMessage,
+  verifiedMessages,
+  verifiedSlot,
   weeklyMessages,
   weeklySlot,
 } from '../lib/promo-content';
@@ -64,5 +66,29 @@ describe('graduation messages', () => {
       expect(text).toContain('SaucerSwap');
       expect(text).toContain(`https://hederapump.dev/token/${coin.address}`);
     }
+  });
+});
+
+describe('verified account messages', () => {
+  it('uses one stable slot so the announcement can never be posted twice', () => {
+    expect(verifiedSlot).toBe('verified:announce');
+  });
+
+  it('names the official X handle on every channel', () => {
+    const msgs = verifiedMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text).toContain('hederapumpdev');
+      expect(text).toContain('https://x.com/hederapumpdev');
+    }
+  });
+
+  it('keeps the claim to what X confirmed and keeps the risk line', () => {
+    const msgs = verifiedMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).not.toContain('audit');
+      expect(text.toLowerCase()).not.toContain('guarantee');
+    }
+    expect(msgs.telegram).toContain('Meme coins are high-risk');
+    expect(msgs.discord).toContain('Meme coins are high-risk');
   });
 });
