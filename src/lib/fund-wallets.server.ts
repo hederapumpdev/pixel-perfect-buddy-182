@@ -105,6 +105,16 @@ async function unforwardedFees(db: Db, bot: string) {
 
 export const idToEvm = (id: string) => "0x" + BigInt(id.split(".")[2] ?? "0").toString(16).padStart(40, "0");
 
+/** A contract's fee recipient counts as the split wallet in both address forms Hedera uses:
+ * the EVM alias and the long-zero form of its account id (contracts created via the SDK
+ * store the long-zero form even when the alias was passed). */
+export function isSplitRecipient(feeRecipient: string | null, splitAddress: string, splitAccountId: string | null) {
+  if (!feeRecipient) return false;
+  const f = feeRecipient.toLowerCase();
+  if (f === splitAddress.toLowerCase()) return true;
+  return !!splitAccountId && f === idToEvm(splitAccountId).toLowerCase();
+}
+
 export async function mirrorAccount(addr: string) {
   const r = await fetch(`${MIRROR_URL}/api/v1/accounts/${addr}`);
   if (!r.ok) return null;
@@ -197,9 +207,10 @@ export async function runFeeSplit() {
   }
 
   const hour = new Date().toISOString().slice(0, 13);
+  const acc = await mirrorAccount(split.address);
   // 3) Collect platform fees held inside contracts that already point at the split wallet.
   for (const c of await contractFeeStatus()) {
-    if (c.feeRecipient?.toLowerCase() !== split.address.toLowerCase() || c.platformFees <= 0n) continue;
+    if (!isSplitRecipient(c.feeRecipient, split.address, acc?.accountId ?? null) || c.platformFees <= 0n) continue;
     return sendOnce(db, split, {
       id: `claim:${c.contract}:${hour}`, kind: "claim", from_wallet: split.address, recipient: idToEvm(c.contract), tinybars: c.platformFees,
       data: encodePump("claimPlatformFees"),
