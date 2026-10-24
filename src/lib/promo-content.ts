@@ -132,9 +132,9 @@ export function testGradMessages() {
   const id = "0.0.10931033";
   const x = `🧪 Test complete.
 
-HEDERAPUMP (0.0.10931033) was a test coin. It was made to check our fast-graduation setup from end to end, and only our own wallets bought it — no outside funds.
+HEDERAPUMP (0.0.10931033) was a test coin — made to check our fast-graduation setup end to end. Only our own wallets bought it, no outside funds.
 
-Not a launch. Don't buy it.
+Not a launch. Don't buy it. The original HEDERAPUMP is 0.0.10924337.
 
 #Hedera #HederaPump`;
   const telegram = `<b>🧪 That one was a test</b>\n\nToken <code>${id}</code> — the HEDERAPUMP that filled its bonding curve and graduated — was a <b>test coin</b>. We made it to check the fast-graduation setup end to end: curve, graduation and the automatic SaucerSwap pool.\n\nOnly our own wallets bought it, so no outside funds are involved. It is not a launch and we do not recommend buying it.\n\nThe original HEDERAPUMP (0.0.10924337) is a different coin and is still on its bonding curve.\n\n${RISK}`;
