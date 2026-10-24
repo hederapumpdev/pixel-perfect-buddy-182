@@ -71,6 +71,10 @@ describe('graduation messages', () => {
       expect(text).toContain(`https://hederapump.dev/token/${coin.address}`);
     }
   });
+
+  it('links SaucerSwap in the Discord graduation post', () => {
+    expect(graduationDiscordMessage(coin)).toContain('[SaucerSwap](https://saucerswap.finance)');
+  });
 });
 
 describe('verified account messages', () => {

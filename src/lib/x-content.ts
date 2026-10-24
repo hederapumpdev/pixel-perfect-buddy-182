@@ -1,3 +1,5 @@
+import { addMentions, dailyMentions } from "./hedera-mentions";
+
 export const DAILY_X_HOURS = [10, 15, 20] as const;
 export const APP_URL = "https://hederapump.dev";
 
@@ -68,5 +70,6 @@ export function dailyXSlot(now: Date, introduction: boolean) {
 
 export function appTweet(index: number, day: string) {
   const topic = topics[index % topics.length] ?? topics[0];
-  return `${topic}\n\n${APP_URL}\n${index === 0 ? "#Hedera #HederaPump" : `#Hedera • ${day}`}`;
+  const text = `${topic}\n\n${APP_URL}\n${index === 0 ? "#Hedera #HederaPump" : `#Hedera • ${day}`}`;
+  return addMentions(text, dailyMentions(topic));
 }
