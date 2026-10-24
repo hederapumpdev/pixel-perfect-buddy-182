@@ -159,3 +159,29 @@ describe('official contract address follow-up', () => {
     }
   });
 });
+
+describe('Solana expansion announcement', () => {
+  it('uses one stable slot so the announcement can never be posted twice', () => {
+    expect(solanaSlot).toBe('solana:announce');
+  });
+
+  it('announces the pump.fun launch, promotion and fee buyback of the real coin on every channel', () => {
+    const msgs = solanaMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).toContain('solana');
+      expect(text.toLowerCase()).toContain('pump.fun');
+      expect(text.toLowerCase()).toContain('fee');
+      expect(text.toLowerCase()).toContain('buy the real hederapump');
+      expect(text).toContain('0.0.10924337');
+    }
+  });
+
+  it('fits the X character limit and promises no guaranteed returns', () => {
+    const msgs = solanaMessages();
+    expect([...msgs.x].length).toBeLessThanOrEqual(280);
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).not.toContain('guaranteed');
+      expect(text.toLowerCase()).not.toContain('profit');
+    }
+  });
+});
