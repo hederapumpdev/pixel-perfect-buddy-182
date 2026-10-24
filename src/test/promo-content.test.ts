@@ -92,3 +92,35 @@ describe('verified account messages', () => {
     expect(msgs.discord).toContain('Meme coins are high-risk');
   });
 });
+
+describe('test coin clarification', () => {
+  it('uses one stable slot so the clarification can never be posted twice', () => {
+    expect(testGradSlot).toBe('testgrad:hederapump');
+  });
+
+  it('names the test token ID and says it was only a test on every channel', () => {
+    const msgs = testGradMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text).toContain('0.0.10931033');
+      expect(text.toLowerCase()).toContain('test');
+      expect(text.toLowerCase()).toContain('our own wallets');
+    }
+  });
+
+  it('tells people not to buy it and points out the original coin', () => {
+    const msgs = testGradMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text).toContain('0.0.10924337');
+      expect(text.toLowerCase()).toContain("don't buy");
+    }
+  });
+
+  it('fits the X character limit and makes no refund or deletion claim', () => {
+    const msgs = testGradMessages();
+    expect([...msgs.x].length).toBeLessThanOrEqual(280);
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).not.toContain('refund');
+      expect(text.toLowerCase()).not.toContain('deleted');
+    }
+  });
+});
