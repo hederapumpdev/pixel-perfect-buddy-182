@@ -1,5 +1,6 @@
 // Browser-safe content for automatic promotion posts:
 // weekly contest winner, weekly summary, graduation alerts and the Discord daily mirror.
+import { addMentions } from "./hedera-mentions";
 
 export type PromoCoin = { address: string; name: string; symbol: string };
 export type WeeklyStats = { coins: number; trades: number; volumeHbar: number; traders: number };
