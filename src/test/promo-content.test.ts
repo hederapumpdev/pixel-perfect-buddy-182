@@ -6,6 +6,8 @@ import {
   graduationDiscordMessage,
   graduationSlot,
   graduationXMessage,
+  solanaMessages,
+  solanaSlot,
   testGradCaMessages,
   testGradCaSlot,
   testGradMessages,
