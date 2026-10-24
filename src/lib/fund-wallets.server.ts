@@ -218,7 +218,6 @@ export async function runFeeSplit() {
   }
 
   // 4) Forward only received fee money — never the bot's own buy budget or reserve.
-  const acc = await mirrorAccount(split.address);
   if (!acc) return { step: "idle" };
   await recordFeeInflows(db, acc.accountId);
   const fees = await unforwardedFees(db, split.address);
