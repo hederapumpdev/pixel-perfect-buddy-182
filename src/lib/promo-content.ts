@@ -161,3 +161,21 @@ The test coin that bonded was 0.0.10931033. Not a launch — don't buy it.
   const discord = `🧪 **Official HEDERAPUMP contract address**\n\nFollowing our test post: the official coin, still on its bonding curve, is\n\n\`${official.ca}\`\nHedera ID \`${official.id}\`\n\nCoin page: https://hederapump.dev/token/${official.ca}\nHedera: https://hashscan.io/mainnet/token/${official.id}\n\nThe coin that filled its curve and graduated was a test run: \`${testId}\`. Not a launch — don't buy it.\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+/** One-off Solana expansion announcement: one post per channel, ever. */
+export const solanaSlot = "solana:announce";
+
+/** One-time announcement: HEDERAPUMP is coming to Solana via pump.fun; Solana fees buy the real coin on Hedera. */
+export function solanaMessages() {
+  const official = "0.0.10924337";
+  const x = addMentions(`🌉 HEDERAPUMP is coming to Solana.
+
+We're launching our official sister coin on pump.fun and promoting it there. Every fee it earns will be used to buy the real HEDERAPUMP on Hedera (${official}).
+
+Same brand, two chains.
+
+#Hedera #HederaPump`, ["hedera"]);
+  const telegram = `<b>🌉 HEDERAPUMP is coming to Solana</b>\n\nWe're launching the official HEDERAPUMP sister coin on <b>pump.fun</b> and we'll be promoting it on the Solana network.\n\n<b>The goal:</b> every fee the Solana coin earns will be used to buy the real HEDERAPUMP on Hedera (token <code>${official}</code>) — growing the original coin with Solana volume.\n\nSame brand, two chains. We'll share the contract address here the moment it launches — never buy before you see it from this channel.\n\n${RISK}`;
+  const discord = `🌉 **HEDERAPUMP is coming to Solana**\n\nWe're launching the official HEDERAPUMP sister coin on **pump.fun** and we'll be promoting it on the Solana network.\n\n**The goal:** every fee the Solana coin earns will be used to buy the real HEDERAPUMP on Hedera (token \`${official}\`) — growing the original coin with Solana volume.\n\nSame brand, two chains. We'll share the contract address here the moment it launches — never buy before you see it from this channel.\n\nhttps://hederapump.dev\n\n${RISK}`;
+  return { x, telegram, discord };
+}
