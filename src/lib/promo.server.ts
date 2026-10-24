@@ -2,6 +2,7 @@
 // Every post is claimed in promo_posts before sending; one external send per call;
 // uncertain sends are marked "unknown" and never retried automatically.
 import { NETWORK } from "./hedera-config";
+import { stripMentions } from "./hedera-mentions";
 import { CONTEST_PRIZE_HBAR, contestLeaderboard, isOfficial, weekKey, weekStart } from "./promotions";
 import {
   contestMessages,
@@ -151,7 +152,7 @@ export async function mirrorDailyToDiscord() {
       if (existing.status === "sending" || existing.status === "unknown") return { step: "awaiting review" };
       continue;
     }
-    return sendNext(db, slot, { discord: post.text }, "app");
+    return sendNext(db, slot, { discord: stripMentions(post.text) }, "app");
   }
   return { step: "up to date" };
 }

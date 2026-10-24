@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addMentions, dailyMentions, HEDERA_HANDLES, xWeight } from '../lib/hedera-mentions';
+import { addMentions, dailyMentions, HEDERA_HANDLES, stripMentions, xWeight } from '../lib/hedera-mentions';
 import { appTweet, topics } from '../lib/x-content';
 import { contestMessages, graduationXMessage, weeklyMessages } from '../lib/promo-content';
 
@@ -65,5 +65,16 @@ describe('milestone posts name the accounts they are about', () => {
   it('tags Hedera in the weekly review', () => {
     const text = weeklyMessages({ coins: 3, trades: 42, volumeHbar: 3068.2, traders: 7 }, '2026-10-12', '2026-10-19').x;
     expect(text).toContain('@hedera');
+  });
+});
+
+describe('stripMentions', () => {
+  it('removes the handle line from copies meant for other channels', () => {
+    const tweet = 'Topic text.\n\nhttps://hederapump.dev\n@SaucerSwapLabs\n#Hedera • 2026-10-24';
+    expect(stripMentions(tweet)).toBe('Topic text.\n\nhttps://hederapump.dev\n#Hedera • 2026-10-24');
+  });
+  it('keeps every other line untouched', () => {
+    const body = 'Weekly contest winner: HashCat ($HCAT)!\n\nCoin: https://hederapump.dev/token/0x0';
+    expect(stripMentions(body)).toBe(body);
   });
 });

@@ -48,3 +48,15 @@ export function dailyMentions(topic: string): HandleKey[] {
   if (/sodax/i.test(topic)) out.push("sodax");
   return out;
 }
+
+/** X handles mean nothing on Telegram or Discord, so copies for those channels drop them. */
+export function stripMentions(text: string): string {
+  const handles = new Set(Object.values(HEDERA_HANDLES).map((handle) => handle.toLowerCase()));
+  return text
+    .split("\n")
+    .filter((line) => {
+      const words = line.trim().split(/\s+/);
+      return !(words.length && words.every((word) => handles.has(word.toLowerCase())));
+    })
+    .join("\n");
+}
