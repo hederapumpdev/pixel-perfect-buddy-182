@@ -10,6 +10,8 @@ import {
   testGradCaSlot,
   testGradMessages,
   testGradSlot,
+  verifiedMessages,
+  verifiedSlot,
   weeklyMessages,
   weeklySlot,
 } from '../lib/promo-content';
