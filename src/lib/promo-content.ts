@@ -124,3 +124,39 @@ https://hederapump.dev/markets
   const discord = `🎓 **HEDERAPUMP fast edition graduated**\n\nToken \`${id}\` filled its bonding curve and now trades on SaucerSwap. Liquidity is locked in the contract forever.\n\nAlways check the token ID — the original HEDERAPUMP (still on its bonding curve) is a different coin.\n\nTrade: https://hederapump.dev/markets\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+export const testGradSlot = "testgrad:hederapump";
+
+/** One-time clarification: the graduated fast-graduation coin was a test run, not a launch. */
+export function testGradMessages() {
+  const id = "0.0.10931033";
+  const x = `🧪 Test complete.
+
+HEDERAPUMP (0.0.10931033) was a test coin — made to check our fast-graduation setup end to end. Only our own wallets bought it, no outside funds.
+
+Not a launch. Don't buy it. The original HEDERAPUMP is 0.0.10924337.
+
+#Hedera #HederaPump`;
+  const telegram = `<b>🧪 That one was a test</b>\n\nToken <code>${id}</code> — the HEDERAPUMP that filled its bonding curve and graduated — was a <b>test coin</b>. We made it to check the fast-graduation setup end to end: curve, graduation and the automatic SaucerSwap pool.\n\nOnly our own wallets bought it, so no outside funds are involved. It is not a launch. Don't buy it.\n\nThe original HEDERAPUMP (0.0.10924337) is a different coin and is still on its bonding curve.\n\n${RISK}`;
+  const discord = `🧪 **That one was a test**\n\nToken \`${id}\` — the HEDERAPUMP that filled its bonding curve and graduated — was a **test coin**. We made it to check the fast-graduation setup end to end: curve, graduation and the automatic SaucerSwap pool.\n\nOnly our own wallets bought it, so no outside funds are involved. It is not a launch. Don't buy it.\n\nThe original HEDERAPUMP (0.0.10924337) is a different coin and is still on its bonding curve.\n\nhttps://hederapump.dev\n\n${RISK}`;
+  return { x, telegram, discord };
+}
+
+export const testGradCaSlot = "testgrad:hederapump-ca";
+
+/** One-time follow-up: the official coin's contract address, so nobody buys the test coin by mistake. */
+export function testGradCaMessages() {
+  const official = { id: "0.0.10924337", ca: "0x0000000000000000000000000000000000a6b131" };
+  const testId = "0.0.10931033";
+  const x = `🧪 Follow-up to our test post.
+
+Official HEDERAPUMP (the real one, still on its bonding curve):
+CA 0x0000000000000000000000000000000000a6b131 · 0.0.10924337
+
+The test coin that bonded was 0.0.10931033. Not a launch — don't buy it.
+
+#Hedera #HederaPump`;
+  const telegram = `<b>🧪 Official HEDERAPUMP contract address</b>\n\nFollowing our test post: the official coin, still on its bonding curve, is\n\n<code>${official.ca}</code>\nHedera ID <code>${official.id}</code>\n\nCoin page: https://hederapump.dev/token/${official.ca}\nHedera: https://hashscan.io/mainnet/token/${official.id}\n\nThe coin that filled its curve and graduated was a test run: <code>${testId}</code>. Not a launch — don't buy it.\n\n${RISK}`;
+  const discord = `🧪 **Official HEDERAPUMP contract address**\n\nFollowing our test post: the official coin, still on its bonding curve, is\n\n\`${official.ca}\`\nHedera ID \`${official.id}\`\n\nCoin page: https://hederapump.dev/token/${official.ca}\nHedera: https://hashscan.io/mainnet/token/${official.id}\n\nThe coin that filled its curve and graduated was a test run: \`${testId}\`. Not a launch — don't buy it.\n\n${RISK}`;
+  return { x, telegram, discord };
+}
