@@ -68,8 +68,9 @@ export const getFundWalletsAdmin = createServerFn({ method: "POST" })
     await (await import("./admin-auth.server")).requireAdmin(data.pin);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
-    const { contractFeeStatus, fundWalletsInfo } = await import("./fund-wallets.server");
+    const { contractFeeStatus, fundWalletsInfo, isSplitRecipient } = await import("./fund-wallets.server");
     const [wallets, contracts] = await Promise.all([fundWalletsInfo(), contractFeeStatus()]);
+    const splitWallet = wallets.find((x) => x.name === "split");
     const { data: transfers } = await db.from("wallet_transfers").select("*").neq("tinybars", 0)
       .order("created_at", { ascending: false }).limit(20);
     const { data: payouts } = await db.from("holdout_payouts").select("id,account,tinybars,status,tx_hash,created_at")
@@ -89,7 +90,11 @@ export const getFundWalletsAdmin = createServerFn({ method: "POST" })
     }
     return {
       wallets,
-      contracts: contracts.map((c) => ({ ...c, platformFees: s(c.platformFees) })),
+      contracts: contracts.map((c) => ({
+        ...c,
+        platformFees: s(c.platformFees),
+        feesToBot: isSplitRecipient(c.feeRecipient, splitWallet?.address ?? "", splitWallet?.accountId ?? null),
+      })),
       transfers: transfers ?? [],
       payouts: payouts ?? [],
       staff: staff ?? [],

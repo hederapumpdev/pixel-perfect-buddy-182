@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ethers } from "ethers";
-import { FUND_WALLETS, feeSourceContracts, fundWallet, fundWalletPublicKey, needsStartDeposit } from "@/lib/fund-wallets.server";
+import { FUND_WALLETS, feeSourceContracts, fundWallet, fundWalletPublicKey, idToEvm, isSplitRecipient, needsStartDeposit } from "@/lib/fund-wallets.server";
 import { MARKET_ROUTER_ID, PUMP_CONTRACTS } from "@/lib/hedera-config";
 
 // The keys are derived from a secret at runtime; a fixed seed keeps this test offline.
@@ -30,6 +30,21 @@ describe("recognized fee sources", () => {
     expect(PUMP_CONTRACTS.every((c) => sources.has(c))).toBe(true);
     // Without the router, post-graduation trades through our site would never reach the split.
     expect(MARKET_ROUTER_ID && sources.has(MARKET_ROUTER_ID)).toBe(true);
+  });
+});
+
+describe("split wallet recognition on contracts", () => {
+  const split = () => fundWallet("split").address;
+  it("accepts the EVM alias form", () => {
+    expect(isSplitRecipient(split(), split(), "0.0.10927104")).toBe(true);
+  });
+  it("accepts the long-zero account id form (SDK-created contracts store this)", () => {
+    expect(isSplitRecipient(idToEvm("0.0.10927104"), split(), "0.0.10927104")).toBe(true);
+  });
+  it("rejects any other address or a missing recipient", () => {
+    expect(isSplitRecipient(idToEvm("0.0.999"), split(), "0.0.10927104")).toBe(false);
+    expect(isSplitRecipient(null, split(), "0.0.10927104")).toBe(false);
+    expect(isSplitRecipient(idToEvm("0.0.10927104"), split(), null)).toBe(false);
   });
 });
 
