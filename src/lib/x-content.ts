@@ -69,7 +69,7 @@ export function dailyXSlot(now: Date, introduction: boolean) {
 }
 
 export function appTweet(index: number, day: string) {
-  const topic = topics[index % topics.length] ?? topics[0];
+  const topic = topics[index % topics.length] ?? topics[0] ?? "";
   const text = `${topic}\n\n${APP_URL}\n${index === 0 ? "#Hedera #HederaPump" : `#Hedera • ${day}`}`;
   return addMentions(text, dailyMentions(topic));
 }
