@@ -90,7 +90,11 @@ export const getFundWalletsAdmin = createServerFn({ method: "POST" })
     }
     return {
       wallets,
-      contracts: contracts.map((c) => ({ ...c, platformFees: s(c.platformFees) })),
+      contracts: contracts.map((c) => ({
+        ...c,
+        platformFees: s(c.platformFees),
+        feesToBot: isSplitRecipient(c.feeRecipient, splitWallet?.address ?? "", splitWallet?.accountId ?? null),
+      })),
       transfers: transfers ?? [],
       payouts: payouts ?? [],
       staff: staff ?? [],
