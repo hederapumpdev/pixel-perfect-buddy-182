@@ -10,5 +10,5 @@ export function topCoinsMessage(coins: TelegramCoin[], now = new Date()) {
   return `<b>HederaPump · Top 10 bonding coins</b>\n\n${rows.length ? rows.join('\n') : 'No active bonding coins yet.'}\n\nUpdated: ${now.toISOString().slice(0, 16).replace('T', ' ')} UTC\n<a href="https://hederapump.dev">HederaPump</a> · Ranked by bonding-curve progress\n\nMeme coins are high-risk. Not financial advice.`;
 }
 export function graduationMessage(coin: TelegramCoin) {
-  return `<b>🎓 A coin has graduated!</b>\n\n${coinLink(coin)} has completed its bonding curve and graduated to SaucerSwap.\n\n<a href="https://hederapump.dev/token/${encodeURIComponent(coin.address)}">View coin</a>\n\nMeme coins are high-risk. Not financial advice.`;
+  return `<b>🎓 A coin has graduated!</b>\n\n${coinLink(coin)} has completed its bonding curve and graduated to <a href="https://saucerswap.finance">SaucerSwap</a>.\n\n<a href="https://hederapump.dev/token/${encodeURIComponent(coin.address)}">View coin</a>\n\nMeme coins are high-risk. Not financial advice.`;
 }
