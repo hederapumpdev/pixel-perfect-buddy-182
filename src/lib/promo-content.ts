@@ -141,3 +141,22 @@ Not a launch. Don't buy it. The original HEDERAPUMP is 0.0.10924337.
   const discord = `🧪 **That one was a test**\n\nToken \`${id}\` — the HEDERAPUMP that filled its bonding curve and graduated — was a **test coin**. We made it to check the fast-graduation setup end to end: curve, graduation and the automatic SaucerSwap pool.\n\nOnly our own wallets bought it, so no outside funds are involved. It is not a launch. Don't buy it.\n\nThe original HEDERAPUMP (0.0.10924337) is a different coin and is still on its bonding curve.\n\nhttps://hederapump.dev\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+export const testGradCaSlot = "testgrad:hederapump-ca";
+
+/** One-time follow-up: the official coin's contract address, so nobody buys the test coin by mistake. */
+export function testGradCaMessages() {
+  const official = { id: "0.0.10924337", ca: "0x0000000000000000000000000000000000a6b131" };
+  const testId = "0.0.10931033";
+  const x = `🧪 Follow-up to our test post.
+
+Official HEDERAPUMP (the real one, still on its bonding curve):
+CA 0x0000000000000000000000000000000000a6b131 · 0.0.10924337
+
+The test coin that bonded was 0.0.10931033. Not a launch — don't buy it.
+
+#Hedera #HederaPump`;
+  const telegram = `<b>🧪 Official HEDERAPUMP contract address</b>\n\nFollowing our test post: the official coin, still on its bonding curve, is\n\n<code>${official.ca}</code>\nHedera ID <code>${official.id}</code>\n\nCoin page: https://hederapump.dev/token/${official.ca}\nHedera: https://hashscan.io/mainnet/token/${official.id}\n\nThe coin that filled its curve and graduated was a test run: <code>${testId}</code>. Not a launch — don't buy it.\n\n${RISK}`;
+  const discord = `🧪 **Official HEDERAPUMP contract address**\n\nFollowing our test post: the official coin, still on its bonding curve, is\n\n\`${official.ca}\`\nHedera ID \`${official.id}\`\n\nCoin page: https://hederapump.dev/token/${official.ca}\nHedera: https://hashscan.io/mainnet/token/${official.id}\n\nThe coin that filled its curve and graduated was a test run: \`${testId}\`. Not a launch — don't buy it.\n\n${RISK}`;
+  return { x, telegram, discord };
+}
