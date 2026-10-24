@@ -1,5 +1,6 @@
 # Roadmap
-- [ ] Prepare HBAR/SOL pool readiness with live costs, balances and funding examples; do not fund, approve or create a pool. Opening awaits the owner's chosen liquidity budget and explicit spending approval.
+- [x] Prepare HBAR/SOL pool readiness with direct public mainnet reads and 0.1/1/5 SOL funding examples; saved in .lovable/hbar-sol-readiness.md. No funds moved, approvals sent, pool created or publication performed.
+- [ ] Activate HBAR/SOL pool — waits for owner's chosen liquidity budget and explicit spending approval. Before paid activation, correct/test existing-pair response decoding, verify token association and refresh all costs/balances; preparation is not transaction approval.
 - [x] Fee wallets: team (0.0.10929322) and Hold Out (0.0.10929323) opened in HashPack, each got its one-time 5.5 HBAR start deposit; first split sent (claimed 100.14 HBAR contract fees → 28.61 team / 14.31 Hold Out / 57.22 platform).
 - [x] Hold Out announcement posted on X, Telegram and Discord; README updated with the fee split and Hold Out; Discord #hold-out channel created with an explainer.
 - [x] Wallet approval in admin: both wallets created by the user.
