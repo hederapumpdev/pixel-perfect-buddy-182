@@ -6,10 +6,10 @@ import {
   graduationDiscordMessage,
   graduationSlot,
   graduationXMessage,
+  testGradCaMessages,
+  testGradCaSlot,
   testGradMessages,
   testGradSlot,
-  verifiedMessages,
-  verifiedSlot,
   weeklyMessages,
   weeklySlot,
 } from '../lib/promo-content';
@@ -119,6 +119,31 @@ describe('test coin clarification', () => {
 
   it('fits the X character limit and makes no refund or deletion claim', () => {
     const msgs = testGradMessages();
+    expect([...msgs.x].length).toBeLessThanOrEqual(280);
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).not.toContain('refund');
+      expect(text.toLowerCase()).not.toContain('deleted');
+    }
+  });
+});
+
+describe('official contract address follow-up', () => {
+  it('uses one stable slot so the address post can never be posted twice', () => {
+    expect(testGradCaSlot).toBe('testgrad:hederapump-ca');
+  });
+
+  it('gives the official contract address and Hedera ID on every channel', () => {
+    const msgs = testGradCaMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text).toContain('0x0000000000000000000000000000000000a6b131');
+      expect(text).toContain('0.0.10924337');
+      expect(text).toContain('0.0.10931033');
+      expect(text.toLowerCase()).toContain("don't buy");
+    }
+  });
+
+  it('fits the X character limit and makes no refund or deletion claim', () => {
+    const msgs = testGradCaMessages();
     expect([...msgs.x].length).toBeLessThanOrEqual(280);
     for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
       expect(text.toLowerCase()).not.toContain('refund');
