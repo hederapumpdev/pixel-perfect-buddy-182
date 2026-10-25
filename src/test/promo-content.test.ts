@@ -14,6 +14,8 @@ import {
   hashpackTipSlot,
   solanaLaunchMessages,
   solanaLaunchSlot,
+  solanaLockedMessages,
+  solanaLockedSlot,
   solanaMessages,
   solanaSlot,
   testGradCaMessages,
@@ -291,6 +293,36 @@ describe('pump.fun launch announcement', () => {
   it('repeats the fee buyback promise and tags pump.fun within the X limit', () => {
     const msgs = solanaLaunchMessages();
     expect(msgs.x).toContain('@Pumpfun');
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).toContain('fee');
+      const low = text.toLowerCase();
+      expect(low).not.toContain('guaranteed');
+      expect(low).not.toContain('profit');
+    }
+    expect([...msgs.x].length).toBeLessThanOrEqual(280);
+  });
+});
+
+describe('team supply locked follow-up', () => {
+  it('uses one stable slot so the follow-up can never be posted twice', () => {
+    expect(solanaLockedSlot).toBe('solana:locked');
+  });
+
+  it('announces the lock and the DexScreener update with the real mint on every channel', () => {
+    const msgs = solanaLockedMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).toContain('locked');
+      expect(text.toLowerCase()).toContain('dexscreener');
+      expect(text).toContain('84aTPXRQPDStSQ65YsHEsyomRz9AHc8u4Cw4tTwepump');
+      expect(text).toContain('0.0.10924337');
+    }
+  });
+
+  it('keeps the two-coin warning and the fee buyback promise, and fits the X limit', () => {
+    const msgs = solanaLockedMessages();
+    for (const text of [msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).toContain('two separate coins');
+    }
     for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
       expect(text.toLowerCase()).toContain('fee');
       const low = text.toLowerCase();
