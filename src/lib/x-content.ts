@@ -17,7 +17,7 @@ export const topics = [
   "Comments on every coin. Read what people say, reply, and see who is really active before you trade. The conversation lives next to the chart.",
   "Who holds what? Each coin page lists its biggest holders, so you can see how coins are spread out before you buy. Public data, no guesswork.",
   "Follow a coin on HederaPump and get a heads-up when it moves or gets close to graduation. Set your alerts and keep an eye on the launch.",
-  "King of the Hill: the coin closest to graduation takes the top spot on the HederaPump homepage. Watch the race and see who is next.",
+  "Hedera Hot Seat: the coin closest to graduation takes the top spot on the HederaPump homepage. Watch the race and see who is next.",
   "Your profile, your name, your picture. Build a HederaPump profile so people can follow your launches and see the coins you have made.",
   "Found a coin worth sharing? Make a share card with its name, price and link in one tap, and send it to your group before anyone else does.",
   "Every coin page shows the token address and the creator behind it, with copy buttons and a link to the public record. Check before you buy.",

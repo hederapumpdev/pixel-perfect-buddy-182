@@ -28,7 +28,7 @@ to SaucerSwap with locked liquidity. No coding, no liquidity setup, no permissio
 - **Automatic token info** — v4 coins publish HIP-405 metadata (logo, description,
   website, X and Telegram links) so SaucerSwap shows full token info without a form.
 - **Any wallet** — HashPack (via WalletConnect), MetaMask, or an email / Google wallet.
-- **Community features** — live ticker, King of the Hill, holders, comments, price
+- **Community features** — live ticker, Hedera Hot Seat, holders, comments, price
   alerts, plus automatic top-10 and graduation posts to Telegram and X.
 
 ## Deployed contracts (Hedera mainnet)
