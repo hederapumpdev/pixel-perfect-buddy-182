@@ -251,3 +251,23 @@ Same brand, two chains.
   const discord = `🚀 **HEDERAPUMP is live on pump.fun**\n\nThe official HEDERAPUMP sister coin on Solana has launched. It shows as **Hederapump** (\`$Hederpump\`).\n\n**Contract (mint):** \`${SOLANA_MINT}\`\nCoin page: ${page}\nChart: ${chart}\n\n**Why it matters:** new launches on pump.fun can now pick HEDERAPUMP as their pair instead of SOL, and every fee the Solana coin earns is used to buy the real HEDERAPUMP on Hedera (token \`${official}\`).\n\n⚠️ These are two separate coins. The original HEDERAPUMP on Hedera is unchanged — always check the address before you buy.\n\nhttps://hederapump.dev\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+/** One-off follow-up: team supply locked and the DexScreener profile is updated. */
+export const solanaLockedSlot = "solana:locked";
+
+/** One-time announcement: the pump.fun coin's team supply is locked and DexScreener now shows our links and banner. */
+export function solanaLockedMessages() {
+  const official = "0.0.10924337";
+  const page = `https://pump.fun/coin/${SOLANA_MINT}`;
+  const chart = `https://dexscreener.com/solana/${SOLANA_MINT}`;
+  const x = addMentions(`🔒 Team supply locked. DexScreener updated.
+
+CA: ${SOLANA_MINT}
+
+Website, socials and banner are live on the chart. Every fee this coin earns buys the real HEDERAPUMP on Hedera (${official}).
+
+#Hedera #HederaPump`, ["pumpfun", "hedera"]);
+  const telegram = `<b>🔒 Team supply locked · DexScreener updated</b>\n\nThe team supply of the HEDERAPUMP sister coin on pump.fun is locked, and its DexScreener profile is now up to date: our website, X, Telegram and Discord links plus the banner are live on the chart.\n\n<b>Contract (mint):</b> <code>${SOLANA_MINT}</code>\nCoin page: <a href="${page}">pump.fun</a>\nChart: <a href="${chart}">DexScreener</a>\n\nEvery fee the Solana coin earns is used to buy the real HEDERAPUMP on Hedera (token <code>${official}</code>).\n\n⚠️ These are two separate coins — always check the address before you buy.\n\n${RISK}`;
+  const discord = `🔒 **Team supply locked · DexScreener updated**\n\nThe team supply of the HEDERAPUMP sister coin on pump.fun is locked, and its DexScreener profile is now up to date: our website, X, Telegram and Discord links plus the banner are live on the chart.\n\n**Contract (mint):** \`${SOLANA_MINT}\`\nCoin page: ${page}\nChart: ${chart}\n\nEvery fee the Solana coin earns is used to buy the real HEDERAPUMP on Hedera (token \`${official}\`).\n\n⚠️ These are two separate coins — always check the address before you buy.\n\n${RISK}`;
+  return { x, telegram, discord };
+}
