@@ -2,6 +2,8 @@
 // Handles were checked against each project's own published channel list on 2026-10-24:
 // Hedera -> @hedera, SaucerSwap Labs -> @SaucerSwapLabs, HashPack -> @hashpack,
 // Hedera Community -> @HederaCommunity, SODAX -> @gosodax.
+// Hedex -> @1hedex (checked 2026-10-25 through the X API: profile name HEDEX,
+// website link resolves to https://hedex.dev).
 
 export const HEDERA_HANDLES = {
   hedera: "@hedera",
@@ -9,6 +11,7 @@ export const HEDERA_HANDLES = {
   hashpack: "@hashpack",
   community: "@HederaCommunity",
   sodax: "@gosodax",
+  hedex: "@1hedex",
 } as const;
 
 export type HandleKey = keyof typeof HEDERA_HANDLES;
@@ -46,6 +49,7 @@ export function dailyMentions(topic: string): HandleKey[] {
   if (/saucerswap/i.test(topic)) out.push("saucerswap");
   if (/hashpack/i.test(topic)) out.push("hashpack");
   if (/sodax/i.test(topic)) out.push("sodax");
+  if (/hedex/i.test(topic)) out.push("hedex");
   return out;
 }
 
