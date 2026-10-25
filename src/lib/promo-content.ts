@@ -242,7 +242,7 @@ export function solanaLaunchMessages() {
 
 CA: ${SOLANA_MINT}
 
-New launches can pair with HEDERAPUMP instead of SOL. Every fee it earns buys the real HEDERAPUMP on Hedera (${official}).
+New launches can pair with HEDERAPUMP, and every fee it earns buys the real HEDERAPUMP on Hedera (${official}).
 
 Same brand, two chains.
 
