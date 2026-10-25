@@ -245,3 +245,21 @@ describe('Hedex listing announcement', () => {
     }
   });
 });
+
+describe('hedex shoutout', () => {
+  it('claims one stable slot for the follow-up', () => {
+    expect(hedexThanksSlot).toBe('hedex:thanks');
+  });
+
+  it('tags the Hedex account, links to the coin list and fits the X limit', () => {
+    const msgs = hedexThanksMessages();
+    expect(msgs.x).toContain('@1hedex');
+    expect(msgs.x.toLowerCase()).toContain('hedex');
+    expect(msgs.x).toContain('https://hederapump.dev/markets');
+    expect([...msgs.x].length).toBeLessThanOrEqual(280);
+    const low = msgs.x.toLowerCase();
+    expect(low).not.toContain('official partner');
+    expect(low).not.toContain('endorsed');
+    expect(low).not.toContain('verified by');
+  });
+});
