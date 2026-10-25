@@ -196,3 +196,20 @@ We've asked HashPack to clear it.
   const discord = `🛡️ **Heads-up for HashPack users**\n\nHashPack's in-app dApp browser is currently flagging hederapump.dev as "possibly harmful" — a false positive. We're not on any external scam list.\n\n**Workaround:** open the site in Safari or Chrome and connect your HashPack wallet with WalletConnect as usual.\n\nWe've asked HashPack to remove the flag and will post here the moment it's cleared.\n\nhttps://hederapump.dev\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+/** One-off Hedex listing announcement: one post per channel, ever. */
+export const hedexSlot = "hedex:announce";
+
+/** One-time announcement: Hedex (hedex.dev) now lists HederaPump coins with live bonding-curve progress. */
+export function hedexMessages() {
+  const x = `🔎 HederaPump coins now show on Hedex.
+
+hedex.dev indexes Hedera markets — SaucerSwap pools plus live bonding-curve progress for every coin launched here.
+
+https://hederapump.dev/markets
+
+#Hedera #HederaPump`;
+  const telegram = `<b>🔎 HederaPump coins now show on Hedex</b>\n\n<a href="https://hedex.dev">Hedex</a> is an independent Hedera markets index. It now lists every coin launched on <a href="https://hederapump.dev">HederaPump</a> with live bonding-curve progress, alongside its own SaucerSwap pool data.\n\nFind your coin: https://hederapump.dev/markets\n\n${RISK}`;
+  const discord = `🔎 **HederaPump coins now show on Hedex**\n\n[Hedex](https://hedex.dev) is an independent Hedera markets index. It now lists every coin launched on HederaPump with live bonding-curve progress, alongside its own SaucerSwap pool data.\n\nFind your coin: https://hederapump.dev/markets\n\n${RISK}`;
+  return { x, telegram, discord };
+}
