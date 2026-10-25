@@ -6,6 +6,8 @@ import {
   graduationDiscordMessage,
   graduationSlot,
   graduationXMessage,
+  hedexMessages,
+  hedexSlot,
   hashpackTipMessages,
   hashpackTipSlot,
   solanaMessages,
