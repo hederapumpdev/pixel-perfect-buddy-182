@@ -12,6 +12,10 @@ import {
   hedexThanksSlot,
   hashpackTipMessages,
   hashpackTipSlot,
+  SOLANA_MINT,
+  SOLANA_PROMO_DAYS,
+  solanaDailyMessages,
+  solanaDailySlot,
   solanaLaunchMessages,
   solanaLaunchSlot,
   solanaLockedMessages,
@@ -330,5 +334,42 @@ describe('team supply locked follow-up', () => {
       expect(low).not.toContain('profit');
     }
     expect([...msgs.x].length).toBeLessThanOrEqual(280);
+  });
+});
+
+describe("daily pump.fun promo week", () => {
+  it("covers exactly the seven launch-week days", () => {
+    expect([...SOLANA_PROMO_DAYS]).toEqual([
+      "2026-10-26",
+      "2026-10-27",
+      "2026-10-28",
+      "2026-10-29",
+      "2026-10-30",
+      "2026-10-31",
+      "2026-11-01",
+    ]);
+  });
+  it("builds one slot per day", () => {
+    expect(solanaDailySlot("2026-10-26")).toBe("solana:daily:2026-10-26");
+  });
+  it("returns messages with the mint and pump.fun link for every promo day", () => {
+    for (const day of SOLANA_PROMO_DAYS) {
+      const messages = solanaDailyMessages(day);
+      expect(messages).not.toBeNull();
+      expect(messages!.x).toContain(SOLANA_MINT);
+      expect(messages!.x).toContain(`https://pump.fun/coin/${SOLANA_MINT}`);
+      expect(messages!.telegram).toContain(SOLANA_MINT);
+      expect(messages!.discord).toContain(SOLANA_MINT);
+      const weighted = messages!.x.replace(/https:\/\/\S+/g, "x".repeat(23));
+      expect([...weighted].length).toBeLessThanOrEqual(280);
+    }
+  });
+  it("gives every day a different X text", () => {
+    const texts = SOLANA_PROMO_DAYS.map((day) => solanaDailyMessages(day)!.x);
+    expect(new Set(texts).size).toBe(SOLANA_PROMO_DAYS.length);
+  });
+  it("returns null outside the promo week", () => {
+    expect(solanaDailyMessages("2026-10-25")).toBeNull();
+    expect(solanaDailyMessages("2026-11-02")).toBeNull();
   });
 });

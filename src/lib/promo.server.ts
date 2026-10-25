@@ -234,6 +234,20 @@ export async function postWeeklySummary(now = new Date()) {
   return sendNext(db, slot, weeklyMessages(stats, day(from), day(to)), "app", 2);
 }
 
+/** Daily pump.fun promo during launch week: one post per channel per Amsterdam day. */
+export async function promoteSolanaDaily(now = new Date()) {
+  const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Amsterdam" }).format(now);
+  const { solanaDailyMessages, solanaDailySlot } = await import("./promo-content");
+  const messages = solanaDailyMessages(day);
+  if (!messages) return { step: "no promo today" };
+  const slot = solanaDailySlot(day);
+  const { data: existing, error } = await db.from("promo_posts").select("slot").eq("slot", slot).limit(1);
+  if (error) throw error;
+  if (existing?.length) return { step: "already processed" };
+  return sendNext(db, slot, messages, "app", 5, DISCORD_NEW_COINS_CHANNEL);
+}
+
 /** One-off feature announcement (owner-triggered); same slot claims, one send per call. */
 export async function announceFeature(slot: string, texts: Partial<Record<Channel, string>>, imageIndex = 4) {
   const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
