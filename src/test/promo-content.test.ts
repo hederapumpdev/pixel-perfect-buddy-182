@@ -8,6 +8,8 @@ import {
   graduationXMessage,
   hedexMessages,
   hedexSlot,
+  hedexThanksMessages,
+  hedexThanksSlot,
   hashpackTipMessages,
   hashpackTipSlot,
   solanaMessages,
