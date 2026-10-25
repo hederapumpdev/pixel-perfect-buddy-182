@@ -49,6 +49,7 @@ import { Route as ApiPublicJobsOfficialCoinRouteImport } from './routes/api/publ
 import { Route as ApiPublicJobsPayoutsRouteImport } from './routes/api/public/jobs/payouts'
 import { Route as ApiPublicJobsSigninAnnounceRouteImport } from './routes/api/public/jobs/signin-announce'
 import { Route as ApiPublicJobsSolanaAnnounceRouteImport } from './routes/api/public/jobs/solana-announce'
+import { Route as ApiPublicJobsSolanaDailyRouteImport } from './routes/api/public/jobs/solana-daily'
 import { Route as ApiPublicJobsSolanaLaunchRouteImport } from './routes/api/public/jobs/solana-launch'
 import { Route as ApiPublicJobsSolanaLockedRouteImport } from './routes/api/public/jobs/solana-locked'
 import { Route as ApiPublicJobsSpotlightRouteImport } from './routes/api/public/jobs/spotlight'
@@ -276,6 +277,12 @@ const ApiPublicJobsSolanaAnnounceRoute =
     path: '/api/public/jobs/solana-announce',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsSolanaDailyRoute =
+  ApiPublicJobsSolanaDailyRouteImport.update({
+    id: '/api/public/jobs/solana-daily',
+    path: '/api/public/jobs/solana-daily',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsSolanaLaunchRoute =
   ApiPublicJobsSolanaLaunchRouteImport.update({
     id: '/api/public/jobs/solana-launch',
@@ -376,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/signin-announce': typeof ApiPublicJobsSigninAnnounceRoute
   '/api/public/jobs/solana-announce': typeof ApiPublicJobsSolanaAnnounceRoute
+  '/api/public/jobs/solana-daily': typeof ApiPublicJobsSolanaDailyRoute
   '/api/public/jobs/solana-launch': typeof ApiPublicJobsSolanaLaunchRoute
   '/api/public/jobs/solana-locked': typeof ApiPublicJobsSolanaLockedRoute
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
@@ -428,6 +436,7 @@ export interface FileRoutesByTo {
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/signin-announce': typeof ApiPublicJobsSigninAnnounceRoute
   '/api/public/jobs/solana-announce': typeof ApiPublicJobsSolanaAnnounceRoute
+  '/api/public/jobs/solana-daily': typeof ApiPublicJobsSolanaDailyRoute
   '/api/public/jobs/solana-launch': typeof ApiPublicJobsSolanaLaunchRoute
   '/api/public/jobs/solana-locked': typeof ApiPublicJobsSolanaLockedRoute
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
@@ -481,6 +490,7 @@ export interface FileRoutesById {
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
   '/api/public/jobs/signin-announce': typeof ApiPublicJobsSigninAnnounceRoute
   '/api/public/jobs/solana-announce': typeof ApiPublicJobsSolanaAnnounceRoute
+  '/api/public/jobs/solana-daily': typeof ApiPublicJobsSolanaDailyRoute
   '/api/public/jobs/solana-launch': typeof ApiPublicJobsSolanaLaunchRoute
   '/api/public/jobs/solana-locked': typeof ApiPublicJobsSolanaLockedRoute
   '/api/public/jobs/spotlight': typeof ApiPublicJobsSpotlightRoute
@@ -535,6 +545,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/signin-announce'
     | '/api/public/jobs/solana-announce'
+    | '/api/public/jobs/solana-daily'
     | '/api/public/jobs/solana-launch'
     | '/api/public/jobs/solana-locked'
     | '/api/public/jobs/spotlight'
@@ -587,6 +598,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/signin-announce'
     | '/api/public/jobs/solana-announce'
+    | '/api/public/jobs/solana-daily'
     | '/api/public/jobs/solana-launch'
     | '/api/public/jobs/solana-locked'
     | '/api/public/jobs/spotlight'
@@ -639,6 +651,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/payouts'
     | '/api/public/jobs/signin-announce'
     | '/api/public/jobs/solana-announce'
+    | '/api/public/jobs/solana-daily'
     | '/api/public/jobs/solana-launch'
     | '/api/public/jobs/solana-locked'
     | '/api/public/jobs/spotlight'
@@ -692,6 +705,7 @@ export interface RootRouteChildren {
   ApiPublicJobsPayoutsRoute: typeof ApiPublicJobsPayoutsRoute
   ApiPublicJobsSigninAnnounceRoute: typeof ApiPublicJobsSigninAnnounceRoute
   ApiPublicJobsSolanaAnnounceRoute: typeof ApiPublicJobsSolanaAnnounceRoute
+  ApiPublicJobsSolanaDailyRoute: typeof ApiPublicJobsSolanaDailyRoute
   ApiPublicJobsSolanaLaunchRoute: typeof ApiPublicJobsSolanaLaunchRoute
   ApiPublicJobsSolanaLockedRoute: typeof ApiPublicJobsSolanaLockedRoute
   ApiPublicJobsSpotlightRoute: typeof ApiPublicJobsSpotlightRoute
@@ -986,6 +1000,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsSolanaAnnounceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/solana-daily': {
+      id: '/api/public/jobs/solana-daily'
+      path: '/api/public/jobs/solana-daily'
+      fullPath: '/api/public/jobs/solana-daily'
+      preLoaderRoute: typeof ApiPublicJobsSolanaDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/solana-launch': {
       id: '/api/public/jobs/solana-launch'
       path: '/api/public/jobs/solana-launch'
@@ -1100,6 +1121,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsPayoutsRoute: ApiPublicJobsPayoutsRoute,
   ApiPublicJobsSigninAnnounceRoute: ApiPublicJobsSigninAnnounceRoute,
   ApiPublicJobsSolanaAnnounceRoute: ApiPublicJobsSolanaAnnounceRoute,
+  ApiPublicJobsSolanaDailyRoute: ApiPublicJobsSolanaDailyRoute,
   ApiPublicJobsSolanaLaunchRoute: ApiPublicJobsSolanaLaunchRoute,
   ApiPublicJobsSolanaLockedRoute: ApiPublicJobsSolanaLockedRoute,
   ApiPublicJobsSpotlightRoute: ApiPublicJobsSpotlightRoute,
