@@ -41,6 +41,7 @@ import { Route as ApiPublicJobsFastgradAnnounceRouteImport } from './routes/api/
 import { Route as ApiPublicJobsFeeSplitRouteImport } from './routes/api/public/jobs/fee-split'
 import { Route as ApiPublicJobsGraduationPromoRouteImport } from './routes/api/public/jobs/graduation-promo'
 import { Route as ApiPublicJobsHashpackTipRouteImport } from './routes/api/public/jobs/hashpack-tip'
+import { Route as ApiPublicJobsHedexAnnounceRouteImport } from './routes/api/public/jobs/hedex-announce'
 import { Route as ApiPublicJobsHoldoutRouteImport } from './routes/api/public/jobs/holdout'
 import { Route as ApiPublicJobsHoldoutAnnounceRouteImport } from './routes/api/public/jobs/holdout-announce'
 import { Route as ApiPublicJobsOfficialCoinRouteImport } from './routes/api/public/jobs/official-coin'
@@ -226,6 +227,12 @@ const ApiPublicJobsHashpackTipRoute =
     path: '/api/public/jobs/hashpack-tip',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsHedexAnnounceRoute =
+  ApiPublicJobsHedexAnnounceRouteImport.update({
+    id: '/api/public/jobs/hedex-announce',
+    path: '/api/public/jobs/hedex-announce',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsHoldoutRoute = ApiPublicJobsHoldoutRouteImport.update({
   id: '/api/public/jobs/holdout',
   path: '/api/public/jobs/holdout',
@@ -340,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
   '/api/public/jobs/hashpack-tip': typeof ApiPublicJobsHashpackTipRoute
+  '/api/public/jobs/hedex-announce': typeof ApiPublicJobsHedexAnnounceRoute
   '/api/public/jobs/holdout': typeof ApiPublicJobsHoldoutRoute
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
@@ -388,6 +396,7 @@ export interface FileRoutesByTo {
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
   '/api/public/jobs/hashpack-tip': typeof ApiPublicJobsHashpackTipRoute
+  '/api/public/jobs/hedex-announce': typeof ApiPublicJobsHedexAnnounceRoute
   '/api/public/jobs/holdout': typeof ApiPublicJobsHoldoutRoute
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
@@ -437,6 +446,7 @@ export interface FileRoutesById {
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
   '/api/public/jobs/hashpack-tip': typeof ApiPublicJobsHashpackTipRoute
+  '/api/public/jobs/hedex-announce': typeof ApiPublicJobsHedexAnnounceRoute
   '/api/public/jobs/holdout': typeof ApiPublicJobsHoldoutRoute
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
@@ -487,6 +497,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
     | '/api/public/jobs/hashpack-tip'
+    | '/api/public/jobs/hedex-announce'
     | '/api/public/jobs/holdout'
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
@@ -535,6 +546,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
     | '/api/public/jobs/hashpack-tip'
+    | '/api/public/jobs/hedex-announce'
     | '/api/public/jobs/holdout'
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
@@ -583,6 +595,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
     | '/api/public/jobs/hashpack-tip'
+    | '/api/public/jobs/hedex-announce'
     | '/api/public/jobs/holdout'
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
@@ -632,6 +645,7 @@ export interface RootRouteChildren {
   ApiPublicJobsFeeSplitRoute: typeof ApiPublicJobsFeeSplitRoute
   ApiPublicJobsGraduationPromoRoute: typeof ApiPublicJobsGraduationPromoRoute
   ApiPublicJobsHashpackTipRoute: typeof ApiPublicJobsHashpackTipRoute
+  ApiPublicJobsHedexAnnounceRoute: typeof ApiPublicJobsHedexAnnounceRoute
   ApiPublicJobsHoldoutRoute: typeof ApiPublicJobsHoldoutRoute
   ApiPublicJobsHoldoutAnnounceRoute: typeof ApiPublicJobsHoldoutAnnounceRoute
   ApiPublicJobsOfficialCoinRoute: typeof ApiPublicJobsOfficialCoinRoute
@@ -874,6 +888,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsHashpackTipRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/hedex-announce': {
+      id: '/api/public/jobs/hedex-announce'
+      path: '/api/public/jobs/hedex-announce'
+      fullPath: '/api/public/jobs/hedex-announce'
+      preLoaderRoute: typeof ApiPublicJobsHedexAnnounceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/holdout': {
       id: '/api/public/jobs/holdout'
       path: '/api/public/jobs/holdout'
@@ -1008,6 +1029,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsFeeSplitRoute: ApiPublicJobsFeeSplitRoute,
   ApiPublicJobsGraduationPromoRoute: ApiPublicJobsGraduationPromoRoute,
   ApiPublicJobsHashpackTipRoute: ApiPublicJobsHashpackTipRoute,
+  ApiPublicJobsHedexAnnounceRoute: ApiPublicJobsHedexAnnounceRoute,
   ApiPublicJobsHoldoutRoute: ApiPublicJobsHoldoutRoute,
   ApiPublicJobsHoldoutAnnounceRoute: ApiPublicJobsHoldoutAnnounceRoute,
   ApiPublicJobsOfficialCoinRoute: ApiPublicJobsOfficialCoinRoute,

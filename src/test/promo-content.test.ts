@@ -6,6 +6,8 @@ import {
   graduationDiscordMessage,
   graduationSlot,
   graduationXMessage,
+  hedexMessages,
+  hedexSlot,
   hashpackTipMessages,
   hashpackTipSlot,
   solanaMessages,
@@ -211,6 +213,33 @@ describe('HashPack false-positive tip', () => {
       expect(text.toLowerCase()).not.toContain('has been removed');
       expect(text.toLowerCase()).not.toContain('is fixed');
       expect(text.toLowerCase()).not.toContain('whitelisted');
+    }
+  });
+});
+
+describe('Hedex listing announcement', () => {
+  it('uses one stable slot so the announcement can never be posted twice', () => {
+    expect(hedexSlot).toBe('hedex:announce');
+  });
+
+  it('names Hedex, links to it and points at the coin list on every channel', () => {
+    const msgs = hedexMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).toContain('hedex');
+      expect(text.toLowerCase()).toContain('hedex.dev');
+      expect(text.toLowerCase()).toContain('bonding-curve');
+      expect(text).toContain('https://hederapump.dev/markets');
+    }
+  });
+
+  it('does not claim an endorsement Hedex has not made and fits the X character limit', () => {
+    const msgs = hedexMessages();
+    expect([...msgs.x].length).toBeLessThanOrEqual(280);
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      const low = text.toLowerCase();
+      expect(low).not.toContain('official partner');
+      expect(low).not.toContain('endorsed');
+      expect(low).not.toContain('verified by');
     }
   });
 });
