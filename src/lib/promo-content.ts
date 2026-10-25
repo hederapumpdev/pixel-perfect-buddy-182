@@ -292,11 +292,11 @@ const SOLANA_DAILY_THEMES: Record<string, { title: string; point: string }> = {
   },
   "2026-10-27": {
     title: "Every fee buys the real coin",
-    point: "Every creator fee the Solana coin earns is used to buy the real HEDERAPUMP on Hedera (token 0.0.10924337). Trading on Solana directly supports the Hedera coin.",
+    point: "Every fee the Solana coin earns buys the real HEDERAPUMP on Hedera (token 0.0.10924337). Trading on Solana directly supports the Hedera coin.",
   },
   "2026-10-28": {
     title: "Pair your launch with HEDERAPUMP",
-    point: "Launching on pump.fun? You can pick HEDERAPUMP as your pair instead of SOL. Every paired launch routes more volume — and more fees — into the buyback.",
+    point: "Launching on pump.fun? Pick HEDERAPUMP as your pair instead of SOL. Every paired launch routes more volume and fees into the buyback.",
   },
   "2026-10-29": {
     title: "Team supply is locked",
@@ -308,7 +308,7 @@ const SOLANA_DAILY_THEMES: Record<string, { title: string; point: string }> = {
   },
   "2026-10-31": {
     title: "Same brand, two chains",
-    point: "HEDERAPUMP lives on Hedera (token 0.0.10924337) and its sister coin trades on Solana via pump.fun. Two separate coins, one brand — always check the address before you buy.",
+    point: "HEDERAPUMP lives on Hedera (token 0.0.10924337); its sister coin trades on Solana. Two separate coins, one brand — always check the address before you buy.",
   },
   "2026-11-01": {
     title: "Launch week wrap-up",
