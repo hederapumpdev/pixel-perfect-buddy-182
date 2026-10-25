@@ -15,6 +15,7 @@ export const tokensQuery = queryOptions({
       .from("tokens")
       .select("*")
       .eq("network", NETWORK)
+      .eq("hidden", false)
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw error;
