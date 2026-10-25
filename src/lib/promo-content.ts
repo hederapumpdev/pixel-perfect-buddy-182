@@ -179,3 +179,20 @@ Same brand, two chains.
   const discord = `🌉 **HEDERAPUMP is coming to Solana**\n\nWe're launching the official HEDERAPUMP sister coin on **pump.fun** and we'll be promoting it on the Solana network.\n\n**The goal:** every fee the Solana coin earns will be used to buy the real HEDERAPUMP on Hedera (token \`${official}\`) — growing the original coin with Solana volume.\n\nSame brand, two chains. We'll share the contract address here the moment it launches — never buy before you see it from this channel.\n\nhttps://hederapump.dev\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+/** One-off HashPack false-positive tip: one post per channel, ever. */
+export const hashpackTipSlot = "hashpack:tip";
+
+/** One-time tip: HashPack's in-app browser flags the site by mistake; use Safari/Chrome + WalletConnect. */
+export function hashpackTipMessages() {
+  const x = addMentions(`🛡️ HashPack's in-app browser is flagging hederapump.dev by mistake — a false positive. We're on no scam list.
+
+Workaround: open the site in Safari or Chrome and connect HashPack with WalletConnect as usual.
+
+We've asked HashPack to clear it.
+
+#Hedera #HederaPump`, ["hashpack"]);
+  const telegram = `<b>🛡️ Heads-up for HashPack users</b>\n\nHashPack's in-app dApp browser is currently flagging <a href="https://hederapump.dev">hederapump.dev</a> as "possibly harmful" — a false positive. We're not on any external scam list.\n\n<b>Workaround:</b> open the site in Safari or Chrome and connect your HashPack wallet with WalletConnect as usual.\n\nWe've asked HashPack to remove the flag and will post here the moment it's cleared.\n\n${RISK}`;
+  const discord = `🛡️ **Heads-up for HashPack users**\n\nHashPack's in-app dApp browser is currently flagging hederapump.dev as "possibly harmful" — a false positive. We're not on any external scam list.\n\n**Workaround:** open the site in Safari or Chrome and connect your HashPack wallet with WalletConnect as usual.\n\nWe've asked HashPack to remove the flag and will post here the moment it's cleared.\n\nhttps://hederapump.dev\n\n${RISK}`;
+  return { x, telegram, discord };
+}
