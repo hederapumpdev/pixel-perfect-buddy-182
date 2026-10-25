@@ -218,6 +218,13 @@
       "when": 1792619438233,
       "tag": "0030_fee_wallets_holdout",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1792943292050,
+      "tag": "0031_tokens_hidden_flag",
+      "breakpoints": true
     }
   ]
 }
