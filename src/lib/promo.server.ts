@@ -241,11 +241,8 @@ export async function promoteSolanaDaily(now = new Date()) {
   const { solanaDailyMessages, solanaDailySlot } = await import("./promo-content");
   const messages = solanaDailyMessages(day);
   if (!messages) return { step: "no promo today" };
-  const slot = solanaDailySlot(day);
-  const { data: existing, error } = await db.from("promo_posts").select("slot").eq("slot", slot).limit(1);
-  if (error) throw error;
-  if (existing?.length) return { step: "already processed" };
-  return sendNext(db, slot, messages, "app", 5, DISCORD_NEW_COINS_CHANNEL);
+  // sendNext settles one channel per call and skips channels already sent.
+  return sendNext(db, solanaDailySlot(day), messages, "app", 5, DISCORD_NEW_COINS_CHANNEL);
 }
 
 /** One-off feature announcement (owner-triggered); same slot claims, one send per call. */
