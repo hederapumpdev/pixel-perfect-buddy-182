@@ -13,6 +13,7 @@ describe('official ecosystem handles', () => {
       hashpack: '@hashpack',
       community: '@HederaCommunity',
       sodax: '@gosodax',
+      hedex: '@1hedex',
       pumpfun: '@Pumpfun',
     });
   });
