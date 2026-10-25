@@ -213,3 +213,16 @@ https://hederapump.dev/markets
   const discord = `🔎 **HederaPump coins now show on Hedex**\n\n[Hedex](https://hedex.dev) is an independent Hedera markets index. It now lists every coin launched on HederaPump with live bonding-curve progress, alongside its own SaucerSwap pool data.\n\nFind your coin: https://hederapump.dev/markets\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+/** One-off X shoutout tagging the Hedex account: one post, ever. */
+export const hedexThanksSlot = "hedex:thanks";
+
+/** One-time X follow-up to the Hedex listing announcement, tagging @1hedex. */
+export function hedexThanksMessages() {
+  const x = addMentions(`🔎 Shoutout to the team behind Hedex — every HederaPump coin now shows there with live bonding-curve progress, next to SaucerSwap pool data.
+
+Find yours: https://hederapump.dev/markets
+
+#Hedera #HederaPump`, ["hedex"]);
+  return { x };
+}
