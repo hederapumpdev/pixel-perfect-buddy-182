@@ -187,7 +187,7 @@ export const hashpackTipSlot = "hashpack:tip";
 export function hashpackTipMessages() {
   const x = addMentions(`🛡️ HashPack's in-app browser is flagging hederapump.dev by mistake — a false positive. We're on no scam list.
 
-Workaround: open the site in Safari or Chrome and connect HashPack with WalletConnect as usual.
+Workaround: open the site in Safari or Chrome and connect HashPack via WalletConnect.
 
 We've asked HashPack to clear it.
 
