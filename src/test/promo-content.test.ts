@@ -6,6 +6,8 @@ import {
   graduationDiscordMessage,
   graduationSlot,
   graduationXMessage,
+  hashpackTipMessages,
+  hashpackTipSlot,
   solanaMessages,
   solanaSlot,
   testGradCaMessages,
@@ -182,6 +184,33 @@ describe('Solana expansion announcement', () => {
     for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
       expect(text.toLowerCase()).not.toContain('guaranteed');
       expect(text.toLowerCase()).not.toContain('profit');
+    }
+  });
+});
+
+describe('HashPack false-positive tip', () => {
+  it('uses one stable slot so the tip can never be posted twice', () => {
+    expect(hashpackTipSlot).toBe('hashpack:tip');
+  });
+
+  it('explains the false positive and the Safari/Chrome + WalletConnect workaround', () => {
+    const msgs = hashpackTipMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).toContain('false positive');
+      expect(text.toLowerCase()).toContain('walletconnect');
+      expect(text.toLowerCase()).toContain('safari');
+      expect(text.toLowerCase()).toContain('chrome');
+    }
+    expect(msgs.x).toContain('@hashpack');
+  });
+
+  it('does not claim the flag is already removed and fits the X character limit', () => {
+    const msgs = hashpackTipMessages();
+    expect([...msgs.x].length).toBeLessThanOrEqual(280);
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).not.toContain('has been removed');
+      expect(text.toLowerCase()).not.toContain('is fixed');
+      expect(text.toLowerCase()).not.toContain('whitelisted');
     }
   });
 });

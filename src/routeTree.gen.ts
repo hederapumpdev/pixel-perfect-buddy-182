@@ -40,6 +40,7 @@ import { Route as ApiPublicJobsDiscordDailyRouteImport } from './routes/api/publ
 import { Route as ApiPublicJobsFastgradAnnounceRouteImport } from './routes/api/public/jobs/fastgrad-announce'
 import { Route as ApiPublicJobsFeeSplitRouteImport } from './routes/api/public/jobs/fee-split'
 import { Route as ApiPublicJobsGraduationPromoRouteImport } from './routes/api/public/jobs/graduation-promo'
+import { Route as ApiPublicJobsHashpackTipRouteImport } from './routes/api/public/jobs/hashpack-tip'
 import { Route as ApiPublicJobsHoldoutRouteImport } from './routes/api/public/jobs/holdout'
 import { Route as ApiPublicJobsHoldoutAnnounceRouteImport } from './routes/api/public/jobs/holdout-announce'
 import { Route as ApiPublicJobsOfficialCoinRouteImport } from './routes/api/public/jobs/official-coin'
@@ -219,6 +220,12 @@ const ApiPublicJobsGraduationPromoRoute =
     path: '/api/public/jobs/graduation-promo',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsHashpackTipRoute =
+  ApiPublicJobsHashpackTipRouteImport.update({
+    id: '/api/public/jobs/hashpack-tip',
+    path: '/api/public/jobs/hashpack-tip',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsHoldoutRoute = ApiPublicJobsHoldoutRouteImport.update({
   id: '/api/public/jobs/holdout',
   path: '/api/public/jobs/holdout',
@@ -332,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/fastgrad-announce': typeof ApiPublicJobsFastgradAnnounceRoute
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/hashpack-tip': typeof ApiPublicJobsHashpackTipRoute
   '/api/public/jobs/holdout': typeof ApiPublicJobsHoldoutRoute
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
@@ -379,6 +387,7 @@ export interface FileRoutesByTo {
   '/api/public/jobs/fastgrad-announce': typeof ApiPublicJobsFastgradAnnounceRoute
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/hashpack-tip': typeof ApiPublicJobsHashpackTipRoute
   '/api/public/jobs/holdout': typeof ApiPublicJobsHoldoutRoute
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
@@ -427,6 +436,7 @@ export interface FileRoutesById {
   '/api/public/jobs/fastgrad-announce': typeof ApiPublicJobsFastgradAnnounceRoute
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/hashpack-tip': typeof ApiPublicJobsHashpackTipRoute
   '/api/public/jobs/holdout': typeof ApiPublicJobsHoldoutRoute
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
@@ -476,6 +486,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/fastgrad-announce'
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/hashpack-tip'
     | '/api/public/jobs/holdout'
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
@@ -523,6 +534,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/fastgrad-announce'
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/hashpack-tip'
     | '/api/public/jobs/holdout'
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
@@ -570,6 +582,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/fastgrad-announce'
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/hashpack-tip'
     | '/api/public/jobs/holdout'
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
@@ -618,6 +631,7 @@ export interface RootRouteChildren {
   ApiPublicJobsFastgradAnnounceRoute: typeof ApiPublicJobsFastgradAnnounceRoute
   ApiPublicJobsFeeSplitRoute: typeof ApiPublicJobsFeeSplitRoute
   ApiPublicJobsGraduationPromoRoute: typeof ApiPublicJobsGraduationPromoRoute
+  ApiPublicJobsHashpackTipRoute: typeof ApiPublicJobsHashpackTipRoute
   ApiPublicJobsHoldoutRoute: typeof ApiPublicJobsHoldoutRoute
   ApiPublicJobsHoldoutAnnounceRoute: typeof ApiPublicJobsHoldoutAnnounceRoute
   ApiPublicJobsOfficialCoinRoute: typeof ApiPublicJobsOfficialCoinRoute
@@ -853,6 +867,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsGraduationPromoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/hashpack-tip': {
+      id: '/api/public/jobs/hashpack-tip'
+      path: '/api/public/jobs/hashpack-tip'
+      fullPath: '/api/public/jobs/hashpack-tip'
+      preLoaderRoute: typeof ApiPublicJobsHashpackTipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/holdout': {
       id: '/api/public/jobs/holdout'
       path: '/api/public/jobs/holdout'
@@ -986,6 +1007,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsFastgradAnnounceRoute: ApiPublicJobsFastgradAnnounceRoute,
   ApiPublicJobsFeeSplitRoute: ApiPublicJobsFeeSplitRoute,
   ApiPublicJobsGraduationPromoRoute: ApiPublicJobsGraduationPromoRoute,
+  ApiPublicJobsHashpackTipRoute: ApiPublicJobsHashpackTipRoute,
   ApiPublicJobsHoldoutRoute: ApiPublicJobsHoldoutRoute,
   ApiPublicJobsHoldoutAnnounceRoute: ApiPublicJobsHoldoutAnnounceRoute,
   ApiPublicJobsOfficialCoinRoute: ApiPublicJobsOfficialCoinRoute,
