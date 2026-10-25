@@ -271,3 +271,66 @@ Website, socials and banner are live on the chart. Every fee this coin earns buy
   const discord = `🔒 **Team supply locked · DexScreener updated**\n\nThe team supply of the HEDERAPUMP sister coin on pump.fun is locked, and its DexScreener profile is now up to date: our website, X, Telegram and Discord links plus the banner are live on the chart.\n\n**Contract (mint):** \`${SOLANA_MINT}\`\nCoin page: ${page}\nChart: ${chart}\n\nEvery fee the Solana coin earns is used to buy the real HEDERAPUMP on Hedera (token \`${official}\`).\n\n⚠️ These are two separate coins — always check the address before you buy.\n\n${RISK}`;
   return { x, telegram, discord };
 }
+
+/** Daily pump.fun promo week: one post per channel per Amsterdam day, 2026-10-26 through 2026-11-01. */
+export const SOLANA_PROMO_DAYS = [
+  "2026-10-26",
+  "2026-10-27",
+  "2026-10-28",
+  "2026-10-29",
+  "2026-10-30",
+  "2026-10-31",
+  "2026-11-01",
+] as const;
+
+export const solanaDailySlot = (day: string) => `solana:daily:${day}`;
+
+const SOLANA_DAILY_THEMES: Record<string, { title: string; point: string }> = {
+  "2026-10-26": {
+    title: "Launch week is on",
+    point: "The HEDERAPUMP sister coin on pump.fun started trading this weekend. This week we post daily updates — follow along and trade early.",
+  },
+  "2026-10-27": {
+    title: "Every fee buys the real coin",
+    point: "Every creator fee the Solana coin earns is used to buy the real HEDERAPUMP on Hedera (token 0.0.10924337). Trading on Solana directly supports the Hedera coin.",
+  },
+  "2026-10-28": {
+    title: "Pair your launch with HEDERAPUMP",
+    point: "Launching on pump.fun? You can pick HEDERAPUMP as your pair instead of SOL. Every paired launch routes more volume — and more fees — into the buyback.",
+  },
+  "2026-10-29": {
+    title: "Team supply is locked",
+    point: "The team supply of the pump.fun coin is locked. No team dumps — the only thing the team wallet does with fees is buy the real HEDERAPUMP on Hedera.",
+  },
+  "2026-10-30": {
+    title: "Track it on DexScreener",
+    point: "The DexScreener profile is fully updated: website, socials and banner are live on the chart. Watch the price, volume and buybacks in real time.",
+  },
+  "2026-10-31": {
+    title: "Same brand, two chains",
+    point: "HEDERAPUMP lives on Hedera (token 0.0.10924337) and its sister coin trades on Solana via pump.fun. Two separate coins, one brand — always check the address before you buy.",
+  },
+  "2026-11-01": {
+    title: "Launch week wrap-up",
+    point: "One week of HEDERAPUMP on pump.fun: daily posts, a locked team supply and every fee going into the real HEDERAPUMP on Hedera. Thanks for trading — more coming.",
+  },
+};
+
+/** Daily pump.fun promo for the given Amsterdam day (YYYY-MM-DD); null outside the promo week. */
+export function solanaDailyMessages(day: string) {
+  const theme = SOLANA_DAILY_THEMES[day];
+  if (!theme) return null;
+  const page = `https://pump.fun/coin/${SOLANA_MINT}`;
+  const chart = `https://dexscreener.com/solana/${SOLANA_MINT}`;
+  const x = addMentions(`☀️ ${theme.title}
+
+${theme.point}
+
+CA: ${SOLANA_MINT}
+${page}
+
+#Hedera #HederaPump`, ["pumpfun", "hedera"]);
+  const telegram = `<b>☀️ ${escapeHtml(theme.title)}</b>\n\n${escapeHtml(theme.point)}\n\n<b>Contract (mint):</b> <code>${SOLANA_MINT}</code>\nCoin page: <a href="${page}">pump.fun</a>\nChart: <a href="${chart}">DexScreener</a>\n\n${RISK}`;
+  const discord = `☀️ **${escapeMd(theme.title)}**\n\n${escapeMd(theme.point)}\n\n**Contract (mint):** \`${SOLANA_MINT}\`\nCoin page: ${page}\nChart: ${chart}\n\n${RISK}`;
+  return { x, telegram, discord };
+}
