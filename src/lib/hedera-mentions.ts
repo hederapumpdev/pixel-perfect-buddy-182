@@ -20,8 +20,16 @@ export type HandleKey = keyof typeof HEDERA_HANDLES;
 
 export const X_LIMIT = 280;
 
-/** X counts any link as 23 characters, so the same weighting is applied here. */
-export const xWeight = (text: string) => [...text.replace(/https?:\/\/\S+/g, "x".repeat(23))].length;
+/**
+ * X counts any link as 23 characters, so the same weighting is applied here.
+ * X also auto-links bare domains ("pump.fun"), so those cost the same as a full URL —
+ * counting them as plain text let a post that looked short get truncated when published.
+ */
+const LINKED_TLDS = "com|dev|fun|io|app|net|org|finance|xyz|co|ai|gg|sh|to|me|cc|social|network|cloud|site|live|exchange|tools";
+const BARE_DOMAIN = new RegExp(`\\b[\\w-]+(?:\\.[\\w-]+)*\\.(?:${LINKED_TLDS})\\b(?:/\\S*)?`, "gi");
+
+export const xWeight = (text: string) =>
+  [...text.replace(/https?:\/\/\S+/g, "x".repeat(23)).replace(BARE_DOMAIN, "x".repeat(23))].length;
 
 /**
  * Adds mentions to a post, dropping the ones that no longer fit inside the X limit.
