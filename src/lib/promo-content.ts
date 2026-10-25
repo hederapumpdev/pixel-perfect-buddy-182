@@ -187,7 +187,7 @@ export const hashpackTipSlot = "hashpack:tip";
 export function hashpackTipMessages() {
   const x = addMentions(`🛡️ HashPack's in-app browser is flagging hederapump.dev by mistake — a false positive. We're on no scam list.
 
-Workaround: open the site in Safari or Chrome and connect HashPack with WalletConnect as usual.
+Workaround: open the site in Safari or Chrome and connect HashPack via WalletConnect.
 
 We've asked HashPack to clear it.
 
@@ -225,4 +225,29 @@ Find yours: https://hederapump.dev/markets
 
 #Hedera #HederaPump`, ["hedex"]);
   return { x };
+}
+
+/** One-off pump.fun launch announcement: the Solana sister coin is live with its real mint. */
+export const solanaLaunchSlot = "solana:launch";
+
+/** Solana mint of the HEDERAPUMP sister coin, verified on-chain 2026-10-25. */
+export const SOLANA_MINT = "84aTPXRQPDStSQ65YsHEsyomRz9AHc8u4Cw4tTwepump";
+
+/** One-time announcement: the HEDERAPUMP sister coin launched on pump.fun; its fees buy the coin on Hedera. */
+export function solanaLaunchMessages() {
+  const official = "0.0.10924337";
+  const page = `https://pump.fun/coin/${SOLANA_MINT}`;
+  const chart = `https://dexscreener.com/solana/${SOLANA_MINT}`;
+  const x = addMentions(`🚀 HEDERAPUMP is live on pump.fun.
+
+CA: ${SOLANA_MINT}
+
+New launches can pair with HEDERAPUMP, and every fee it earns buys the real HEDERAPUMP on Hedera (${official}).
+
+Same brand, two chains.
+
+#Hedera #HederaPump`, ["pumpfun", "hedera"]);
+  const telegram = `<b>🚀 HEDERAPUMP is live on pump.fun</b>\n\nThe official HEDERAPUMP sister coin on Solana has launched. It shows as <b>Hederapump</b> (<code>$Hederpump</code>).\n\n<b>Contract (mint):</b> <code>${SOLANA_MINT}</code>\nCoin page: <a href="${page}">pump.fun</a>\nChart: <a href="${chart}">DexScreener</a>\n\n<b>Why it matters:</b> new launches on pump.fun can now pick HEDERAPUMP as their pair instead of SOL, and every fee the Solana coin earns is used to buy the real HEDERAPUMP on Hedera (token <code>${official}</code>).\n\n⚠️ These are two separate coins. The original HEDERAPUMP on Hedera is unchanged — always check the address before you buy.\n\nhttps://hederapump.dev\n\n${RISK}`;
+  const discord = `🚀 **HEDERAPUMP is live on pump.fun**\n\nThe official HEDERAPUMP sister coin on Solana has launched. It shows as **Hederapump** (\`$Hederpump\`).\n\n**Contract (mint):** \`${SOLANA_MINT}\`\nCoin page: ${page}\nChart: ${chart}\n\n**Why it matters:** new launches on pump.fun can now pick HEDERAPUMP as their pair instead of SOL, and every fee the Solana coin earns is used to buy the real HEDERAPUMP on Hedera (token \`${official}\`).\n\n⚠️ These are two separate coins. The original HEDERAPUMP on Hedera is unchanged — always check the address before you buy.\n\nhttps://hederapump.dev\n\n${RISK}`;
+  return { x, telegram, discord };
 }

@@ -12,6 +12,8 @@ import {
   hedexThanksSlot,
   hashpackTipMessages,
   hashpackTipSlot,
+  solanaLaunchMessages,
+  solanaLaunchSlot,
   solanaMessages,
   solanaSlot,
   testGradCaMessages,
@@ -261,5 +263,40 @@ describe('hedex shoutout', () => {
     expect(low).not.toContain('official partner');
     expect(low).not.toContain('endorsed');
     expect(low).not.toContain('verified by');
+  });
+});
+
+describe('pump.fun launch announcement', () => {
+  it('uses one stable slot so the launch post can never be posted twice', () => {
+    expect(solanaLaunchSlot).toBe('solana:launch');
+  });
+
+  it('gives the real Solana mint and the Hedera coin it supports on every channel', () => {
+    const msgs = solanaLaunchMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text).toContain('84aTPXRQPDStSQ65YsHEsyomRz9AHc8u4Cw4tTwepump');
+      expect(text).toContain('0.0.10924337');
+      expect(text.toLowerCase()).toContain('pump.fun');
+    }
+  });
+
+  it('says the two coins are separate so nobody buys the wrong one', () => {
+    const msgs = solanaLaunchMessages();
+    for (const text of [msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).toContain('two separate coins');
+      expect(text.toLowerCase()).toContain('check the address');
+    }
+  });
+
+  it('repeats the fee buyback promise and tags pump.fun within the X limit', () => {
+    const msgs = solanaLaunchMessages();
+    expect(msgs.x).toContain('@Pumpfun');
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).toContain('fee');
+      const low = text.toLowerCase();
+      expect(low).not.toContain('guaranteed');
+      expect(low).not.toContain('profit');
+    }
+    expect([...msgs.x].length).toBeLessThanOrEqual(280);
   });
 });

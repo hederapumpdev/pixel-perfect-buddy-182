@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { addMentions, dailyMentions, HEDERA_HANDLES, stripMentions, xWeight } from '../lib/hedera-mentions';
 import { appTweet, topics } from '../lib/x-content';
-import { contestMessages, graduationXMessage, weeklyMessages } from '../lib/promo-content';
+import { contestMessages, graduationXMessage, solanaLaunchMessages, weeklyMessages } from '../lib/promo-content';
 
 const coin = { address: '0x0000000000000000000000000000000000a6b793', name: 'HashCat', symbol: 'HCAT' };
 
@@ -13,7 +13,21 @@ describe('official ecosystem handles', () => {
       hashpack: '@hashpack',
       community: '@HederaCommunity',
       sodax: '@gosodax',
+      hedex: '@1hedex',
+      pumpfun: '@Pumpfun',
     });
+  });
+});
+
+describe('X link weighting', () => {
+  it('charges a bare domain the same 23 characters X charges for a link', () => {
+    expect(xWeight('pump.fun')).toBe(23);
+    expect(xWeight('https://hederapump.dev/markets')).toBe(23);
+    expect(xWeight('0.0.10924337')).toBe(12);
+  });
+
+  it('keeps the pump.fun launch post inside the limit once X links the domain', () => {
+    expect(xWeight(solanaLaunchMessages().x)).toBeLessThanOrEqual(280);
   });
 });
 
