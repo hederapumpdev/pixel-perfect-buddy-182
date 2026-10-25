@@ -4,6 +4,7 @@
 // Hedera Community -> @HederaCommunity, SODAX -> @gosodax.
 // Hedex -> @1hedex (checked 2026-10-25 through the X API: profile name HEDEX,
 // website link resolves to https://hedex.dev).
+// Pump.fun -> @Pumpfun (checked 2026-10-25 through the X API: account name "Pump.fun").
 
 export const HEDERA_HANDLES = {
   hedera: "@hedera",
@@ -12,6 +13,7 @@ export const HEDERA_HANDLES = {
   community: "@HederaCommunity",
   sodax: "@gosodax",
   hedex: "@1hedex",
+  pumpfun: "@Pumpfun",
 } as const;
 
 export type HandleKey = keyof typeof HEDERA_HANDLES;
