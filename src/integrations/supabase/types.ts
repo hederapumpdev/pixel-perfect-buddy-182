@@ -622,6 +622,7 @@ export type Database = {
           creator: string
           description: string | null
           graduated: boolean
+          hidden: boolean
           image_url: string | null
           last_trade_at: string | null
           name: string
@@ -644,6 +645,7 @@ export type Database = {
           creator: string
           description?: string | null
           graduated?: boolean
+          hidden?: boolean
           image_url?: string | null
           last_trade_at?: string | null
           name: string
@@ -666,6 +668,7 @@ export type Database = {
           creator?: string
           description?: string | null
           graduated?: boolean
+          hidden?: boolean
           image_url?: string | null
           last_trade_at?: string | null
           name?: string
