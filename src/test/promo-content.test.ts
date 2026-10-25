@@ -320,8 +320,10 @@ describe('team supply locked follow-up', () => {
 
   it('keeps the two-coin warning and the fee buyback promise, and fits the X limit', () => {
     const msgs = solanaLockedMessages();
+    for (const text of [msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).toContain('two separate coins');
+    }
     for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
-      expect(text.toLowerCase()).toContain('two separate coins' + '');
       expect(text.toLowerCase()).toContain('fee');
       const low = text.toLowerCase();
       expect(low).not.toContain('guaranteed');
