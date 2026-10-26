@@ -190,7 +190,7 @@ export async function spotlightCoin(now = new Date(), injected?: Db) {
   if (claimError) throw claimError;
   const chosen = claims?.[0]?.token;
   if (chosen) {
-    const { data: coin, error } = await db.from("tokens").select("address,name,symbol,trade_count,volume_hbar").eq("network", NETWORK).eq("address", chosen).maybeSingle();
+    const { data: coin, error } = await db.from("tokens").select("address,name,symbol,trade_count,volume_hbar").eq("network", NETWORK).eq("address", chosen).eq("hidden", false).maybeSingle();
     if (error) throw error;
     if (coin) return sendNext(db, slot, spotlightMessages({ address: coin.address, name: coin.name ?? "", symbol: coin.symbol ?? "" }, coin.trade_count ?? 0, Number(coin.volume_hbar ?? 0)), "app", 3, DISCORD_NEW_COINS_CHANNEL, coin.address);
   }
