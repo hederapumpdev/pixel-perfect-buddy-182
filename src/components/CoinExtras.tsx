@@ -9,6 +9,7 @@ import { fmtAge } from "@/lib/queries";
 import { HederaAddress, ProfileLink } from "@/components/HederaAddress";
 import { Avatar, useProfiles } from "@/components/ProfileEditor";
 import { StaffBadge } from "@/components/StaffBadge";
+import { FollowButton, useMyFollowing } from "@/components/FollowPanel";
 
 type Trade = { trader: string; is_buy: boolean; token_amount: number | string };
 
@@ -139,28 +140,44 @@ export function Holders({
   const cId = contract.toLowerCase();
   const cr = creator.toLowerCase();
   const profiles = useProfiles(rows.map((r) => r.who));
+  const following = useMyFollowing();
+  const [tab, setTab] = useState<"all" | "following">("all");
+  const shown = tab === "all" ? rows : rows.filter((r) => following.includes(r.who));
+  const pill = (on: boolean) => `rounded-md px-3 py-1.5 text-xs font-semibold ${on ? "bg-secondary text-foreground" : "text-muted-foreground hover:bg-secondary/60"}`;
   return (
     <div className="rounded-lg border border-border bg-card">
-      <p className="border-b border-border px-4 py-3 text-sm font-semibold">Top holders</p>
-      <div className="divide-y divide-border font-mono text-xs">
-        {rows.map((r, i) => {
+      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+        <p className="mr-auto text-sm font-semibold">Top holders</p>
+        <button type="button" className={pill(tab === "all")} onClick={() => setTab("all")}>All ({rows.length})</button>
+        <button type="button" className={pill(tab === "following")} onClick={() => setTab("following")}>Following ({rows.filter((r) => following.includes(r.who)).length})</button>
+      </div>
+      <div className="divide-y divide-border">
+        {shown.map((r) => {
           const w = r.who.toLowerCase();
+          const p = profiles[w];
           const tag = w === cId ? "bonding curve" : w === cr ? "dev" : null;
           return (
-            <div key={r.who} className="flex items-center justify-between gap-2 px-4 py-2">
-              <span className="flex min-w-0 items-center gap-2" title={r.who}>
-                <span className="shrink-0">{i + 1}.</span>
-                {profiles[w] && <Avatar hash={profiles[w]?.avatar} size={24} />}
-                <ProfileLink address={r.who} className="truncate hover:underline">{profiles[w]?.name ?? <HederaAddress address={r.who} />}</ProfileLink><StaffBadge wallet={r.who} />
-                {tag && (
-                  <span className="ml-2 rounded bg-secondary px-1.5 py-0.5 text-[10px] text-primary">{tag}</span>
-                )}
-              </span>
-              <span className="shrink-0">{((r.amt / supply) * 100).toFixed(2)}%</span>
+            <div key={r.who} className="flex items-center gap-3 px-4 py-3">
+              <Avatar hash={p?.avatar} size={44} />
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-1.5" title={r.who}>
+                  <ProfileLink address={r.who} className="truncate font-semibold hover:underline">{p?.name ?? <HederaAddress address={r.who} />}</ProfileLink>
+                  {p?.x && (
+                    <a href={`https://x.com/${p.x}`} target="_blank" rel="noreferrer" aria-label={`@${p.x} on X (not verified)`} className="shrink-0 text-muted-foreground hover:text-foreground">𝕏</a>
+                  )}
+                  <StaffBadge wallet={r.who} />
+                  {tag && <span className="shrink-0 rounded bg-secondary px-1.5 py-0.5 text-[10px] text-primary">{tag}</span>}
+                </div>
+                {!tag && <div className="mt-1"><FollowButton account={r.who} /></div>}
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="font-mono text-sm font-semibold">{((r.amt / supply) * 100).toFixed(2)}%</p>
+                <p className="font-mono text-xs text-muted-foreground">{r.amt.toLocaleString("en-US", { maximumFractionDigits: 0 })}</p>
+              </div>
             </div>
           );
         })}
-        {!rows.length && <p className="px-4 py-6 text-center text-muted-foreground">No holders yet.</p>}
+        {!shown.length && <p className="px-4 py-6 text-center text-sm text-muted-foreground">{tab === "following" ? "None of the wallets you follow hold this coin." : "No holders yet."}</p>}
       </div>
     </div>
   );

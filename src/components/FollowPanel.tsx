@@ -77,3 +77,50 @@ export function FollowPanel({ account }: { account: string }) {
     </div>
   );
 }
+
+/** Small Follow/Unfollow button for lists; reads the viewer's own following list. */
+export function FollowButton({ account }: { account: string }) {
+  const w = useWallet();
+  const qc = useQueryClient();
+  const get = useServerFn(getFollows);
+  const set = useServerFn(setFollow);
+  const [busy, setBusy] = useState(false);
+  const me = w.accountId;
+  const mine = useQuery({ queryKey: ["follows", me], enabled: !!me, queryFn: () => get({ data: { account: me! } }), staleTime: 15_000 });
+  if (!/^0\.0\.\d+$/.test(account) || me === account) return null;
+  const on = !!mine.data?.following.includes(account);
+  async function toggle(e: React.MouseEvent) {
+    e.preventDefault();
+    if (!me) {
+      toast.error("Connect your wallet to follow");
+      return;
+    }
+    setBusy(true);
+    try {
+      const time = new Date().toISOString();
+      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+      const msg = { follower: me, followee: account, follow: !on, time, nonce };
+      const sig = await w.signText(followMessage(msg));
+      await set({ data: { ...msg, ...sig } });
+      await qc.invalidateQueries({ queryKey: ["follows"] });
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <button type="button" disabled={busy} onClick={toggle}
+      className="rounded-md bg-secondary px-2.5 py-1 font-sans text-xs font-semibold text-secondary-foreground hover:bg-muted disabled:opacity-50">
+      {on ? "Following" : "Follow"}
+    </button>
+  );
+}
+
+/** Account IDs the connected wallet follows (empty when signed out). */
+export function useMyFollowing() {
+  const w = useWallet();
+  const get = useServerFn(getFollows);
+  const me = w.accountId;
+  return useQuery({ queryKey: ["follows", me], enabled: !!me, queryFn: () => get({ data: { account: me! } }), staleTime: 15_000 }).data?.following ?? [];
+}
