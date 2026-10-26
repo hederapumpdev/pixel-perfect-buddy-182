@@ -7,7 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Avatar, useProfiles } from "@/components/ProfileEditor";
 import { getFollows, setFollow } from "@/lib/follow.functions";
 import { followMessage } from "@/lib/follow-message";
+import { readNotifSession } from "@/lib/notifications";
 import { useWallet } from "@/lib/wallet";
+
+/** One wallet approval: the bell's week-long sign-in, or a fresh signature when there is none. */
+async function proveFollow(w: ReturnType<typeof useWallet>, msg: { follower: string; followee: string; follow: boolean }) {
+  const session = readNotifSession(msg.follower);
+  if (session) return { ...msg, sessionToken: session.token };
+  const time = new Date().toISOString();
+  const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+  const full = { ...msg, time, nonce };
+  const sig = await w.signText(followMessage(full));
+  return { ...full, ...sig };
+}
 
 /** Followers/following counts + lists; shows a Follow button when viewing someone else. */
 export function FollowPanel({ account }: { account: string }) {
