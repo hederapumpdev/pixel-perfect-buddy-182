@@ -78,7 +78,7 @@ export function BubbleMap({
                         {label.length > 14 ? `${label.slice(0, 13)}…` : label}
                       </text>
                     )}
-                    {b.r >= 26 && (
+                    {b.r >= 34 && (
                       <text
                         x={b.x}
                         y={b.y + 12}
