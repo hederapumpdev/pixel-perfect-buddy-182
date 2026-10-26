@@ -111,5 +111,5 @@
 - [ ] Spotlight channel coverage: fix is built and tested in preview, live site still runs the old version. Publish on owner approval, then set the spotlight schedule to `5,20,35,50 */6 * * *` so each six-hour window posts on X, Telegram and Discord.
 
 ## Follow + holders feedback (2026-10-26)
-- [ ] Holders list looks old to owner — new design verified live; likely cached page, told owner to refresh and tap Holders
-- [ ] Follow asks wallet approval every time — let a valid bell sign-in (community_sessions token) replace the per-follow signature
+- [x] Holders list looks old to owner — new design verified live on hederapump.dev (All/Following tabs, avatars, Follow buttons); owner's screenshot showed the Trades tab, likely a cached page
+- [x] Follow approval: setFollow now accepts the bell's week-long session token instead of a fresh signature; FollowPanel/FollowButton use readNotifSession, falling back to a signature when no session. 23 tests pass, typecheck clean, build OK. Not yet published.
