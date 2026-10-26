@@ -113,3 +113,5 @@
 ## Follow + holders feedback (2026-10-26)
 - [x] Holders list looks old to owner — new design verified live on hederapump.dev (All/Following tabs, avatars, Follow buttons); owner's screenshot showed the Trades tab, likely a cached page
 - [x] Follow approval: setFollow now accepts the bell's week-long session token instead of a fresh signature; FollowPanel/FollowButton use readNotifSession, falling back to a signature when no session. 23 tests pass, typecheck clean, build OK. Not yet published.
+
+- [ ] Bubble map op muntpagina: knop die een kaart opent met bubbels per houder (grootte = aantal munten), zoals memejob.fun maar niet meteen groot zichtbaar.
