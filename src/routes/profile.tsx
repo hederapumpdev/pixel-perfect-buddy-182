@@ -1,6 +1,7 @@
 import { InstantWallet } from "@/components/InstantWallet";
 import { WalletHoldings } from "@/components/WalletHoldings";
 import { ProfileEditor } from "@/components/ProfileEditor";
+import { FollowPanel } from "@/components/FollowPanel";
 import { StaffClaim } from "@/components/StaffClaim";
 import { HoldOutCard } from "@/components/HoldOutCard";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -218,6 +219,7 @@ function Profile() {
         </Link>
       </p>
       <ProfileEditor wallet={(w.evmAddress ?? longZero(w.accountId!)).toLowerCase()} accountId={w.accountId!} />
+      <FollowPanel account={w.accountId!} />
       <InstantWallet />
       <WalletHoldings accountId={w.accountId!} addrs={addrs} balanceHbar={w.balanceHbar} />
 
