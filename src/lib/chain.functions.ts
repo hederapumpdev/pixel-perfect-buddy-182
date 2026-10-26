@@ -152,10 +152,14 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
     if (error) return; // duplicate
     const { data: t } = await db
       .from("tokens")
-      .select("volume_hbar,trade_count")
+      .select("volume_hbar,trade_count,symbol")
       .eq("address", token)
       .maybeSingle();
     if (!t) return;
+    if (a.isBuy) {
+      const { notifyFollowersOfBuy } = await import("./notifications.server");
+      await notifyFollowersOfBuy(db, String(a.trader).toLowerCase(), token, t.symbol ?? "", tsToIso(log.timestamp)).catch(() => {});
+    }
     await db
       .from("tokens")
       .update({
@@ -168,11 +172,14 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
       })
       .eq("address", token);
   } else if (ev.eventName === "Graduated" || ev.eventName === "Migrated") {
+    const token = String(a.token).toLowerCase();
     const { error } = await db
       .from("tokens")
       .update({ graduated: true })
-      .eq("address", String(a.token).toLowerCase());
+      .eq("address", token);
     if (error) throw error;
+    const { notifyCoinGraduated } = await import("./notifications.server");
+    await notifyCoinGraduated(db, token).catch(() => {});
   }
 }
 
