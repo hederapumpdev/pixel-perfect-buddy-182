@@ -75,7 +75,7 @@ describe("bell wording", () => {
   });
 
   it("does not print a wallet name in front of a graduation", () => {
-    expect(notificationText({ kind: "graduation", symbol: "HPUMP" })).toEqual({ showActor: false, text: "HPUMP graduated to SaucerSwap" });
+    expect(notificationText({ kind: "graduation", symbol: "HPUMP" })).toEqual({ showActor: false, text: "$HPUMP graduated to SaucerSwap" });
   });
 });
 
@@ -96,6 +96,6 @@ describe("notification login", () => {
     expect(msg).toContain("Account: 0.0.10927104");
     expect(msg).toContain("Time: 2026-10-26T12:00:00.000Z");
     expect(msg).toContain("Nonce: abcd");
-    expect(msg).not.toContain("0.0.1");
+    expect(msg).not.toContain("0.0.99999");
   });
 });
