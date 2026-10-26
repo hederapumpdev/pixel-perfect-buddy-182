@@ -24,7 +24,10 @@ export function FollowPanel({ account }: { account: string }) {
   const profiles = useProfiles(list);
 
   async function toggle() {
-    if (!me) return toast.error("Connect your wallet to follow");
+    if (!me) {
+      toast.error("Connect your wallet to follow");
+      return;
+    }
     setBusy(true);
     try {
       const time = new Date().toISOString();
