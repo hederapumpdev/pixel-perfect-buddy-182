@@ -5,7 +5,7 @@ import { Comments, Holders } from "@/components/CoinExtras";
 import { FollowButton } from "@/components/PriceAlerts";
 import { Avatar, useProfiles } from "@/components/ProfileEditor";
 import { StaffBadge } from "@/components/StaffBadge";
-import { HederaAddress, useHederaId } from "@/components/HederaAddress";
+import { HederaAddress, ProfileLink, useHederaId } from "@/components/HederaAddress";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
