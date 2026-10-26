@@ -13,6 +13,24 @@ export const listComments = createServerFn({ method: "GET" })
     return rows ?? [];
   });
 
+/** Latest comments written by one wallet (any of its address forms), for its public profile. */
+export const listCommentsByAuthor = createServerFn({ method: "POST" })
+  .inputValidator((d: { authors: string[] }) => ({
+    authors: [...new Set((d.authors ?? []).map((a) => String(a).trim()))].filter((a) => a.length >= 3 && a.length <= 100).slice(0, 4),
+  }))
+  .handler(async ({ data }) => {
+    if (!data.authors.length) return [];
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const variants = [...new Set(data.authors.flatMap((a) => [a, a.toLowerCase()]))];
+    const { data: rows } = await supabaseAdmin
+      .from("coin_comments")
+      .select("id, token, body, created_at")
+      .in("author", variants)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    return rows ?? [];
+  });
+
 export const postComment = createServerFn({ method: "POST" })
   .inputValidator((d: { token: string; author: string; body: string }) => {
     const token = String(d.token ?? "").toLowerCase().trim();

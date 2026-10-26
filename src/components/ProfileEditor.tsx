@@ -22,6 +22,19 @@ export async function squareImage(f: File): Promise<File> {
   if (!b) throw new Error("Couldn't read this image");
   return new File([b], "avatar.jpg", { type: "image/jpeg" });
 }
+/** 3:1 cover photo, cropped from the centre and kept small enough for the image store. */
+export async function coverImage(f: File): Promise<File> {
+  const bmp = await createImageBitmap(f);
+  const w = Math.min(bmp.width, bmp.height * 3);
+  const h = w / 3;
+  const c = document.createElement("canvas");
+  c.width = 1200;
+  c.height = 400;
+  c.getContext("2d")!.drawImage(bmp, (bmp.width - w) / 2, (bmp.height - h) / 2, w, h, 0, 0, 1200, 400);
+  const b = await new Promise<Blob | null>((r) => c.toBlob(r, "image/jpeg", 0.8));
+  if (!b) throw new Error("Couldn't read this image");
+  return new File([b], "cover.jpg", { type: "image/jpeg" });
+}
 export const toB64 = (f: File) =>
   new Promise<string>((res, rej) => {
     const r = new FileReader();
@@ -62,6 +75,16 @@ export function useProfiles(wallets: string[]) {
   }));
 }
 
+export function Cover({ hash }: { hash: string | null | undefined }) {
+  const url = imageUrl(hash ?? null);
+  return (
+    <div className="relative -mx-4 h-36 overflow-hidden bg-gradient-to-br from-primary/40 via-accent/30 to-background sm:mx-0 sm:h-48 sm:rounded-xl">
+      {url && <img src={url} alt="" className="h-full w-full object-cover" />}
+      <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+    </div>
+  );
+}
+
 export function Avatar({ hash, size = 40 }: { hash: string | null | undefined; size?: number }) {
   const url = imageUrl(hash ?? null);
   return url ? (
@@ -83,23 +106,25 @@ export function ProfileEditor({ wallet, accountId }: { wallet: string; accountId
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [banner, setBanner] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   function start() {
     setName(me?.name ?? "");
     setBio(me?.bio ?? "");
     setAvatar(me?.avatar ?? null);
+    setBanner(me?.banner ?? null);
     setX(me?.x ?? "");
     setOpen(true);
   }
 
-  async function pick(f: File | undefined) {
+  async function pick(f: File | undefined, cover = false) {
     if (!f) return;
     setBusy(true);
     try {
-      const img = await squareImage(f);
+      const img = cover ? await coverImage(f) : await squareImage(f);
       const { hash } = await upload({ data: { mime: img.type, base64: await toB64(img) } });
-      setAvatar(hash);
+      (cover ? setBanner : setAvatar)(hash);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -114,8 +139,8 @@ export function ProfileEditor({ wallet, accountId }: { wallet: string; accountId
       const time = new Date().toISOString();
       const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
       const handle = x.trim().replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//i, "").replace(/^@/, "").split(/[/?#]/)[0] || null;
-      const sig = await w.signText(profileEditMessage({ accountId, wallet, time, nonce, name: name.trim(), bio: bio.trim(), avatar, x: handle }));
-      await save({ data: { accountId, wallet, time, nonce, name, bio, avatar, x: handle, ...sig } });
+      const sig = await w.signText(profileEditMessage({ accountId, wallet, time, nonce, name: name.trim(), bio: bio.trim(), avatar, x: handle, banner }));
+      await save({ data: { accountId, wallet, time, nonce, name, bio, avatar, x: handle, banner, ...sig } });
       qc.invalidateQueries({ queryKey: ["profiles"] });
       toast.success("Profile saved");
       setOpen(false);
@@ -149,6 +174,15 @@ export function ProfileEditor({ wallet, accountId }: { wallet: string; accountId
           Change picture
           <input type="file" accept="image/*" className="hidden" onChange={(e) => pick(e.target.files?.[0])} />
         </label>
+        <label className="cursor-pointer text-sm text-primary">
+          {banner ? "Change cover" : "Add cover photo"}
+          <input type="file" accept="image/*" className="hidden" onChange={(e) => pick(e.target.files?.[0], true)} />
+        </label>
+        {banner && (
+          <button type="button" className="text-sm text-muted-foreground hover:underline" onClick={() => setBanner(null)}>
+            Remove cover
+          </button>
+        )}
       </div>
       <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Username" maxLength={24} />
       <textarea
