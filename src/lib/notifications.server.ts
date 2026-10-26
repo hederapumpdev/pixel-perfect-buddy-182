@@ -31,7 +31,7 @@ type Notice = { kind: NotificationKind; actor?: string | null; token?: string | 
 
 /** Writes one notice per wallet that still has this type switched on. */
 export async function notifyMany(db: Supabase, accounts: string[], n: Notice) {
-  const targets = [...new Set(accounts)].filter(isAccount);
+  let targets = [...new Set(accounts)].filter(isAccount);
   if (!targets.length || !isNotificationKind(n.kind)) return;
   const { data: off } = await db
     .from("notification_prefs")
@@ -40,18 +40,27 @@ export async function notifyMany(db: Supabase, accounts: string[], n: Notice) {
     .eq("kind", n.kind)
     .eq("enabled", false);
   const skip = new Set((off ?? []).map((r) => r.account));
-  const rows = targets
-    .filter((a) => !skip.has(a))
-    .map((a) => ({
-      account: a,
-      kind: n.kind,
-      actor: n.actor && isAccount(n.actor) ? n.actor : null,
-      token: n.token ? String(n.token).toLowerCase().slice(0, 80) : null,
-      symbol: n.symbol ? String(n.symbol).slice(0, 16) : null,
-      dedupe_key: n.dedupe ? String(n.dedupe).slice(0, 120) : null,
-    }));
-  if (!rows.length) return;
-  const { error } = await db.from("notifications").insert(rows, { onConflict: "account,kind,dedupe_key", ignoreDuplicates: true });
+  targets = targets.filter((a) => !skip.has(a));
+  if (n.dedupe) {
+    const { data: seen } = await db
+      .from("notifications")
+      .select("account")
+      .in("account", targets)
+      .eq("kind", n.kind)
+      .eq("dedupe_key", n.dedupe);
+    const done = new Set((seen ?? []).map((r) => r.account));
+    targets = targets.filter((a) => !done.has(a));
+  }
+  if (!targets.length) return;
+  const rows = targets.map((a) => ({
+    account: a,
+    kind: n.kind,
+    actor: n.actor && isAccount(n.actor) ? n.actor : null,
+    token: n.token ? String(n.token).toLowerCase().slice(0, 80) : null,
+    symbol: n.symbol ? String(n.symbol).slice(0, 16) : null,
+    dedupe_key: n.dedupe ? String(n.dedupe).slice(0, 120) : null,
+  }));
+  const { error } = await db.from("notifications").insert(rows);
   if (error) console.error("notification insert failed", error.message);
 }
 

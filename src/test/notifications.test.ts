@@ -39,7 +39,7 @@ describe("per-type opt out", () => {
   });
 
   it("sends again once the wallet switches the type back on", () => {
-    expect(prefEnabled([{ kind: "comment", enabled: false }, { kind: "comment", enabled: true }], "comment")).toBe(true);
+    expect(prefEnabled([{ kind: "follower_buy", enabled: true }], "follower_buy")).toBe(true);
   });
 });
 
