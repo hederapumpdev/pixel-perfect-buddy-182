@@ -36,7 +36,7 @@ export async function verifyChatLogin(data: { author: string; time: string; nonc
 }
 
 /** Verifies a wallet signature for any account (mirror-node key or EVM alias). Returns the account's EVM alias. */
-export async function verifyWalletSignature(d: { account: string; time: string; message: string; signature?: string; evmSignature?: string }) {
+export async function verifyWalletSignature(d: { account: string; time: string; message: string; signature?: string | undefined; evmSignature?: string | undefined }) {
   if (!Number.isFinite(Date.parse(d.time)) || Math.abs(Date.now() - Date.parse(d.time)) > 300_000) throw new Error("Signature expired. Try again.");
   const response = await fetch(`${MIRROR_URL}/api/v1/accounts/${d.account}`);
   if (!response.ok) throw new Error("Wallet not found on Hedera.");
