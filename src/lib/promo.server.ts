@@ -75,7 +75,7 @@ async function sendDiscord(text: string, nonce: string, channelId: string): Prom
 type Db = any;
 
 /** Posts the first unsettled channel for a slot; one external send per call. */
-async function sendNext(db: Db, slot: string, texts: Partial<Record<Channel, string>>, imageKind: "app" | "graduation", imageIndex = 0, discordChannel = DISCORD_ANNOUNCEMENTS_CHANNEL) {
+async function sendNext(db: Db, slot: string, texts: Partial<Record<Channel, string>>, imageKind: "app" | "graduation", imageIndex = 0, discordChannel = DISCORD_ANNOUNCEMENTS_CHANNEL, token: string | null = null) {
   for (const channel of CHANNELS) {
     const text = texts[channel];
     if (!text) continue;
@@ -85,7 +85,7 @@ async function sendNext(db: Db, slot: string, texts: Partial<Record<Channel, str
       if (existing.status === "sending" || existing.status === "unknown") return { step: `${channel} awaiting review` };
       continue; // sent / failed / skipped are settled
     }
-    const { error: claimError } = await db.from("promo_posts").insert({ slot, channel, status: "sending", text });
+    const { error: claimError } = await db.from("promo_posts").insert({ slot, channel, status: "sending", text, token });
     if (claimError) {
       if (claimError.code === "23505") return { step: "claimed elsewhere" };
       throw claimError;
@@ -181,31 +181,35 @@ export async function promoteGraduation() {
   return { step: "up to date" };
 }
 
-/** Every six hours: highlights a random community coin (never an official one) on all channels. */
-export async function spotlightCoin(now = new Date()) {
-  const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+/** Every six hours: highlights one community coin (never an official one) on all channels. */
+export async function spotlightCoin(now = new Date(), injected?: Db) {
+  const db: Db = injected ?? (await import("@/integrations/supabase/client.server")).supabaseAdmin;
+  const slot = spotlightSlot(now);
+  // The coin chosen for this window is stored with its first channel claim, so every channel announces the same coin.
+  const { data: claims, error: claimError } = await db.from("promo_posts").select("token").eq("slot", slot).not("token", "is", null).limit(1);
+  if (claimError) throw claimError;
+  const chosen = claims?.[0]?.token;
+  if (chosen) {
+    const { data: coin, error } = await db.from("tokens").select("address,name,symbol,trade_count,volume_hbar").eq("network", NETWORK).eq("address", chosen).eq("hidden", false).maybeSingle();
+    if (error) throw error;
+    if (coin) return sendNext(db, slot, spotlightMessages({ address: coin.address, name: coin.name ?? "", symbol: coin.symbol ?? "" }, coin.trade_count ?? 0, Number(coin.volume_hbar ?? 0)), "app", 3, DISCORD_NEW_COINS_CHANNEL, coin.address);
+  }
   const { data: coins, error } = await db
     .from("tokens")
     .select("address,name,symbol,creator,trade_count,volume_hbar")
     .eq("network", NETWORK)
+    .eq("hidden", false)
     .eq("graduated", false)
     .gt("trade_count", 0)
     .order("volume_hbar", { ascending: false })
     .limit(20);
   if (error) throw error;
-  const pool = (coins ?? []).filter((c) => !isOfficial(c.creator));
+  const pool = (coins ?? []).filter((c: { creator?: string | null }) => !isOfficial(c.creator));
   if (!pool.length) return { step: "no coins to spotlight" };
   const coin = pool[Math.floor(Math.random() * pool.length)];
   if (!coin) return { step: "no coins to spotlight" };
   const picked: PromoCoin = { address: coin.address, name: coin.name ?? "", symbol: coin.symbol ?? "" };
-  return sendNext(
-    db,
-    spotlightSlot(now),
-    spotlightMessages(picked, coin.trade_count ?? 0, Number(coin.volume_hbar ?? 0)),
-    "app",
-    3,
-    DISCORD_NEW_COINS_CHANNEL,
-  );
+  return sendNext(db, slot, spotlightMessages(picked, coin.trade_count ?? 0, Number(coin.volume_hbar ?? 0)), "app", 3, DISCORD_NEW_COINS_CHANNEL, coin.address);
 }
 
 /** Sunday: posts the past 7 days of launchpad activity to all three channels. */

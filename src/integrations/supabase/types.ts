@@ -382,6 +382,7 @@ export type Database = {
           slot: string
           status: string
           text: string | null
+          token: string | null
         }
         Insert: {
           channel: string
@@ -391,6 +392,7 @@ export type Database = {
           slot: string
           status?: string
           text?: string | null
+          token?: string | null
         }
         Update: {
           channel?: string
@@ -400,6 +402,7 @@ export type Database = {
           slot?: string
           status?: string
           text?: string | null
+          token?: string | null
         }
         Relationships: []
       }
