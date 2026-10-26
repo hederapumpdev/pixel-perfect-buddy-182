@@ -398,6 +398,15 @@ function TokenPage() {
 
           <TradeStatistics token={t.address} />
 
+          <BubbleMap
+            tokenId={v2 ? `0.0.${BigInt(t.address)}` : null}
+            decimals={v2 ? 8 : 18}
+            creator={t.creator}
+            contract={t.contract}
+            trades={trades}
+            supply={1_000_000_000}
+          />
+
           <div className="rounded-lg border border-border bg-card">
             <div className="flex gap-2 p-2 border-b border-border">
               {(
