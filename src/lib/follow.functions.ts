@@ -41,6 +41,9 @@ export const setFollow = createServerFn({ method: "POST" })
       if ((count ?? 0) >= 1000) throw new Error("You follow the maximum of 1000 wallets");
       const { error } = await supabaseAdmin.from("wallet_follows").upsert({ follower: data.follower, followee: data.followee }, { onConflict: "follower,followee", ignoreDuplicates: true });
       if (error) throw new Error("Following failed");
+      const { notifyUser } = await import("./notifications.server");
+      const { followDedupe } = await import("./notifications");
+      await notifyUser(supabaseAdmin, data.followee, { kind: "new_follower", actor: data.follower, dedupe: followDedupe(data.follower) });
     } else {
       const { error } = await supabaseAdmin.from("wallet_follows").delete().eq("follower", data.follower).eq("followee", data.followee);
       if (error) throw new Error("Unfollowing failed");
