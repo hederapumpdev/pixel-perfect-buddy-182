@@ -53,7 +53,6 @@ export const setFollow = createServerFn({ method: "POST" })
       const { verifyWalletSignature } = await import("./community-auth.server");
       await verifyWalletSignature({ account: data.follower, time: data.time!, message: followMessage(data as { follower: string; followee: string; follow: boolean; time: string; nonce: string }), signature: data.signature, evmSignature: data.evmSignature });
     }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (data.follow) {
       const { count } = await supabaseAdmin.from("wallet_follows").select("*", { count: "exact", head: true }).eq("follower", data.follower);
       if ((count ?? 0) >= 1000) throw new Error("You follow the maximum of 1000 wallets");
