@@ -39,3 +39,4 @@
 - Web3Auth v11 has no `web3auth.provider`; read the sign-in key via `signinProvider()` in `src/lib/wallet.tsx` (primary connector's provider), otherwise logins reach "authorized" but never attach.
 - Opening a SaucerSwap pool goes through `src/lib/sol-pool.ts` only: the creation fee is read live from the factory and converted with Hedera's exchange rate, and the bot wallet must already hold both sides before anything is sent — never estimate the fee or fund a pool automatically.
 - Profile edits are proven by a fresh wallet signature over the exact content (profile-message.ts, verifyWalletSignature); the old device edit key is retired — replays can only re-save identical data. X handles are shown as unverified links.
+- Follows are stored by Hedera account ID in `wallet_follows` (server-only access); every follow/unfollow is proven by a fresh wallet signature (`follow-message.ts`) so nobody can follow on behalf of another wallet.
