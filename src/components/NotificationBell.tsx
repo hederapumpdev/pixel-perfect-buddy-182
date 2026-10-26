@@ -24,27 +24,13 @@ import {
   notificationText,
   notificationsLoginMessage,
   prefEnabled,
+  readNotifSession,
   timeAgo,
   unreadCount,
   type NotificationKind,
   type NotificationRow,
+  type NotifSession,
 } from "@/lib/notifications";
-
-type Session = { token: string; account: string; expiresAt: string };
-
-/** The bell only works for the wallet that signed in, and only until the session runs out. */
-function readSession(account: string | null): Session | null {
-  try {
-    const raw = localStorage.getItem(NOTIF_SESSION_KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw) as Session;
-    if (!s?.token || !s.account || Date.parse(s.expiresAt) <= Date.now()) return null;
-    if (account && s.account !== account) return null;
-    return s;
-  } catch {
-    return null;
-  }
-}
 
 /** Header bell: unread count, the feed itself, and a switch per notice type. */
 export function NotificationBell() {
@@ -57,13 +43,13 @@ export function NotificationBell() {
   const fetchPrefs = useServerFn(getNotificationPrefs);
   const savePref = useServerFn(setNotificationPref);
 
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<NotifSession | null>(null);
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    setSession(readSession(me));
+    setSession(readNotifSession(me));
   }, [me]);
 
   const token = session?.token;

@@ -23,6 +23,25 @@ export const NOTIFICATION_HINTS: Record<NotificationKind, string> = {
 export const NOTIF_SESSION_KEY = "hederaPump.notifSession";
 export const NOTIF_SESSION_MS = 7 * 24 * 60 * 60_000;
 
+export type NotifSession = { token: string; account: string; expiresAt: string };
+
+/**
+ * The saved sign-in for this wallet, if it is still valid. One signature opens a week of
+ * notifications — and the same session also proves follows, so following needs no new approval.
+ */
+export function readNotifSession(account: string | null): NotifSession | null {
+  try {
+    const raw = localStorage.getItem(NOTIF_SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw) as NotifSession;
+    if (!s?.token || !s.account || Date.parse(s.expiresAt) <= Date.now()) return null;
+    if (account && s.account !== account) return null;
+    return s;
+  } catch {
+    return null;
+  }
+}
+
 export type NotificationRow = {
   id: string;
   kind: NotificationKind;
