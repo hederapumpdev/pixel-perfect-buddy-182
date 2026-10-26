@@ -1,0 +1,2 @@
+ALTER TABLE public.promo_posts ADD COLUMN IF NOT EXISTS token text;
+COMMENT ON COLUMN public.promo_posts.token IS 'Coin address the slot announces, stored with the first channel claim so every channel posts the same coin.';

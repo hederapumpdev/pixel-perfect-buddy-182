@@ -225,6 +225,13 @@
       "when": 1792943292050,
       "tag": "0031_tokens_hidden_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792998085237,
+      "tag": "0032_promo_posts_token",
+      "breakpoints": true
     }
   ]
 }
