@@ -20,11 +20,11 @@ describe("layoutBubbles", () => {
       SUPPLY,
     );
     expect(bs).toHaveLength(3);
-    expect(bs[0].who).toBe("0.0.1");
-    expect(bs[0].r).toBeGreaterThan(bs[1].r);
-    expect(bs[1].r).toBeGreaterThan(bs[2].r);
+    expect(bs[0]!.who).toBe("0.0.1");
+    expect(bs[0]!.r).toBeGreaterThan(bs[1]!.r);
+    expect(bs[1]!.r).toBeGreaterThan(bs[2]!.r);
     // radius scales with sqrt: 100 vs 25 → factor 2
-    expect(bs[0].r / bs[1].r).toBeCloseTo(2, 5);
+    expect(bs[0]!.r / bs[1]!.r).toBeCloseTo(2, 5);
   });
 
   it("keeps every bubble fully inside the view box", () => {
@@ -42,7 +42,7 @@ describe("layoutBubbles", () => {
 
   it("reports each holder's share of the supply", () => {
     const [b] = layoutBubbles([{ who: "0.0.9", amt: 250_000_000 }], SUPPLY);
-    expect(b.pct).toBeCloseTo(25, 5);
+    expect(b!.pct).toBeCloseTo(25, 5);
   });
 
   it("is deterministic and caps at 40 holders", () => {
