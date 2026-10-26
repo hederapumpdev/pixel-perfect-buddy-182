@@ -738,6 +738,24 @@ export type Database = {
           },
         ]
       }
+      wallet_follows: {
+        Row: {
+          created_at: string
+          followee: string
+          follower: string
+        }
+        Insert: {
+          created_at?: string
+          followee: string
+          follower: string
+        }
+        Update: {
+          created_at?: string
+          followee?: string
+          follower?: string
+        }
+        Relationships: []
+      }
       wallet_profiles: {
         Row: {
           avatar: string | null

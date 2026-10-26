@@ -239,6 +239,13 @@
       "when": 1793024150143,
       "tag": "0033_wallet_profiles_x_handle",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1793025905655,
+      "tag": "0034_wallet_follows",
+      "breakpoints": true
     }
   ]
 }
