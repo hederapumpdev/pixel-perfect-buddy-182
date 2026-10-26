@@ -24,7 +24,7 @@ export function layoutBubbles(rows: HolderRow[], supply: number): Bubble[] {
     .slice(0, 40);
   if (!list.length || !(supply > 0)) return [];
 
-  const maxAmt = list[0].amt;
+  const maxAmt = list[0]!.amt;
   const raw = list.map((row, i) => {
     const r = Math.max(MIN_R, MAX_R * Math.sqrt(row.amt / maxAmt));
     const angle = i * GOLDEN_ANGLE;
