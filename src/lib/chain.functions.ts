@@ -111,7 +111,7 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
     }
     const s = (k: string, n = 300) => (typeof meta[k] === "string" ? meta[k].slice(0, n) : null);
     const img = s("image", 80);
-    await db.from("tokens").upsert(
+    const { data: inserted } = await db.from("tokens").upsert(
       {
         address: String(a.token).toLowerCase(),
         network: NETWORK,
@@ -130,7 +130,12 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
         created_at: tsToIso(log.timestamp),
       },
       { onConflict: "address", ignoreDuplicates: true },
-    );
+    ).select("address");
+    // Only a first-time insert is a launch; re-synced history never re-notifies.
+    if (inserted?.length && Date.now() - Date.parse(tsToIso(log.timestamp)) < 24 * 3600_000) {
+      const { notifyFollowersOfLaunch } = await import("./notifications.server");
+      await notifyFollowersOfLaunch(db, String(a.creator).toLowerCase(), String(a.token).toLowerCase(), String(a.symbol).slice(0, 10)).catch(() => {});
+    }
   } else if (ev.eventName === "Trade") {
     const token = String(a.token).toLowerCase();
     const vH = hbar(a.virtualHbar as bigint),

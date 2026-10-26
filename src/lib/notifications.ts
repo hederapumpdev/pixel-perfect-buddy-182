@@ -119,7 +119,7 @@ export function notificationText(n: Pick<NotificationRow, "kind" | "symbol">): {
     case "follower_comment":
       return { showActor: true, text: `commented on ${sym ?? "a coin"}` };
     case "follower_graduation":
-      return { showActor: true, text: `'s coin ${sym ?? ""} graduated to SaucerSwap`.replace("  ", " ") };
+      return { showActor: true, text: `— their coin ${sym ?? ""} graduated to SaucerSwap`.replace("  ", " ") };
     case "graduation":
       return { showActor: false, text: `${sym ?? "Your coin"} graduated to SaucerSwap` };
   }
