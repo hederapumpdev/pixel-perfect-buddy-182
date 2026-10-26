@@ -24,6 +24,39 @@ export const json = (body: unknown, status = 200) =>
 
 export const isAddr = (s: string | null): s is string => !!s && /^0x[0-9a-f]{40}$/.test(s);
 
+type TokenMeta = {
+  image_url: string | null;
+  website: string | null;
+  twitter: string | null;
+  telegram: string | null;
+};
+
+const httpUrl = (s: string | null) => (s && /^https?:\/\//i.test(s) ? s : null);
+
+// Coin images are stored as a content hash and served from our own site.
+const iconUrl = (s: string | null) =>
+  s && /^[a-f0-9]{64}$/.test(s) ? `https://hederapump.dev/api/public/img/${s}` : httpUrl(s);
+
+/** Optional asset metadata DexScreener shows on the coin page: icon, website and socials. */
+export function assetMeta(t: TokenMeta) {
+  const icon = iconUrl(t.image_url);
+  const website = httpUrl(t.website);
+  const twitter = httpUrl(t.twitter);
+  const telegram = httpUrl(t.telegram);
+  return {
+    ...(icon ? { icon } : {}),
+    ...(website ? { websites: [{ label: "Website", url: website }] } : {}),
+    ...(twitter || telegram
+      ? {
+          socials: [
+            ...(twitter ? [{ type: "twitter", url: twitter }] : []),
+            ...(telegram ? [{ type: "telegram", url: telegram }] : []),
+          ],
+        }
+      : {}),
+  };
+}
+
 export async function db() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return supabaseAdmin;
