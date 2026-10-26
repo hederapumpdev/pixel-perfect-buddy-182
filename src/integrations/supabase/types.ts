@@ -816,6 +816,7 @@ export type Database = {
       wallet_profiles: {
         Row: {
           avatar: string | null
+          banner: string | null
           bio: string | null
           edit_key_hash: string | null
           name: string
@@ -825,6 +826,7 @@ export type Database = {
         }
         Insert: {
           avatar?: string | null
+          banner?: string | null
           bio?: string | null
           edit_key_hash?: string | null
           name: string
@@ -834,6 +836,7 @@ export type Database = {
         }
         Update: {
           avatar?: string | null
+          banner?: string | null
           bio?: string | null
           edit_key_hash?: string | null
           name?: string
