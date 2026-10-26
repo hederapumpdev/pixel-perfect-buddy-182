@@ -75,7 +75,7 @@ async function sendDiscord(text: string, nonce: string, channelId: string): Prom
 type Db = any;
 
 /** Posts the first unsettled channel for a slot; one external send per call. */
-async function sendNext(db: Db, slot: string, texts: Partial<Record<Channel, string>>, imageKind: "app" | "graduation", imageIndex = 0, discordChannel = DISCORD_ANNOUNCEMENTS_CHANNEL) {
+async function sendNext(db: Db, slot: string, texts: Partial<Record<Channel, string>>, imageKind: "app" | "graduation", imageIndex = 0, discordChannel = DISCORD_ANNOUNCEMENTS_CHANNEL, token: string | null = null) {
   for (const channel of CHANNELS) {
     const text = texts[channel];
     if (!text) continue;
@@ -85,7 +85,7 @@ async function sendNext(db: Db, slot: string, texts: Partial<Record<Channel, str
       if (existing.status === "sending" || existing.status === "unknown") return { step: `${channel} awaiting review` };
       continue; // sent / failed / skipped are settled
     }
-    const { error: claimError } = await db.from("promo_posts").insert({ slot, channel, status: "sending", text });
+    const { error: claimError } = await db.from("promo_posts").insert({ slot, channel, status: "sending", text, token });
     if (claimError) {
       if (claimError.code === "23505") return { step: "claimed elsewhere" };
       throw claimError;
