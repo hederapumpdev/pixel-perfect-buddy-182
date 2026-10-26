@@ -60,14 +60,14 @@ export function BubbleMap({
                   ? "Bonding curve"
                   : (profiles[w]?.name ?? (isDev ? "dev" : short(b.who)));
                 const fill = isCurve
-                  ? "fill-primary"
+                  ? "fill-primary stroke-primary"
                   : isDev
-                    ? "fill-accent"
-                    : "fill-secondary";
+                    ? "fill-accent/40 stroke-accent"
+                    : "fill-primary/15 stroke-primary/50";
                 return (
                   <g key={b.who}>
-                    <circle cx={b.x} cy={b.y} r={b.r} className={`${fill} stroke-border`} strokeWidth={1.5} opacity={isCurve ? 0.9 : 0.85} />
-                    {b.r >= 26 && (
+                    <circle cx={b.x} cy={b.y} r={b.r} className={fill} strokeWidth={1.5} />
+                    {b.r >= 34 && (
                       <text
                         x={b.x}
                         y={b.y - 2}

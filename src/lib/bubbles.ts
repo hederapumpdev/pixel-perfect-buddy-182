@@ -8,9 +8,9 @@ export type Bubble = { who: string; amt: number; pct: number; x: number; y: numb
 export const BUBBLE_VIEW = { w: 600, h: 420, pad: 8 } as const;
 
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5)); // ~137.5°
-const MAX_R = 110;
+const MAX_R = 95;
 const MIN_R = 14;
-const SPREAD = 34;
+const SPREAD = 52;
 
 /**
  * Lay out holder bubbles, biggest first, centered in BUBBLE_VIEW.
