@@ -253,6 +253,13 @@
       "when": 1793027070680,
       "tag": "0035_create_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1793034753681,
+      "tag": "0036_notif_kinds_and_banner",
+      "breakpoints": true
     }
   ]
 }

@@ -16,7 +16,7 @@ import {
 
 describe("notification types", () => {
   it("offers exactly the four notice types a trader can switch", () => {
-    expect([...NOTIFICATION_KINDS].sort()).toEqual(["comment", "follower_buy", "graduation", "new_follower"]);
+    expect([...NOTIFICATION_KINDS].sort()).toEqual(["comment", "follower_buy", "follower_comment", "follower_graduation", "follower_launch", "follower_sell", "graduation", "new_follower"]);
     for (const kind of NOTIFICATION_KINDS) expect(NOTIFICATION_LABELS[kind].length).toBeGreaterThan(0);
   });
 
@@ -97,5 +97,15 @@ describe("notification login", () => {
     expect(msg).toContain("Time: 2026-10-26T12:00:00.000Z");
     expect(msg).toContain("Nonce: abcd");
     expect(msg).not.toContain("0.0.99999");
+  });
+});
+
+describe("follower activity notices", () => {
+  it("words sells, launches, comments and graduations by people you follow", async () => {
+    const { notificationText } = await import("@/lib/notifications");
+    expect(notificationText({ kind: "follower_sell", symbol: "HPUMP" }).text).toBe("sold $HPUMP");
+    expect(notificationText({ kind: "follower_launch", symbol: "CAT" }).text).toBe("launched $CAT");
+    expect(notificationText({ kind: "follower_comment", symbol: "CAT" }).text).toBe("commented on $CAT");
+    expect(notificationText({ kind: "follower_graduation", symbol: "CAT" }).text).toContain("graduated");
   });
 });

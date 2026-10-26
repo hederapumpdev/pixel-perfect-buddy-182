@@ -1,5 +1,5 @@
 import { MIRROR_URL } from "./hedera-config";
-import { buyDedupe, dayKey, graduationDedupe, isNotificationKind, type NotificationKind } from "./notifications";
+import { buyDedupe, sellDedupe, launchDedupe, commentDedupe, dayKey, graduationDedupe, isNotificationKind, type NotificationKind } from "./notifications";
 
 type Supabase = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
 
@@ -68,17 +68,42 @@ export function notifyUser(db: Supabase, account: string, n: Notice) {
   return notifyMany(db, [account], n);
 }
 
-/** "Someone I follow bought" — one notice per follower per coin per day. */
-export async function notifyFollowersOfBuy(db: Supabase, traderEvm: string, token: string, symbol: string, whenIso: string) {
+async function followersOf(db: Supabase, account: string): Promise<string[]> {
+  const { data: rows } = await db.from("wallet_follows").select("follower").eq("followee", account).limit(500);
+  return (rows ?? []).map((r) => r.follower);
+}
+
+/** "Someone I follow bought/sold" — one notice per follower per coin per side per day. */
+export async function notifyFollowersOfTrade(db: Supabase, traderEvm: string, token: string, symbol: string, whenIso: string, isBuy: boolean) {
   const trader = await evmToAccount(traderEvm);
   if (!trader) return;
-  const { data: rows } = await db.from("wallet_follows").select("follower").eq("followee", trader).limit(500);
-  await notifyMany(db, (rows ?? []).map((r) => r.follower), {
-    kind: "follower_buy",
+  await notifyMany(db, await followersOf(db, trader), {
+    kind: isBuy ? "follower_buy" : "follower_sell",
     actor: trader,
     token,
     symbol,
-    dedupe: buyDedupe(token, dayKey(whenIso)),
+    dedupe: (isBuy ? buyDedupe : sellDedupe)(token, dayKey(whenIso)),
+  });
+}
+
+/** Followers hear when a wallet they follow launches a coin. */
+export async function notifyFollowersOfLaunch(db: Supabase, creatorEvm: string, token: string, symbol: string) {
+  const creator = await evmToAccount(creatorEvm);
+  if (!creator) return;
+  await notifyMany(db, await followersOf(db, creator), { kind: "follower_launch", actor: creator, token, symbol, dedupe: launchDedupe(token) });
+}
+
+/** Followers hear when a wallet they follow comments — once per coin per day. */
+export async function notifyFollowersOfComment(db: Supabase, token: string, authorEvm: string) {
+  const author = await evmToAccount(authorEvm);
+  if (!author) return;
+  const { data: coin } = await db.from("tokens").select("symbol").eq("address", token).maybeSingle();
+  await notifyMany(db, await followersOf(db, author), {
+    kind: "follower_comment",
+    actor: author,
+    token,
+    symbol: coin?.symbol ?? null,
+    dedupe: commentDedupe(token, dayKey(new Date().toISOString())),
   });
 }
 
@@ -100,4 +125,5 @@ export async function notifyCoinGraduated(db: Supabase, token: string) {
   const account = await evmToAccount(coin.creator);
   if (!account) return;
   await notifyUser(db, account, { kind: "graduation", token, symbol: coin.symbol, dedupe: graduationDedupe(token) });
+  await notifyMany(db, await followersOf(db, account), { kind: "follower_graduation", actor: account, token, symbol: coin.symbol, dedupe: graduationDedupe(token) });
 }
