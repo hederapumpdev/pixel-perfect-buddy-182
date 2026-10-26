@@ -33,9 +33,13 @@ type TokenMeta = {
 
 const httpUrl = (s: string | null) => (s && /^https?:\/\//i.test(s) ? s : null);
 
+// Coin images are stored as a content hash and served from our own site.
+const iconUrl = (s: string | null) =>
+  s && /^[a-f0-9]{64}$/.test(s) ? `https://hederapump.dev/api/public/img/${s}` : httpUrl(s);
+
 /** Optional asset metadata DexScreener shows on the coin page: icon, website and socials. */
 export function assetMeta(t: TokenMeta) {
-  const icon = httpUrl(t.image_url);
+  const icon = iconUrl(t.image_url);
   const website = httpUrl(t.website);
   const twitter = httpUrl(t.twitter);
   const telegram = httpUrl(t.telegram);
