@@ -42,6 +42,10 @@ describe("coin spotlight channel coverage", () => {
     vi.stubEnv("TELEGRAM_API_KEY", "test");
     vi.stubEnv("DISCORD_API_KEY", "test");
     vi.stubEnv("LOVABLE_API_KEY", "test");
+    vi.stubEnv("X_CONSUMER_KEY", "test");
+    vi.stubEnv("X_CONSUMER_SECRET", "test");
+    vi.stubEnv("X_ACCESS_TOKEN", "test");
+    vi.stubEnv("X_ACCESS_TOKEN_SECRET", "test");
     vi.stubGlobal("fetch", vi.fn(async (input: unknown) => {
       const url = String(input);
       if (url.includes("/telegram/")) return Response.json({ ok: true, result: { message_id: 61 } });
@@ -62,7 +66,7 @@ describe("coin spotlight channel coverage", () => {
 
   it("stores the coin with the first claim so later channels reuse it", async () => {
     const db = fakeDb([], [{ ...chosen, address: "0xddd", name: "Fresh Cat", symbol: "FCH", graduated: false, trade_count: 3, volume_hbar: 50 }]);
-    expect(await spotlightCoin(new Date("2026-10-26T06:05:00Z"), db as never)).toEqual({ step: "telegram sent" });
-    expect(db.inserts.at(-1)).toMatchObject({ channel: "telegram", token: "0xddd" });
+    expect(await spotlightCoin(new Date("2026-10-26T06:05:00Z"), db as never)).toEqual({ step: "x sent" });
+    expect(db.inserts.at(-1)).toMatchObject({ channel: "x", token: "0xddd" });
   });
 });
