@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -10,7 +11,7 @@ const { state } = vi.hoisted(() => ({ state: { accountId: "0.0.10927104" as stri
 
 // Link needs a router context the header never has on its own.
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children, className }: { children?: unknown; className?: string }) => <div className={className}>{children}</div>,
+  Link: ({ children, className }: { children?: ReactNode; className?: string }) => <div className={className}>{children}</div>,
 }));
 
 // Server calls would leave the test; each one answers from fixed rows instead.
