@@ -25,6 +25,7 @@ import { Route as SupportRouteImport } from './routes/support'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as MarketsIndexRouteImport } from './routes/markets.index'
 import { Route as MarketsIdRouteImport } from './routes/markets.$id'
+import { Route as ProfileWalletRouteImport } from './routes/profile_.$wallet'
 import { Route as TokenIdRouteImport } from './routes/token.$id'
 import { Route as ApiPublicSupportChatRouteImport } from './routes/api/public/support-chat'
 import { Route as ApiPublicDexscreenerAssetRouteImport } from './routes/api/public/dexscreener/asset'
@@ -139,6 +140,11 @@ const MarketsIndexRoute = MarketsIndexRouteImport.update({
 const MarketsIdRoute = MarketsIdRouteImport.update({
   id: '/markets/$id',
   path: '/markets/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileWalletRoute = ProfileWalletRouteImport.update({
+  id: '/profile_/$wallet',
+  path: '/profile/$wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TokenIdRoute = TokenIdRouteImport.update({
@@ -358,6 +364,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/team': typeof TeamRoute
   '/markets/$id': typeof MarketsIdRoute
+  '/profile/$wallet': typeof ProfileWalletRoute
   '/token/$id': typeof TokenIdRoute
   '/markets/': typeof MarketsIndexRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
@@ -411,6 +418,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/team': typeof TeamRoute
   '/markets/$id': typeof MarketsIdRoute
+  '/profile/$wallet': typeof ProfileWalletRoute
   '/token/$id': typeof TokenIdRoute
   '/markets': typeof MarketsIndexRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
@@ -465,6 +473,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/team': typeof TeamRoute
   '/markets/$id': typeof MarketsIdRoute
+  '/profile_/$wallet': typeof ProfileWalletRoute
   '/token/$id': typeof TokenIdRoute
   '/markets/': typeof MarketsIndexRoute
   '/api/public/support-chat': typeof ApiPublicSupportChatRoute
@@ -520,6 +529,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/team'
     | '/markets/$id'
+    | '/profile/$wallet'
     | '/token/$id'
     | '/markets/'
     | '/api/public/support-chat'
@@ -573,6 +583,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/team'
     | '/markets/$id'
+    | '/profile/$wallet'
     | '/token/$id'
     | '/markets'
     | '/api/public/support-chat'
@@ -626,6 +637,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/team'
     | '/markets/$id'
+    | '/profile_/$wallet'
     | '/token/$id'
     | '/markets/'
     | '/api/public/support-chat'
@@ -680,6 +692,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TeamRoute: typeof TeamRoute
   MarketsIdRoute: typeof MarketsIdRoute
+  ProfileWalletRoute: typeof ProfileWalletRoute
   TokenIdRoute: typeof TokenIdRoute
   MarketsIndexRoute: typeof MarketsIndexRoute
   ApiPublicSupportChatRoute: typeof ApiPublicSupportChatRoute
@@ -830,6 +843,13 @@ declare module '@tanstack/react-router' {
       path: '/markets/$id'
       fullPath: '/markets/$id'
       preLoaderRoute: typeof MarketsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile_/$wallet': {
+      id: '/profile_/$wallet'
+      path: '/profile/$wallet'
+      fullPath: '/profile/$wallet'
+      preLoaderRoute: typeof ProfileWalletRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/token/$id': {
@@ -1096,6 +1116,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TeamRoute: TeamRoute,
   MarketsIdRoute: MarketsIdRoute,
+  ProfileWalletRoute: ProfileWalletRoute,
   TokenIdRoute: TokenIdRoute,
   MarketsIndexRoute: MarketsIndexRoute,
   ApiPublicSupportChatRoute: ApiPublicSupportChatRoute,
