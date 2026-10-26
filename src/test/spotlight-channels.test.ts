@@ -26,8 +26,8 @@ function fakeDb(promo: Row[], tokens: Row[]) {
       order: () => api,
       limit: (n: number) => ((limited = n), api),
       maybeSingle: async () => ({ data: selected()[0] ?? null, error: null }),
-      insert: async (row: Row) => (inserts.push({ ...row }), { error: null }),
-      update: async () => api,
+      insert: (row: Row) => (inserts.push({ ...row }), api),
+      update: () => api,
       then: (resolve: (r: { data: Row[]; error: null }) => void) => resolve({ data: selected().slice(0, limited), error: null }),
     };
     return api;
