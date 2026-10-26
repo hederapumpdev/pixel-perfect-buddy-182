@@ -343,6 +343,63 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_prefs: {
+        Row: {
+          account: string
+          enabled: boolean
+          kind: string
+          updated_at: string
+        }
+        Insert: {
+          account: string
+          enabled?: boolean
+          kind: string
+          updated_at?: string
+        }
+        Update: {
+          account?: string
+          enabled?: boolean
+          kind?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          account: string
+          actor: string | null
+          created_at: string
+          dedupe_key: string | null
+          id: string
+          kind: string
+          read_at: string | null
+          symbol: string | null
+          token: string | null
+        }
+        Insert: {
+          account: string
+          actor?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          kind: string
+          read_at?: string | null
+          symbol?: string | null
+          token?: string | null
+        }
+        Update: {
+          account?: string
+          actor?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          kind?: string
+          read_at?: string | null
+          symbol?: string | null
+          token?: string | null
+        }
+        Relationships: []
+      }
       official_coins: {
         Row: {
           created_at: string
