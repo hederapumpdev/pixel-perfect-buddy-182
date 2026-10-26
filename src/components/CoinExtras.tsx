@@ -11,7 +11,7 @@ import { Avatar, useProfiles } from "@/components/ProfileEditor";
 import { StaffBadge } from "@/components/StaffBadge";
 import { FollowButton, useMyFollowing } from "@/components/FollowPanel";
 
-type Trade = { trader: string; is_buy: boolean; token_amount: number | string };
+export type Trade = { trader: string; is_buy: boolean; token_amount: number | string };
 
 export function Comments({ token, author }: { token: string; author: string | null }) {
   const list = useServerFn(listComments);
@@ -87,21 +87,7 @@ export function Comments({ token, author }: { token: string; author: string | nu
 }
 
 /** HTS coins: real balances from the mirror. v1 coins: net curve trades. */
-export function Holders({
-  tokenId,
-  decimals,
-  creator,
-  contract,
-  trades,
-  supply,
-}: {
-  tokenId: string | null;
-  decimals: number;
-  creator: string;
-  contract: string;
-  trades: Trade[];
-  supply: number;
-}) {
+export function useHoldersRows(tokenId: string | null, decimals: number, trades: Trade[]) {
   const [rows, setRows] = useState<{ who: string; amt: number }[]>([]);
   useEffect(() => {
     let off = false;
@@ -136,6 +122,26 @@ export function Holders({
       off = true;
     };
   }, [tokenId, decimals, trades.length]);
+  return rows;
+}
+
+/** HTS coins: real balances from the mirror. v1 coins: net curve trades. */
+export function Holders({
+  tokenId,
+  decimals,
+  creator,
+  contract,
+  trades,
+  supply,
+}: {
+  tokenId: string | null;
+  decimals: number;
+  creator: string;
+  contract: string;
+  trades: Trade[];
+  supply: number;
+}) {
+  const rows = useHoldersRows(tokenId, decimals, trades);
 
   const cId = contract.toLowerCase();
   const cr = creator.toLowerCase();
