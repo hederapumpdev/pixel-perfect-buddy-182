@@ -34,7 +34,7 @@ export function ResultChart({ trades }: { trades: ResultTrade[] }) {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={series}>
             <YAxis hide domain={["dataMin", "dataMax"]} />
-            <Line type="stepAfter" dataKey="v" dot={false} strokeWidth={2} stroke={up ? "var(--color-up, hsl(var(--primary)))" : "var(--color-down, hsl(var(--destructive)))"} isAnimationActive={false} />
+            <Line type="stepAfter" dataKey="v" dot={false} strokeWidth={2} stroke={up ? "var(--color-up)" : "var(--color-down)"} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
