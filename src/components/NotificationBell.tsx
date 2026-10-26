@@ -43,13 +43,13 @@ export function NotificationBell() {
   const fetchPrefs = useServerFn(getNotificationPrefs);
   const savePref = useServerFn(setNotificationPref);
 
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<NotifSession | null>(null);
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    setSession(readSession(me));
+    setSession(readNotifSession(me));
   }, [me]);
 
   const token = session?.token;
