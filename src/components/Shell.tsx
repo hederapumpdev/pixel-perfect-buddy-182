@@ -5,6 +5,7 @@ import { NETWORK, PUMP_CONTRACT_ID } from "@/lib/hedera-config";
 import { LiveTicker } from "@/components/LiveTicker";
 import { AlertWatcher } from "@/components/PriceAlerts";
 import { WalletMenu } from "@/components/WalletMenu";
+import { NotificationBell } from "@/components/NotificationBell";
 import logo from "@/assets/hederapump-logo.png";
 
 const nav = [
@@ -68,7 +69,8 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <NotificationBell />
             <WalletMenu />
           </div>
         </div>
