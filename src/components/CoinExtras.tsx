@@ -11,7 +11,7 @@ import { Avatar, useProfiles } from "@/components/ProfileEditor";
 import { StaffBadge } from "@/components/StaffBadge";
 import { FollowButton, useMyFollowing } from "@/components/FollowPanel";
 
-type Trade = { trader: string; is_buy: boolean; token_amount: number | string };
+export type Trade = { trader: string; is_buy: boolean; token_amount: number | string };
 
 export function Comments({ token, author }: { token: string; author: string | null }) {
   const list = useServerFn(listComments);

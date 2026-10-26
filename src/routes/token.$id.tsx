@@ -2,6 +2,7 @@ import { OfficialBadge } from "@/components/OfficialBadge";
 import { TokenLogoSubmission } from "@/components/TokenLogoSubmission";
 import { ShareButton } from "@/components/ShareCard";
 import { Comments, Holders } from "@/components/CoinExtras";
+import { BubbleMap } from "@/components/BubbleMap";
 import { FollowButton } from "@/components/PriceAlerts";
 import { Avatar, useProfiles } from "@/components/ProfileEditor";
 import { StaffBadge } from "@/components/StaffBadge";
