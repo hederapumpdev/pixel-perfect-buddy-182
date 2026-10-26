@@ -187,6 +187,7 @@ export function NotificationBell() {
                     <span className="block text-xs text-muted-foreground">{NOTIFICATION_HINTS[kind]}</span>
                   </span>
                   <Switch
+                    aria-label={NOTIFICATION_LABELS[kind]}
                     className="ml-auto mt-1"
                     checked={prefEnabled(prefs.data ?? [], kind)}
                     onCheckedChange={(v) => togglePref(kind, !!v)}

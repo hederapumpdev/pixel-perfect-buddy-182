@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { NotificationBell } from "@/components/NotificationBell";
@@ -83,7 +82,7 @@ describe("the header bell", () => {
   it("shows who followed and when", async () => {
     useSession();
     renderBell();
-    await userEvent.click(await screen.findByLabelText("1 unread notifications"));
+    fireEvent.click(await screen.findByLabelText("1 unread notifications"));
     expect(await screen.findByText("started following you")).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("1m ago")).toBeInTheDocument();
@@ -91,18 +90,18 @@ describe("the header bell", () => {
 
   it("asks for one signature before it can show anything", async () => {
     renderBell();
-    await userEvent.click(await screen.findByLabelText("Notifications"));
+    fireEvent.click(await screen.findByLabelText("Notifications"));
     expect(await screen.findByRole("button", { name: "Turn on notifications" })).toBeInTheDocument();
   });
 
   it("lists every notice type with the one the wallet switched off left off", async () => {
     useSession();
     renderBell();
-    await userEvent.click(await screen.findByLabelText("1 unread notifications"));
-    await userEvent.click(await screen.findByLabelText("Notification settings"));
+    fireEvent.click(await screen.findByLabelText("1 unread notifications"));
+    fireEvent.click(await screen.findByLabelText("Notification settings"));
     expect(await screen.findByText("New follower")).toBeInTheDocument();
     expect(screen.getByText("Someone I follow bought")).toBeInTheDocument();
-    expect(screen.getByRole("switch", { name: /comment on my coin/i })).toHaveAttribute("aria-checked", "false");
-    expect(screen.getByRole("switch", { name: /new follower/i })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("switch", { name: "Comment on my coin" })).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByRole("switch", { name: "New follower" })).toHaveAttribute("aria-checked", "true");
   });
 });
