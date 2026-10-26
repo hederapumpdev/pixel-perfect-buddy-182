@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { MIRROR_URL, NETWORK } from "@/lib/hedera-config";
 import { fallbackAddress, nativeHederaId } from "@/lib/hedera-address";
@@ -23,4 +24,13 @@ export function useHederaId(address: string) {
 export function HederaAddress({ address }: { address: string }) {
   const id = useHederaId(address);
   return <span title={address}>{id ?? fallbackAddress(address)}</span>;
+}
+/** Wraps a name/address so it opens that wallet's public profile. Do not use inside another link. */
+export function ProfileLink({ address, children, className }: { address: string; children: React.ReactNode; className?: string }) {
+  const id = useHederaId(address);
+  return (
+    <Link to="/profile/$wallet" params={{ wallet: id ?? address.toLowerCase() }} className={className ?? "hover:underline"}>
+      {children}
+    </Link>
+  );
 }

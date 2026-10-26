@@ -232,6 +232,13 @@
       "when": 1792998085237,
       "tag": "0032_promo_posts_token",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1793024150143,
+      "tag": "0033_wallet_profiles_x_handle",
+      "breakpoints": true
     }
   ]
 }

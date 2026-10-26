@@ -9,25 +9,8 @@ import { getProfiles, saveProfile } from "@/lib/profile.functions";
 import { imageUrl } from "@/lib/queries";
 import { MIRROR_URL } from "@/lib/hedera-config";
 import { profileWalletAddress } from "@/lib/profile-wallets";
-
-const KEY = "hederaPump.profileKey";
-function editKey() {
-  let k = "";
-  try {
-    k = localStorage.getItem(KEY) || "";
-  } catch {
-    /* blocked */
-  }
-  if (!k) {
-    k = [...crypto.getRandomValues(new Uint8Array(32))].map((b) => b.toString(16).padStart(2, "0")).join("");
-    try {
-      localStorage.setItem(KEY, k);
-    } catch {
-      /* blocked */
-    }
-  }
-  return k;
-}
+import { profileEditMessage } from "@/lib/profile-message";
+import { useWallet } from "@/lib/wallet";
 
 export async function squareImage(f: File): Promise<File> {
   const bmp = await createImageBitmap(f);
@@ -88,7 +71,9 @@ export function Avatar({ hash, size = 40 }: { hash: string | null | undefined; s
   );
 }
 
-export function ProfileEditor({ wallet }: { wallet: string }) {
+export function ProfileEditor({ wallet, accountId }: { wallet: string; accountId: string }) {
+  const w = useWallet();
+  const [x, setX] = useState("");
   const profiles = useProfiles([wallet]);
   const me = profiles[wallet.toLowerCase()];
   const save = useServerFn(saveProfile);
@@ -104,6 +89,7 @@ export function ProfileEditor({ wallet }: { wallet: string }) {
     setName(me?.name ?? "");
     setBio(me?.bio ?? "");
     setAvatar(me?.avatar ?? null);
+    setX(me?.x ?? "");
     setOpen(true);
   }
 
@@ -125,7 +111,11 @@ export function ProfileEditor({ wallet }: { wallet: string }) {
     e.preventDefault();
     setBusy(true);
     try {
-      await save({ data: { wallet, key: editKey(), name, bio, avatar } });
+      const time = new Date().toISOString();
+      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+      const handle = x.trim().replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//i, "").replace(/^@/, "").split(/[/?#]/)[0] || null;
+      const sig = await w.signText(profileEditMessage({ accountId, wallet, time, nonce, name: name.trim(), bio: bio.trim(), avatar, x: handle }));
+      await save({ data: { accountId, wallet, time, nonce, name, bio, avatar, x: handle, ...sig } });
       qc.invalidateQueries({ queryKey: ["profiles"] });
       toast.success("Profile saved");
       setOpen(false);
@@ -143,6 +133,7 @@ export function ProfileEditor({ wallet }: { wallet: string }) {
         <div className="min-w-0 flex-1">
           <p className="text-xl font-bold">{me?.name ?? "No name yet"}</p>
           {me?.bio && <p className="mt-1 text-sm text-muted-foreground">{me.bio}</p>}
+          {me?.x && <XLink handle={me.x} />}
         </div>
         <Button variant="outline" onClick={start}>
           Edit profile
@@ -168,14 +159,25 @@ export function ProfileEditor({ wallet }: { wallet: string }) {
         placeholder="Bio (optional)"
         className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm"
       />
+      <Input value={x} onChange={(e) => setX(e.target.value)} placeholder="X handle (optional), e.g. @hederapumpdev" maxLength={60} />
+      <p className="text-xs text-muted-foreground">Saving asks your wallet to sign — this proves the profile is yours. It costs nothing.</p>
       <div className="flex gap-2">
         <Button type="submit" disabled={busy}>
-          Save
+          {busy ? "Check your wallet…" : "Save"}
         </Button>
         <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
           Cancel
         </Button>
       </div>
     </form>
+  );
+}
+
+export function XLink({ handle }: { handle: string }) {
+  return (
+    <p className="mt-1 text-sm">
+      <a href={`https://x.com/${handle}`} target="_blank" rel="noreferrer nofollow" className="text-primary hover:underline">@{handle}</a>
+      <span className="ml-2 text-xs text-muted-foreground">(not verified)</span>
+    </p>
   );
 }

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Shell } from "@/components/Shell";
 import { TokenCard } from "@/components/TokenCard";
 import { WalletHoldings } from "@/components/WalletHoldings";
-import { Avatar, useProfiles } from "@/components/ProfileEditor";
+import { Avatar, XLink, useProfiles } from "@/components/ProfileEditor";
 import { supabase } from "@/integrations/supabase/client";
 import { HASHSCAN_URL, MIRROR_URL, NETWORK } from "@/lib/hedera-config";
 import { fmtAge, fmtHbar } from "@/lib/queries";
@@ -105,8 +105,9 @@ function PublicProfile() {
         </div>
       </div>
       {profile?.bio && <p className="mt-3 max-w-2xl text-muted-foreground">{profile.bio}</p>}
+      {profile?.x && <XLink handle={profile.x} />}
 
-      <WalletHoldings accountId={id} addrs={addrs} balanceHbar={null} />
+      <WalletHoldings accountId={id} addrs={addrs} balanceHbar={null} own={false} />
       <p className="mt-2 text-xs text-muted-foreground">Portfolio counts HederaPump coins only. Values are estimates at current prices.</p>
 
       <h2 className="mt-8 text-xl font-semibold">Coins launched ({coins.data?.length ?? 0})</h2>

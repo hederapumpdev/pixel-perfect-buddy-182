@@ -742,26 +742,29 @@ export type Database = {
         Row: {
           avatar: string | null
           bio: string | null
-          edit_key_hash: string
+          edit_key_hash: string | null
           name: string
           updated_at: string
           wallet: string
+          x_handle: string | null
         }
         Insert: {
           avatar?: string | null
           bio?: string | null
-          edit_key_hash: string
+          edit_key_hash?: string | null
           name: string
           updated_at?: string
           wallet: string
+          x_handle?: string | null
         }
         Update: {
           avatar?: string | null
           bio?: string | null
-          edit_key_hash?: string
+          edit_key_hash?: string | null
           name?: string
           updated_at?: string
           wallet?: string
+          x_handle?: string | null
         }
         Relationships: []
       }

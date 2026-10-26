@@ -25,10 +25,12 @@ export function WalletHoldings({
   accountId,
   addrs,
   balanceHbar,
+  own = true,
 }: {
   accountId: string;
   addrs: string[];
   balanceHbar: number | null | undefined;
+  own?: boolean;
 }) {
   const rate = useHbarUsd().data;
   const usd = useUsd();
@@ -98,12 +100,12 @@ export function WalletHoldings({
     <div className="mt-6 rounded-lg border border-border bg-card">
       <div className="grid grid-cols-2 gap-3 border-b border-border p-4">
         <div>
-          <p className="text-xs text-muted-foreground">HBAR in your wallet</p>
+          <p className="text-xs text-muted-foreground">{own ? "HBAR in your wallet" : "HBAR balance"}</p>
           <p className="mt-1 font-mono text-2xl font-semibold">{fmtHbar(hbar)}</p>
           {rate && <p className="font-mono text-xs text-muted-foreground">{usd(hbar)}</p>}
         </div>
         <div>
-          <p className="text-xs text-muted-foreground">Your coins are worth</p>
+          <p className="text-xs text-muted-foreground">{own ? "Your coins are worth" : "Coins worth"}</p>
           <p className="mt-1 font-mono text-2xl font-semibold">{q.isLoading ? "…" : fmtHbar(total)}</p>
           {!q.isLoading && rate && <p className="font-mono text-xs text-muted-foreground">{usd(total)}</p>}
           {!q.isLoading && pnlAll !== 0 && (
@@ -115,7 +117,7 @@ export function WalletHoldings({
           )}
         </div>
       </div>
-      <p className="px-4 pt-3 text-sm font-semibold">Coins in your wallet</p>
+      <p className="px-4 pt-3 text-sm font-semibold">{own ? "Coins in your wallet" : "Coins held"}</p>
       <div className="divide-y divide-border">
         {(q.data?.rows ?? []).map(({ c, amt, value, pnl, pct }) => (
           <Link

@@ -34,3 +34,24 @@ export async function verifyChatLogin(data: { author: string; time: string; nonc
   } catch { ok = false; }
   if (!ok) throw new Error("Wallet signature could not be verified.");
 }
+
+/** Verifies a wallet signature for any account (mirror-node key or EVM alias). Returns the account's EVM alias. */
+export async function verifyWalletSignature(d: { account: string; time: string; message: string; signature?: string | undefined; evmSignature?: string | undefined }) {
+  if (!Number.isFinite(Date.parse(d.time)) || Math.abs(Date.now() - Date.parse(d.time)) > 300_000) throw new Error("Signature expired. Try again.");
+  const response = await fetch(`${MIRROR_URL}/api/v1/accounts/${d.account}`);
+  if (!response.ok) throw new Error("Wallet not found on Hedera.");
+  const account = await response.json() as { evm_address?: string; key?: { _type?: string; key?: string } };
+  const evm = account.evm_address?.toLowerCase() ?? null;
+  let ok = false;
+  try {
+    if (d.evmSignature && evm) ok = await verifyMessage({ address: evm as `0x${string}`, message: d.message, signature: d.evmSignature as `0x${string}` });
+    else if (d.signature && account.key?.key) {
+      const signed = new TextEncoder().encode(`\x19Hedera Signed Message:\n${d.message.length}${d.message}`);
+      const sig = hexToBytes(d.signature);
+      if (account.key._type === "ED25519") ok = ed25519.verify(sig, signed, hexToBytes(account.key.key));
+      else if (account.key._type === "ECDSA_SECP256K1") ok = secp256k1.verify(sig, keccak_256(signed), hexToBytes(account.key.key), { prehash: false, lowS: false });
+    }
+  } catch { ok = false; }
+  if (!ok) throw new Error("Wallet signature could not be verified.");
+  return { evm };
+}
