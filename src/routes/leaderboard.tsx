@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Shell } from "@/components/Shell";
-import { HederaAddress } from "@/components/HederaAddress";
+import { HederaAddress, ProfileLink } from "@/components/HederaAddress";
 import { supabase } from "@/integrations/supabase/client";
 import { NETWORK } from "@/lib/hedera-config";
 import { tokensQuery } from "@/lib/queries";
@@ -69,7 +69,7 @@ function Leaderboard() {
               {board.map((r, i) => (
                 <tr key={r.wallet} className="border-t border-border">
                   <td className="p-3 font-bold">{i + 1}</td>
-                  <td className="p-3"><HederaAddress address={r.wallet} /></td>
+                  <td className="p-3"><ProfileLink address={r.wallet}><HederaAddress address={r.wallet} /></ProfileLink></td>
                   <td className="p-3 text-right">{r.volume.toLocaleString(undefined, { maximumFractionDigits: 0 })} ℏ</td>
                   <td className="p-3 text-right">{r.coins}</td>
                   <td className="p-3 text-right font-bold text-primary">{r.points.toLocaleString()}</td>

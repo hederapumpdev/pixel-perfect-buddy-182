@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { listComments, postComment } from "@/lib/comments.functions";
 import { MIRROR_URL } from "@/lib/hedera-config";
 import { fmtAge } from "@/lib/queries";
-import { HederaAddress } from "@/components/HederaAddress";
+import { HederaAddress, ProfileLink } from "@/components/HederaAddress";
 import { Avatar, useProfiles } from "@/components/ProfileEditor";
 import { StaffBadge } from "@/components/StaffBadge";
 
@@ -69,7 +69,7 @@ export function Comments({ token, author }: { token: string; author: string | nu
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">
                 <span className="font-semibold text-foreground">
-                  {profs[c.author.toLowerCase()]?.name ?? <HederaAddress address={c.author} />}
+                  <ProfileLink address={c.author}>{profs[c.author.toLowerCase()]?.name ?? <HederaAddress address={c.author} />}</ProfileLink>
                 </span>{" "}<StaffBadge wallet={c.author} />{" "}
                 · {fmtAge(c.created_at)} ago
               </p>
@@ -151,7 +151,7 @@ export function Holders({
               <span className="flex min-w-0 items-center gap-2" title={r.who}>
                 <span className="shrink-0">{i + 1}.</span>
                 {profiles[w] && <Avatar hash={profiles[w]?.avatar} size={24} />}
-                <span className="truncate">{profiles[w]?.name ?? <HederaAddress address={r.who} />}</span><StaffBadge wallet={r.who} />
+                <ProfileLink address={r.who} className="truncate hover:underline">{profiles[w]?.name ?? <HederaAddress address={r.who} />}</ProfileLink><StaffBadge wallet={r.who} />
                 {tag && (
                   <span className="ml-2 rounded bg-secondary px-1.5 py-0.5 text-[10px] text-primary">{tag}</span>
                 )}

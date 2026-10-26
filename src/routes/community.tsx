@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, useProfiles } from "@/components/ProfileEditor";
 import { StaffBadge } from "@/components/StaffBadge";
-import { HederaAddress } from "@/components/HederaAddress";
+import { HederaAddress, ProfileLink } from "@/components/HederaAddress";
 import { useWallet } from "@/lib/wallet";
 import { communityQuery } from "@/lib/community-query";
 import { chatLoginMessage, CHAT_MAX_LENGTH } from "@/lib/community";
@@ -81,7 +81,7 @@ function Community() {
         {messages.map(m => <article key={m.id} className="flex gap-3 py-4">
           <Avatar hash={profiles[m.author]?.avatar} size={36} />
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm"><span className="font-semibold">{profiles[m.author]?.name ?? <HederaAddress address={m.author} />}</span><StaffBadge wallet={m.author} /><time dateTime={m.created_at} className="text-xs text-muted-foreground">{new Date(m.created_at).toISOString().slice(11, 16)} UTC</time></div>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm"><ProfileLink address={m.author} className="font-semibold hover:underline">{profiles[m.author]?.name ?? <HederaAddress address={m.author} />}</ProfileLink><StaffBadge wallet={m.author} /><time dateTime={m.created_at} className="text-xs text-muted-foreground">{new Date(m.created_at).toISOString().slice(11, 16)} UTC</time></div>
             <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed [overflow-wrap:anywhere]">{m.body}</p>
           </div>
         </article>)}
