@@ -42,11 +42,8 @@ export function FollowPanel({ account }: { account: string }) {
     }
     setBusy(true);
     try {
-      const time = new Date().toISOString();
-      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
-      const msg = { follower: me, followee: account, follow: !isFollowing, time, nonce };
-      const sig = await w.signText(followMessage(msg));
-      await set({ data: { ...msg, ...sig } });
+      const msg = { follower: me, followee: account, follow: !isFollowing };
+      await set({ data: await proveFollow(w, msg) });
       await qc.invalidateQueries({ queryKey: ["follows"] });
       toast.success(msg.follow ? "Following" : "Unfollowed");
     } catch (e) {
@@ -109,11 +106,7 @@ export function FollowButton({ account }: { account: string }) {
     }
     setBusy(true);
     try {
-      const time = new Date().toISOString();
-      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
-      const msg = { follower: me, followee: account, follow: !on, time, nonce };
-      const sig = await w.signText(followMessage(msg));
-      await set({ data: { ...msg, ...sig } });
+      await set({ data: await proveFollow(w, { follower: me, followee: account, follow: !on }) });
       await qc.invalidateQueries({ queryKey: ["follows"] });
     } catch (err) {
       toast.error((err as Error).message);
