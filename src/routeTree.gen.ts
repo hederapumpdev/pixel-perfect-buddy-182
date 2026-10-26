@@ -48,6 +48,7 @@ import { Route as ApiPublicJobsHoldoutRouteImport } from './routes/api/public/jo
 import { Route as ApiPublicJobsHoldoutAnnounceRouteImport } from './routes/api/public/jobs/holdout-announce'
 import { Route as ApiPublicJobsOfficialCoinRouteImport } from './routes/api/public/jobs/official-coin'
 import { Route as ApiPublicJobsPayoutsRouteImport } from './routes/api/public/jobs/payouts'
+import { Route as ApiPublicJobsProfilesAnnounceRouteImport } from './routes/api/public/jobs/profiles-announce'
 import { Route as ApiPublicJobsSigninAnnounceRouteImport } from './routes/api/public/jobs/signin-announce'
 import { Route as ApiPublicJobsSolanaAnnounceRouteImport } from './routes/api/public/jobs/solana-announce'
 import { Route as ApiPublicJobsSolanaDailyRouteImport } from './routes/api/public/jobs/solana-daily'
@@ -271,6 +272,12 @@ const ApiPublicJobsPayoutsRoute = ApiPublicJobsPayoutsRouteImport.update({
   path: '/api/public/jobs/payouts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsProfilesAnnounceRoute =
+  ApiPublicJobsProfilesAnnounceRouteImport.update({
+    id: '/api/public/jobs/profiles-announce',
+    path: '/api/public/jobs/profiles-announce',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsSigninAnnounceRoute =
   ApiPublicJobsSigninAnnounceRouteImport.update({
     id: '/api/public/jobs/signin-announce',
@@ -388,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
+  '/api/public/jobs/profiles-announce': typeof ApiPublicJobsProfilesAnnounceRoute
   '/api/public/jobs/signin-announce': typeof ApiPublicJobsSigninAnnounceRoute
   '/api/public/jobs/solana-announce': typeof ApiPublicJobsSolanaAnnounceRoute
   '/api/public/jobs/solana-daily': typeof ApiPublicJobsSolanaDailyRoute
@@ -442,6 +450,7 @@ export interface FileRoutesByTo {
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
+  '/api/public/jobs/profiles-announce': typeof ApiPublicJobsProfilesAnnounceRoute
   '/api/public/jobs/signin-announce': typeof ApiPublicJobsSigninAnnounceRoute
   '/api/public/jobs/solana-announce': typeof ApiPublicJobsSolanaAnnounceRoute
   '/api/public/jobs/solana-daily': typeof ApiPublicJobsSolanaDailyRoute
@@ -497,6 +506,7 @@ export interface FileRoutesById {
   '/api/public/jobs/holdout-announce': typeof ApiPublicJobsHoldoutAnnounceRoute
   '/api/public/jobs/official-coin': typeof ApiPublicJobsOfficialCoinRoute
   '/api/public/jobs/payouts': typeof ApiPublicJobsPayoutsRoute
+  '/api/public/jobs/profiles-announce': typeof ApiPublicJobsProfilesAnnounceRoute
   '/api/public/jobs/signin-announce': typeof ApiPublicJobsSigninAnnounceRoute
   '/api/public/jobs/solana-announce': typeof ApiPublicJobsSolanaAnnounceRoute
   '/api/public/jobs/solana-daily': typeof ApiPublicJobsSolanaDailyRoute
@@ -553,6 +563,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
+    | '/api/public/jobs/profiles-announce'
     | '/api/public/jobs/signin-announce'
     | '/api/public/jobs/solana-announce'
     | '/api/public/jobs/solana-daily'
@@ -607,6 +618,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
+    | '/api/public/jobs/profiles-announce'
     | '/api/public/jobs/signin-announce'
     | '/api/public/jobs/solana-announce'
     | '/api/public/jobs/solana-daily'
@@ -661,6 +673,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/holdout-announce'
     | '/api/public/jobs/official-coin'
     | '/api/public/jobs/payouts'
+    | '/api/public/jobs/profiles-announce'
     | '/api/public/jobs/signin-announce'
     | '/api/public/jobs/solana-announce'
     | '/api/public/jobs/solana-daily'
@@ -716,6 +729,7 @@ export interface RootRouteChildren {
   ApiPublicJobsHoldoutAnnounceRoute: typeof ApiPublicJobsHoldoutAnnounceRoute
   ApiPublicJobsOfficialCoinRoute: typeof ApiPublicJobsOfficialCoinRoute
   ApiPublicJobsPayoutsRoute: typeof ApiPublicJobsPayoutsRoute
+  ApiPublicJobsProfilesAnnounceRoute: typeof ApiPublicJobsProfilesAnnounceRoute
   ApiPublicJobsSigninAnnounceRoute: typeof ApiPublicJobsSigninAnnounceRoute
   ApiPublicJobsSolanaAnnounceRoute: typeof ApiPublicJobsSolanaAnnounceRoute
   ApiPublicJobsSolanaDailyRoute: typeof ApiPublicJobsSolanaDailyRoute
@@ -1006,6 +1020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsPayoutsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/profiles-announce': {
+      id: '/api/public/jobs/profiles-announce'
+      path: '/api/public/jobs/profiles-announce'
+      fullPath: '/api/public/jobs/profiles-announce'
+      preLoaderRoute: typeof ApiPublicJobsProfilesAnnounceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/signin-announce': {
       id: '/api/public/jobs/signin-announce'
       path: '/api/public/jobs/signin-announce'
@@ -1140,6 +1161,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsHoldoutAnnounceRoute: ApiPublicJobsHoldoutAnnounceRoute,
   ApiPublicJobsOfficialCoinRoute: ApiPublicJobsOfficialCoinRoute,
   ApiPublicJobsPayoutsRoute: ApiPublicJobsPayoutsRoute,
+  ApiPublicJobsProfilesAnnounceRoute: ApiPublicJobsProfilesAnnounceRoute,
   ApiPublicJobsSigninAnnounceRoute: ApiPublicJobsSigninAnnounceRoute,
   ApiPublicJobsSolanaAnnounceRoute: ApiPublicJobsSolanaAnnounceRoute,
   ApiPublicJobsSolanaDailyRoute: ApiPublicJobsSolanaDailyRoute,

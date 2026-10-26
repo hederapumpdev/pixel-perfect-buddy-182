@@ -10,6 +10,8 @@ import {
   hedexSlot,
   hedexThanksMessages,
   hedexThanksSlot,
+  profilesMessages,
+  profilesSlot,
   hashpackTipMessages,
   hashpackTipSlot,
   SOLANA_MINT,
@@ -334,6 +336,32 @@ describe('team supply locked follow-up', () => {
       expect(low).not.toContain('profit');
     }
     expect([...msgs.x].length).toBeLessThanOrEqual(280);
+  });
+});
+
+describe('trader profiles announcement', () => {
+  it('uses one stable slot so the announcement can never be posted twice', () => {
+    expect(profilesSlot).toBe('profiles:announce');
+  });
+
+  it('announces public profiles, wallet-signed editing and linked names on every channel', () => {
+    const msgs = profilesMessages();
+    for (const text of [msgs.x, msgs.telegram, msgs.discord]) {
+      const low = text.toLowerCase();
+      expect(low).toContain('profile');
+      expect(low).toContain('public');
+      expect(low).toContain('wallet');
+      expect(text).toContain('https://hederapump.dev');
+    }
+  });
+
+  it('labels X links as not verified and fits the X character limit', () => {
+    const msgs = profilesMessages();
+    for (const text of [msgs.telegram, msgs.discord]) {
+      expect(text.toLowerCase()).toContain('not verified');
+    }
+    const weighted = msgs.x.replace(/https:\/\/\S+/g, 'x'.repeat(23));
+    expect([...weighted].length).toBeLessThanOrEqual(280);
   });
 });
 
