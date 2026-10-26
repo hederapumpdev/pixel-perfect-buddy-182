@@ -101,7 +101,7 @@ describe("the header bell", () => {
     fireEvent.click(await screen.findByLabelText("Notification settings"));
     expect(await screen.findByText("New follower")).toBeInTheDocument();
     expect(screen.getByText("Someone I follow bought")).toBeInTheDocument();
-    expect(screen.getByRole("switch", { name: "Comment on my coin" })).toHaveAttribute("aria-checked", "false");
+    await waitFor(() => expect(screen.getByRole("switch", { name: "Comment on my coin" })).toHaveAttribute("aria-checked", "false"));
     expect(screen.getByRole("switch", { name: "New follower" })).toHaveAttribute("aria-checked", "true");
   });
 });
