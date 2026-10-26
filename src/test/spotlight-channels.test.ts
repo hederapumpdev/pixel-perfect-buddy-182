@@ -60,8 +60,8 @@ describe("coin spotlight channel coverage", () => {
     expect(await spotlightCoin(new Date("2026-10-26T06:20:00Z"), db as never)).toEqual({ step: "telegram sent" });
     const claim = db.inserts.at(-1);
     expect(claim).toMatchObject({ channel: "telegram", status: "sending", token: "0xccc" });
-    expect(String(claim?.text)).toContain("Locked Cat");
-    expect(String(claim?.text)).toContain("https://hederapump.dev/token/0xccc");
+    expect(String(claim?.["text"])).toContain("Locked Cat");
+    expect(String(claim?.["text"])).toContain("https://hederapump.dev/token/0xccc");
   });
 
   it("stores the coin with the first claim so later channels reuse it", async () => {

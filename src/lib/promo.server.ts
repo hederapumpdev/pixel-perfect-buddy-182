@@ -204,7 +204,7 @@ export async function spotlightCoin(now = new Date(), injected?: Db) {
     .order("volume_hbar", { ascending: false })
     .limit(20);
   if (error) throw error;
-  const pool = (coins ?? []).filter((c) => !isOfficial(c.creator));
+  const pool = (coins ?? []).filter((c: { creator?: string | null }) => !isOfficial(c.creator));
   if (!pool.length) return { step: "no coins to spotlight" };
   const coin = pool[Math.floor(Math.random() * pool.length)];
   if (!coin) return { step: "no coins to spotlight" };
