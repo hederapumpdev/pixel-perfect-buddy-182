@@ -14,7 +14,7 @@ export const Route = createFileRoute("/api/public/dexscreener/asset")({
         if (!isAddr(id)) return json({ error: "invalid id" }, 400);
         const { data: t } = await (await db())
           .from("tokens")
-          .select("address,name,symbol,tokens_sold")
+          .select("address,name,symbol,tokens_sold,image_url,website,twitter,telegram")
           .eq("address", id)
           .maybeSingle();
         if (!t) return json({ error: "not found" }, 404);
@@ -25,6 +25,7 @@ export const Route = createFileRoute("/api/public/dexscreener/asset")({
             symbol: t.symbol,
             totalSupply: TOTAL_SUPPLY,
             circulatingSupply: Number(t.tokens_sold),
+            ...assetMeta(t),
           },
         });
       },
