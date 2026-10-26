@@ -34,7 +34,8 @@ export const postComment = createServerFn({ method: "POST" })
     if ((count ?? 0) > 0) throw new Error("Slow down — wait a few seconds");
     const { error } = await supabaseAdmin.from("coin_comments").insert(data);
     if (error) throw new Error("Posting failed, please try again");
-    const { notifyCoinCreatorOfComment } = await import("./notifications.server");
+    const { notifyCoinCreatorOfComment, notifyFollowersOfComment } = await import("./notifications.server");
     await notifyCoinCreatorOfComment(supabaseAdmin, data.token, data.author);
+    await notifyFollowersOfComment(supabaseAdmin, data.token, data.author).catch(() => {});
     return { ok: true };
   });

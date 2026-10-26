@@ -2,7 +2,7 @@
  * Notification rules shared by the server (writing notices) and the bell (showing them).
  * Every type here can be switched off per wallet in notification_prefs.
  */
-export const NOTIFICATION_KINDS = ["new_follower", "comment", "graduation", "follower_buy"] as const;
+export const NOTIFICATION_KINDS = ["new_follower", "comment", "graduation", "follower_buy", "follower_sell", "follower_launch", "follower_comment", "follower_graduation"] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
 export const NOTIFICATION_LABELS: Record<NotificationKind, string> = {
@@ -10,6 +10,10 @@ export const NOTIFICATION_LABELS: Record<NotificationKind, string> = {
   comment: "Comment on my coin",
   graduation: "My coin graduated",
   follower_buy: "Someone I follow bought",
+  follower_sell: "Someone I follow sold",
+  follower_launch: "Someone I follow launched a coin",
+  follower_comment: "Someone I follow commented",
+  follower_graduation: "A coin by someone I follow graduated",
 };
 
 export const NOTIFICATION_HINTS: Record<NotificationKind, string> = {
@@ -17,6 +21,10 @@ export const NOTIFICATION_HINTS: Record<NotificationKind, string> = {
   comment: "Someone comments on a coin you launched.",
   graduation: "A coin you launched finishes its bonding curve.",
   follower_buy: "A wallet you follow buys a coin.",
+  follower_sell: "A wallet you follow sells a coin.",
+  follower_launch: "A wallet you follow launches a new coin.",
+  follower_comment: "A wallet you follow comments on a coin.",
+  follower_graduation: "A coin launched by a wallet you follow graduates.",
 };
 
 /** Where the bell keeps its signed-in session. */
@@ -71,6 +79,15 @@ export function graduationDedupe(token: string): string {
 export function buyDedupe(token: string, day: string): string {
   return `buy:${token.toLowerCase()}:${day}`;
 }
+export function sellDedupe(token: string, day: string): string {
+  return `sell:${token.toLowerCase()}:${day}`;
+}
+export function launchDedupe(token: string): string {
+  return `launch:${token.toLowerCase()}`;
+}
+export function commentDedupe(token: string, day: string): string {
+  return `comment:${token.toLowerCase()}:${day}`;
+}
 
 /** UTC calendar day used to keep buy notices to one per coin per day. */
 export function dayKey(iso: string): string {
@@ -95,6 +112,14 @@ export function notificationText(n: Pick<NotificationRow, "kind" | "symbol">): {
       return { showActor: true, text: `commented on ${sym ?? "your coin"}` };
     case "follower_buy":
       return { showActor: true, text: `bought ${sym ?? "a coin"}` };
+    case "follower_sell":
+      return { showActor: true, text: `sold ${sym ?? "a coin"}` };
+    case "follower_launch":
+      return { showActor: true, text: `launched ${sym ?? "a new coin"}` };
+    case "follower_comment":
+      return { showActor: true, text: `commented on ${sym ?? "a coin"}` };
+    case "follower_graduation":
+      return { showActor: true, text: `'s coin ${sym ?? ""} graduated to SaucerSwap`.replace("  ", " ") };
     case "graduation":
       return { showActor: false, text: `${sym ?? "Your coin"} graduated to SaucerSwap` };
   }

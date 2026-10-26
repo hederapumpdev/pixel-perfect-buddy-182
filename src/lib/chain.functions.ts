@@ -156,9 +156,9 @@ async function handleLog(db: any, log: MirrorLog, contract: string) {
       .eq("address", token)
       .maybeSingle();
     if (!t) return;
-    if (a.isBuy) {
-      const { notifyFollowersOfBuy } = await import("./notifications.server");
-      await notifyFollowersOfBuy(db, String(a.trader).toLowerCase(), token, t.symbol ?? "", tsToIso(log.timestamp)).catch(() => {});
+    {
+      const { notifyFollowersOfTrade } = await import("./notifications.server");
+      await notifyFollowersOfTrade(db, String(a.trader).toLowerCase(), token, t.symbol ?? "", tsToIso(log.timestamp), Boolean(a.isBuy)).catch(() => {});
     }
     await db
       .from("tokens")
