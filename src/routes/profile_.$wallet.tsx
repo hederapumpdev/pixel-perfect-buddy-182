@@ -112,7 +112,7 @@ function PublicProfile() {
       <h2 className="mt-8 text-xl font-semibold">Coins launched ({coins.data?.length ?? 0})</h2>
       {coins.data?.length ? (
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {coins.data.map((c) => <TokenCard key={c.address} token={c} />)}
+          {coins.data.map((c) => <TokenCard key={c.address} t={c} />)}
         </div>
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">No coins launched yet.</p>

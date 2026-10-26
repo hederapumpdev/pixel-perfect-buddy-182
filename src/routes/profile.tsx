@@ -212,6 +212,10 @@ function Profile() {
         <a href={`${HASHSCAN_URL}/account/${w.accountId}`} target="_blank" rel="noreferrer">
           {w.accountId}
         </a>
+        {" · "}
+        <Link to="/profile/$wallet" params={{ wallet: w.accountId }} className="text-primary hover:underline">
+          View public profile
+        </Link>
       </p>
       <ProfileEditor wallet={(w.evmAddress ?? longZero(w.accountId!)).toLowerCase()} />
       <InstantWallet />
