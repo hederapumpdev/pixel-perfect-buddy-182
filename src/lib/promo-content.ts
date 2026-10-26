@@ -272,6 +272,23 @@ Website, socials and banner are live on the chart. Every fee this coin earns buy
   return { x, telegram, discord };
 }
 
+/** One-off profiles announcement: one post per channel, ever. */
+export const profilesSlot = "profiles:announce";
+
+/** One-time announcement: public trader profiles, wallet-signed editing and clickable names. */
+export function profilesMessages() {
+  const x = addMentions(`👤 New on HederaPump: trader profiles.
+
+Every wallet now has a public page — name, bio, avatar, coins launched, holdings and trading stats. Editing is proven by signing with your wallet, and names across the site link to profiles.
+
+https://hederapump.dev
+
+#Hedera #HederaPump`, ["hedera"]);
+  const telegram = `<b>👤 New on HederaPump: trader profiles</b>\n\nEvery wallet now has a public profile page on <a href="https://hederapump.dev">HederaPump</a>:\n\n• Name, bio, avatar and an optional X link (shown as not verified)\n• Coins launched, coin holdings and estimated profit\n• Recent trades\n\nEditing your profile is proven by signing a message with your wallet — no passwords, no device keys. And names in the chat, leaderboard and trade lists now link straight to that trader's profile.\n\nSet yours up: https://hederapump.dev/profile\n\n${RISK}`;
+  const discord = `👤 **New on HederaPump: trader profiles**\n\nEvery wallet now has a public profile page:\n\n• Name, bio, avatar and an optional X link (shown as not verified)\n• Coins launched, coin holdings and estimated profit\n• Recent trades\n\nEditing your profile is proven by signing a message with your wallet — no passwords, no device keys. Names in the chat, leaderboard and trade lists now link straight to that trader's profile.\n\nSet yours up: https://hederapump.dev/profile\n\n${RISK}`;
+  return { x, telegram, discord };
+}
+
 /** Daily pump.fun promo week: one post per channel per Amsterdam day, 2026-10-26 through 2026-11-01. */
 export const SOLANA_PROMO_DAYS = [
   "2026-10-26",
