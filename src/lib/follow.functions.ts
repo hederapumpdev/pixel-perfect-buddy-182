@@ -23,18 +23,36 @@ export const getFollows = createServerFn({ method: "POST" })
     };
   });
 
-/** Follow/unfollow; proven by a fresh wallet signature from the follower. */
+/**
+ * Follow/unfollow. Proven either by a fresh wallet signature from the follower, or by the
+ * bell's week-long sign-in session — one signature then covers follows without new approvals.
+ */
 export const setFollow = createServerFn({ method: "POST" })
-  .inputValidator((d: { follower: string; followee: string; follow: boolean; time: string; nonce: string; signature?: string; evmSignature?: string }) => {
+  .inputValidator((d: { follower: string; followee: string; follow: boolean; time?: string; nonce?: string; signature?: string; evmSignature?: string; sessionToken?: string }) => {
     if (!isAccountId(d.follower) || !isAccountId(d.followee)) throw new Error("Connect your wallet first");
     if (d.follower === d.followee) throw new Error("You can't follow yourself");
-    if (typeof d.time !== "string" || d.time.length > 40 || !/^[a-f0-9]{32}$/.test(d.nonce)) throw new Error("Invalid signature");
-    if ((d.signature?.length ?? 0) > 300 || (d.evmSignature?.length ?? 0) > 300) throw new Error("Invalid signature");
+    if (d.sessionToken !== undefined && !/^[a-f0-9]{64}$/.test(d.sessionToken)) throw new Error("Invalid session");
+    if (!d.sessionToken) {
+      if (typeof d.time !== "string" || d.time.length > 40 || !/^[a-f0-9]{32}$/.test(d.nonce ?? "")) throw new Error("Invalid signature");
+      if ((d.signature?.length ?? 0) > 300 || (d.evmSignature?.length ?? 0) > 300) throw new Error("Invalid signature");
+    }
     return { ...d, follow: !!d.follow };
   })
   .handler(async ({ data }) => {
-    const { verifyWalletSignature } = await import("./community-auth.server");
-    await verifyWalletSignature({ account: data.follower, time: data.time, message: followMessage(data), signature: data.signature, evmSignature: data.evmSignature });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.sessionToken) {
+      const { tokenHash } = await import("./community-auth.server");
+      const { data: sess } = await supabaseAdmin
+        .from("community_sessions")
+        .select("author")
+        .eq("token_hash", await tokenHash(data.sessionToken))
+        .gt("expires_at", new Date().toISOString())
+        .maybeSingle();
+      if (!sess || sess.author !== data.follower) throw new Error("Sign-in expired — approve once more in your wallet");
+    } else {
+      const { verifyWalletSignature } = await import("./community-auth.server");
+      await verifyWalletSignature({ account: data.follower, time: data.time!, message: followMessage(data as { follower: string; followee: string; follow: boolean; time: string; nonce: string }), signature: data.signature, evmSignature: data.evmSignature });
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (data.follow) {
       const { count } = await supabaseAdmin.from("wallet_follows").select("*", { count: "exact", head: true }).eq("follower", data.follower);
