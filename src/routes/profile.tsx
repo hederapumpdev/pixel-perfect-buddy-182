@@ -217,7 +217,7 @@ function Profile() {
           View public profile
         </Link>
       </p>
-      <ProfileEditor wallet={(w.evmAddress ?? longZero(w.accountId!)).toLowerCase()} />
+      <ProfileEditor wallet={(w.evmAddress ?? longZero(w.accountId!)).toLowerCase()} accountId={w.accountId!} />
       <InstantWallet />
       <WalletHoldings accountId={w.accountId!} addrs={addrs} balanceHbar={w.balanceHbar} />
 
