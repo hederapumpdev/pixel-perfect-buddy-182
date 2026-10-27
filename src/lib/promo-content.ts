@@ -197,6 +197,25 @@ We've asked HashPack to clear it.
   return { x, telegram, discord };
 }
 
+/** One-off follow-up: HashPack warning cleared + dApp listing confirmed. */
+export const hashpackClearedSlot = "hashpack:cleared";
+
+/** One-time: HashPack's warning is gone; HashPack confirmed adding HederaPump to its dApps once submissions reopen. */
+export function hashpackClearedMessages() {
+  const x = addMentions(`✅ The HashPack warning is gone.
+
+hederapump.dev opens normally again in HashPack's in-app browser — connect and trade straight from your wallet.
+
+Even better: HashPack confirmed HederaPump will be added to their dApps list as soon as their dApp page update is done. 🚀
+
+Thanks to the HashPack team!
+
+#Hedera #HederaPump`, ["hashpack"]);
+  const telegram = `<b>✅ The HashPack warning is gone!</b>\n\n<a href="https://hederapump.dev">hederapump.dev</a> opens normally again in HashPack's in-app browser — no more "possibly harmful" screen. Connect your wallet and trade straight from HashPack.\n\n<b>And there's more:</b> HashPack confirmed HederaPump will be added to their <b>dApps list</b>. New listings are paused for a moment while they update their dApp page — we'll be added as soon as that's done. 🚀\n\nBig thanks to the HashPack team for the quick help.\n\n${RISK}`;
+  const discord = `✅ **The HashPack warning is gone!**\n\nhederapump.dev opens normally again in HashPack's in-app browser — no more "possibly harmful" screen. Connect your wallet and trade straight from HashPack.\n\n**And there's more:** HashPack confirmed HederaPump will be added to their **dApps list**. New listings are paused for a moment while they update their dApp page — we'll be added as soon as that's done. 🚀\n\nBig thanks to the HashPack team for the quick help.\n\nhttps://hederapump.dev\n\n${RISK}`;
+  return { x, telegram, discord };
+}
+
 /** One-off Hedex listing announcement: one post per channel, ever. */
 export const hedexSlot = "hedex:announce";
 

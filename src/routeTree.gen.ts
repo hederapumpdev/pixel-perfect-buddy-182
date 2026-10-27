@@ -41,6 +41,7 @@ import { Route as ApiPublicJobsDiscordDailyRouteImport } from './routes/api/publ
 import { Route as ApiPublicJobsFastgradAnnounceRouteImport } from './routes/api/public/jobs/fastgrad-announce'
 import { Route as ApiPublicJobsFeeSplitRouteImport } from './routes/api/public/jobs/fee-split'
 import { Route as ApiPublicJobsGraduationPromoRouteImport } from './routes/api/public/jobs/graduation-promo'
+import { Route as ApiPublicJobsHashpackClearedRouteImport } from './routes/api/public/jobs/hashpack-cleared'
 import { Route as ApiPublicJobsHashpackTipRouteImport } from './routes/api/public/jobs/hashpack-tip'
 import { Route as ApiPublicJobsHedexAnnounceRouteImport } from './routes/api/public/jobs/hedex-announce'
 import { Route as ApiPublicJobsHedexThanksRouteImport } from './routes/api/public/jobs/hedex-thanks'
@@ -232,6 +233,12 @@ const ApiPublicJobsGraduationPromoRoute =
     path: '/api/public/jobs/graduation-promo',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsHashpackClearedRoute =
+  ApiPublicJobsHashpackClearedRouteImport.update({
+    id: '/api/public/jobs/hashpack-cleared',
+    path: '/api/public/jobs/hashpack-cleared',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsHashpackTipRoute =
   ApiPublicJobsHashpackTipRouteImport.update({
     id: '/api/public/jobs/hashpack-tip',
@@ -388,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/fastgrad-announce': typeof ApiPublicJobsFastgradAnnounceRoute
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/hashpack-cleared': typeof ApiPublicJobsHashpackClearedRoute
   '/api/public/jobs/hashpack-tip': typeof ApiPublicJobsHashpackTipRoute
   '/api/public/jobs/hedex-announce': typeof ApiPublicJobsHedexAnnounceRoute
   '/api/public/jobs/hedex-thanks': typeof ApiPublicJobsHedexThanksRoute
@@ -443,6 +451,7 @@ export interface FileRoutesByTo {
   '/api/public/jobs/fastgrad-announce': typeof ApiPublicJobsFastgradAnnounceRoute
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/hashpack-cleared': typeof ApiPublicJobsHashpackClearedRoute
   '/api/public/jobs/hashpack-tip': typeof ApiPublicJobsHashpackTipRoute
   '/api/public/jobs/hedex-announce': typeof ApiPublicJobsHedexAnnounceRoute
   '/api/public/jobs/hedex-thanks': typeof ApiPublicJobsHedexThanksRoute
@@ -499,6 +508,7 @@ export interface FileRoutesById {
   '/api/public/jobs/fastgrad-announce': typeof ApiPublicJobsFastgradAnnounceRoute
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
+  '/api/public/jobs/hashpack-cleared': typeof ApiPublicJobsHashpackClearedRoute
   '/api/public/jobs/hashpack-tip': typeof ApiPublicJobsHashpackTipRoute
   '/api/public/jobs/hedex-announce': typeof ApiPublicJobsHedexAnnounceRoute
   '/api/public/jobs/hedex-thanks': typeof ApiPublicJobsHedexThanksRoute
@@ -556,6 +566,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/fastgrad-announce'
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/hashpack-cleared'
     | '/api/public/jobs/hashpack-tip'
     | '/api/public/jobs/hedex-announce'
     | '/api/public/jobs/hedex-thanks'
@@ -611,6 +622,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/fastgrad-announce'
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/hashpack-cleared'
     | '/api/public/jobs/hashpack-tip'
     | '/api/public/jobs/hedex-announce'
     | '/api/public/jobs/hedex-thanks'
@@ -666,6 +678,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/fastgrad-announce'
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
+    | '/api/public/jobs/hashpack-cleared'
     | '/api/public/jobs/hashpack-tip'
     | '/api/public/jobs/hedex-announce'
     | '/api/public/jobs/hedex-thanks'
@@ -722,6 +735,7 @@ export interface RootRouteChildren {
   ApiPublicJobsFastgradAnnounceRoute: typeof ApiPublicJobsFastgradAnnounceRoute
   ApiPublicJobsFeeSplitRoute: typeof ApiPublicJobsFeeSplitRoute
   ApiPublicJobsGraduationPromoRoute: typeof ApiPublicJobsGraduationPromoRoute
+  ApiPublicJobsHashpackClearedRoute: typeof ApiPublicJobsHashpackClearedRoute
   ApiPublicJobsHashpackTipRoute: typeof ApiPublicJobsHashpackTipRoute
   ApiPublicJobsHedexAnnounceRoute: typeof ApiPublicJobsHedexAnnounceRoute
   ApiPublicJobsHedexThanksRoute: typeof ApiPublicJobsHedexThanksRoute
@@ -971,6 +985,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsGraduationPromoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/hashpack-cleared': {
+      id: '/api/public/jobs/hashpack-cleared'
+      path: '/api/public/jobs/hashpack-cleared'
+      fullPath: '/api/public/jobs/hashpack-cleared'
+      preLoaderRoute: typeof ApiPublicJobsHashpackClearedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/hashpack-tip': {
       id: '/api/public/jobs/hashpack-tip'
       path: '/api/public/jobs/hashpack-tip'
@@ -1154,6 +1175,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsFastgradAnnounceRoute: ApiPublicJobsFastgradAnnounceRoute,
   ApiPublicJobsFeeSplitRoute: ApiPublicJobsFeeSplitRoute,
   ApiPublicJobsGraduationPromoRoute: ApiPublicJobsGraduationPromoRoute,
+  ApiPublicJobsHashpackClearedRoute: ApiPublicJobsHashpackClearedRoute,
   ApiPublicJobsHashpackTipRoute: ApiPublicJobsHashpackTipRoute,
   ApiPublicJobsHedexAnnounceRoute: ApiPublicJobsHedexAnnounceRoute,
   ApiPublicJobsHedexThanksRoute: ApiPublicJobsHedexThanksRoute,
