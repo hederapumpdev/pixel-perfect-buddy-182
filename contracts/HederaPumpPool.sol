@@ -123,7 +123,7 @@ contract HederaPumpPool {
         p.reserveHbar -= hbarOut;
         p.reserveToken -= tokenOut;
         require(HTS.transferToken(token, address(this), msg.sender, int64(int256(tokenOut))) == OK, "transfer");
-        _send(msg.sender, hbarOut);
+        _send(payable(msg.sender), hbarOut);
         emit PoolRemoved(token, msg.sender, shareAmount, hbarOut, tokenOut);
     }
 
@@ -171,7 +171,7 @@ contract HederaPumpPool {
 
         p.reserveHbar -= out + protocol;
         p.reserveToken += tokenAmount;
-        _send(msg.sender, out);
+        _send(payable(msg.sender), out);
         _send(feeRecipient, protocol);
         emit Swapped(token, msg.sender, false, tokenAmount, out, fee);
     }
