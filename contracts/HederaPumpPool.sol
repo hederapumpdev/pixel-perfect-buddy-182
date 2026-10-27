@@ -84,7 +84,9 @@ contract HederaPumpPool {
 
         if (p.totalShares == 0) {
             // Opening deposit: any ratio is fair because the pool prices itself from it.
-            minted = isqrt(hbar * tokenAmount) - MIN_SHARES;
+            uint256 raw = isqrt(hbar * tokenAmount);
+            require(raw > MIN_SHARES, "too small");
+            minted = raw - MIN_SHARES;
             require(minted >= minShares, "slippage");
             shares[token][address(this)] = MIN_SHARES;
             p.totalShares = minted + MIN_SHARES;
