@@ -101,16 +101,16 @@ describe("HederaPump Pools", () => {
   it("mints a second provider the same share of both sides, and nothing for an unbalanced deposit", async () => {
     const r = await setup();
     await r.call(HTS_ADDR, mock.abi, "mint", [TOKEN, other.toString(), 100_000n]);
-    await r.call(HTS_ADDR, mock.abi, "approve", [TOKEN, r.p.toString(), 100_000n]);
-    // 1_000 HBAR and 4_000 coins is exactly the pool's ratio, so it buys 10% of 19_000 shares.
+    await r.call(HTS_ADDR, mock.abi, "approve", [TOKEN, r.p.toString(), 100_000n], 0n, other);
+    // 1_000 HBAR and 4_000 coins is exactly the pool's ratio, so it buys 10% of the 20_000 shares.
     const ok = await r.call(r.p, pool.abi, "addLiquidity", [TOKEN, 4_000n, 1_900n, DEADLINE], 1_000n, other);
     expect(ok.execResult.exceptionError).toBeUndefined();
-    expect(await r.sharesOf(other.toString() as `0x${string}`)).toBe(1_900n);
+    expect(await r.sharesOf(other.toString() as `0x${string}`)).toBe(2_000n);
     // 1 coin plus 1_000 HBAR is badly balanced: the coin side only earns 0 shares, so minShares
     // of 1 must stop the whole deposit instead of quietly minting nothing.
     const bad = await r.call(r.p, pool.abi, "addLiquidity", [TOKEN, 1n, 1n, DEADLINE], 1_000n, other);
     expect(bad.execResult.exceptionError).toBeDefined();
-    expect(await r.sharesOf(other.toString() as `0x${string}`)).toBe(1_900n);
+    expect(await r.sharesOf(other.toString() as `0x${string}`)).toBe(2_000n);
     expect(await r.bal(r.p)).toBe(11_000n);
   });
 
@@ -122,7 +122,7 @@ describe("HederaPump Pools", () => {
     expect(q).toEqual([3_600n, 36n]);
     const res = await r.call(r.p, pool.abi, "swapExactHbarForTokens", [TOKEN, 3_600n, DEADLINE], 1_000n);
     expect(res.execResult.exceptionError).toBeUndefined();
-    expect(await r.tokenOf(user.toString() as `0x${string}`)).toBe(3_600n);
+    expect(await r.tokenOf(user.toString() as `0x${string}`)).toBe(963_600n);
     expect(await r.bal(feeWallet)).toBe(27n);
     expect(await r.reserves()).toEqual([10_973n, 36_373n, 20_000n]);
     expect(await r.bal(r.p)).toBe(10_973n); // the pool still holds exactly what its reserves claim
@@ -159,7 +159,7 @@ describe("HederaPump Pools", () => {
 
     const out = await r.call(r.p, pool.abi, "removeLiquidity", [TOKEN, 19_000n, 9_000n, 38_000n, DEADLINE]);
     expect(out.execResult.exceptionError).toBeUndefined();
-    expect(await r.bal(user)).toBe(1_000_000_000n); // the 10_000 HBAR deposit is back, untouched
+    expect(await r.bal(user)).toBe(999_999_500n); // 95% comes back: the locked 1_000 shares own the rest
     expect(await r.tokenOf(user.toString() as `0x${string}`)).toBe(1_000_000n - 40_000n + 38_000n);
     // The 1_000 locked shares still own the rest, so the pool keeps its 5% and nothing more.
     expect(await r.reserves()).toEqual([500n, 2_000n, 1_000n]);
@@ -175,7 +175,7 @@ describe("HederaPump Pools", () => {
     expect(add.execResult.exceptionError).toBeDefined();
     const exit = await r.call(r.p, pool.abi, "removeLiquidity", [TOKEN, 19_000n, 0n, 0n, DEADLINE]);
     expect(exit.execResult.exceptionError).toBeUndefined();
-    expect(await r.bal(user)).toBeGreaterThan(1_000_000_000n);
+    expect(await r.bal(user)).toBe(999_999_500n);
   });
 
   it("cannot be used as a plain wallet, and the owner cannot raise the fee past the cap", async () => {
@@ -187,9 +187,9 @@ describe("HederaPump Pools", () => {
     expect((await r.call(r.p, pool.abi, "setFees", [301n, 25n, feeWallet.toString()])).execResult.exceptionError).toBeDefined();
     expect((await r.call(r.p, pool.abi, "setFees", [100n, 101n, feeWallet.toString()])).execResult.exceptionError).toBeDefined();
     expect((await r.call(r.p, pool.abi, "setFees", [100n, 25n, feeWallet.toString()], 0n, other)).execResult.exceptionError).toBeDefined();
-    expect(await r.read(r.p, pool.abi, "feeBps")).toBe(100n);
+    expect(await r.read(r.p, pool.abi, "feeBps")).toBe(100);
     expect((await r.call(r.p, pool.abi, "setFees", [200n, 50n, feeWallet.toString()])).execResult.exceptionError).toBeUndefined();
-    expect(await r.read(r.p, pool.abi, "feeBps")).toBe(200n);
-    expect(await r.read(r.p, pool.abi, "lpFeeBps")).toBe(50n);
+    expect(await r.read(r.p, pool.abi, "feeBps")).toBe(200);
+    expect(await r.read(r.p, pool.abi, "lpFeeBps")).toBe(50);
   });
 });
