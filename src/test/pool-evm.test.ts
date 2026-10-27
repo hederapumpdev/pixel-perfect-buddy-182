@@ -16,7 +16,7 @@ contract MockHTS {
   function balanceOf(address t, address a) external view returns (uint256) { return bal[t][a]; }
   function approve(address t, address s, uint256 v) external returns (int64) { all[t][msg.sender][s] = v; return 22; }
   function transferToken(address t, address f, address r, int64 a) external returns (int64) {
-    uint v = uint(a);
+    uint v = uint(int256(a));
     if (bal[t][f] < v) return 10;
     bal[t][f] -= v; bal[t][r] += v; return 22;
   }
@@ -89,7 +89,6 @@ async function setup(open = true) {
 
 describe("HederaPump Pools", () => {
   it("opens a pool from the first deposit and accounts for every coin and every tinybar", async () => {
-    const { p, reserves, sharesOf, bal, tokenOf } = await setup(false);
     const r = await setup(false);
     await r.call(r.p, pool.abi, "addLiquidity", [TOKEN, 40_000n, 0n, DEADLINE], 10_000n);
     expect(await r.reserves()).toEqual([10_000n, 40_000n, 20_000n]);
@@ -97,8 +96,6 @@ describe("HederaPump Pools", () => {
     expect(await r.sharesOf(r.p.toString() as `0x${string}`)).toBe(1_000n);
     expect(await r.bal(r.p)).toBe(10_000n); // no HBAR inside the pool that the reserves do not know about
     expect(await r.tokenOf(r.p.toString() as `0x${string}`)).toBe(40_000n);
-    expect(await tokenOf(p.toString() as `0x${string}`)).toBe(40_000n);
-    expect(reserves).toBeDefined();
   });
 
   it("mints a second provider the same share of both sides, and nothing for an unbalanced deposit", async () => {
