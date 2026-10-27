@@ -46,7 +46,7 @@ beforeAll(() => {
 
 // Hedera's token service lives at 0x167; the pool calls that address directly.
 const HTS_ADDR = createAddressFromString("0x0000000000000000000000000000000000000167");
-const TOKEN = "0x00000000000000000000000000000000000a6cb59";
+const TOKEN = "0x0000000000000000000000000000000000a6cb59";
 const DEADLINE = 9_999_999_999n;
 const user = createAddressFromString("0x0000000000000000000000000000000000100000");
 const other = createAddressFromString("0x0000000000000000000000000000000000200000");
