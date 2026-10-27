@@ -95,7 +95,10 @@ export async function createOfficialCoin(now = new Date(), replacement = false) 
 
   try {
     const { count } = await db.from("tokens").select("address", { count: "exact", head: true }).ilike("creator", creator);
-    const metadataUrl = `https://hederapump.dev/api/public/token-meta/${creator}/${count ?? 0}`;
+    const { pinTokenMetadata } = await import("./ipfs-meta.server");
+    const pinned = await pinTokenMetadata({ name: pick.name, symbol: pick.symbol, imageHash: image, creator: "HederaPump",
+      description: `Official HederaPump coin inspired by $${pick.symbol}. Original artwork; not affiliated with the original token.` });
+    const metadataUrl = pinned ?? `https://hederapump.dev/api/public/token-meta/${creator}/${count ?? 0}`;
     const meta = JSON.stringify({
       description: replacement
         ? "Official HederaPump replacement for our image-less CATONICE test launch. Original team mascot, inspired by cat memes trending on Solana; not affiliated with other tokens."

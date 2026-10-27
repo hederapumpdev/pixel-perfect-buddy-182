@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useWallet } from "@/lib/wallet";
-import { syncChain, uploadImage, uploadText as uploadTextFn } from "@/lib/chain.functions";
+import { syncChain, uploadImage, uploadText as uploadTextFn, pinCoinMetadata } from "@/lib/chain.functions";
 import { supabase } from "@/integrations/supabase/client";
 import {
   GAS,
@@ -93,6 +93,7 @@ function Create() {
   const nav = useNavigate();
   const upload = useServerFn(uploadImage);
   const uploadText = useServerFn(uploadTextFn);
+  const pinMeta = useServerFn(pinCoinMetadata);
   const sync = useServerFn(syncChain);
   const [f, setF] = useState({
     name: "",
@@ -154,7 +155,15 @@ function Create() {
           .from("tokens")
           .select("address", { count: "exact", head: true })
           .ilike("creator", creator);
-        const metadataUrl = `https://hederapump.dev/api/public/token-meta/${creator}/${count ?? 0}`;
+        setBusy("Saving coin info to IPFS…");
+        // SaucerSwap only reads ipfs:// memos; fall back to our own URL if pinning fails.
+        const pinned = await pinMeta({ data: {
+          name: f.name.trim(), symbol: f.ticker, description: descText || undefined, imageHash: image,
+          website: f.website.trim() || undefined, twitter: f.twitter.trim() || undefined,
+          telegram: f.telegram.trim() || undefined, creator: accountId,
+        } }).catch(() => ({ uri: null }));
+        const metadataUrl = pinned.uri ?? `https://hederapump.dev/api/public/token-meta/${creator}/${count ?? 0}`;
+        setBusy("Confirm in your wallet…");
         v4Calldata = encodePumpV4("createToken", [f.name.trim(), f.ticker, meta, metadataUrl, 0n]);
       }
       const { transactionHash } = hts
