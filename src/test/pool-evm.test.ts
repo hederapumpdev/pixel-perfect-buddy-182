@@ -27,7 +27,7 @@ contract MockHTS {
   }
 }`;
 
-type C = { abi: Abi; evm: { bytecode: { object: string } } };
+type C = { abi: Abi; evm: { bytecode: { object: string }; deployedBytecode: { object: string } } };
 let pool: C, mock: C;
 beforeAll(() => {
   const r = JSON.parse(solc.compile(JSON.stringify({
@@ -36,7 +36,7 @@ beforeAll(() => {
       "P.sol": { content: readFileSync("contracts/HederaPumpPool.sol", "utf8") },
       "M.sol": { content: mocks },
     },
-    settings: { evmVersion: "cancun", outputSelection: { "*": { "*": ["abi", "evm.bytecode.object"] } } },
+    settings: { evmVersion: "cancun", outputSelection: { "*": { "*": ["abi", "evm.bytecode.object", "evm.deployedBytecode.object"] } } },
   })));
   const errs = (r.errors ?? []).filter((e: { severity: string }) => e.severity === "error");
   if (errs.length) throw new Error(JSON.stringify(errs));
@@ -55,7 +55,7 @@ const feeWallet = createAddressFromString("0x00000000000000000000000000000000003
 async function setup(open = true) {
   const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Cancun }) });
   await vm.stateManager.putAccount(HTS_ADDR, new Account(0n, 0n));
-  await vm.stateManager.putCode(HTS_ADDR, hexToBytes(`0x${mock.evm.bytecode.object}`));
+  await vm.stateManager.putCode(HTS_ADDR, hexToBytes(`0x${mock.evm.deployedBytecode.object}`));
   await vm.stateManager.putAccount(user, new Account(0n, 1_000_000_000n));
   await vm.stateManager.putAccount(other, new Account(0n, 1_000_000_000n));
 
