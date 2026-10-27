@@ -120,6 +120,7 @@ contract HederaPumpPool {
 
         hbarOut = (shareAmount * p.reserveHbar) / p.totalShares;
         tokenOut = (shareAmount * p.reserveToken) / p.totalShares;
+        p.totalShares -= shareAmount; // the pool's total shrinks with every burn
         require(hbarOut >= minHbar && tokenOut >= minToken, "slippage");
 
         p.reserveHbar -= hbarOut;
