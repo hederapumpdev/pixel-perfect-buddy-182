@@ -149,10 +149,10 @@ contract HederaPumpPool {
         require(out >= minOut, "slippage");
 
         // The trader's coins and our cut leave the reserve; the providers' cut stays inside it.
-        p.reserveToken -= out + protocol;
+        p.reserveToken -= gross - lpFee; // the providers' cut stays inside the pool
         p.reserveHbar += msg.value;
         require(HTS.transferToken(token, address(this), msg.sender, int64(int256(out))) == OK, "transfer (associate token first)");
-        _send(feeRecipient, protocol);
+        require(HTS.transferToken(token, address(this), feeRecipient, int64(int256(protocol))) == OK, "fee transfer");
         emit Swapped(token, msg.sender, true, msg.value, out, fee);
     }
 
@@ -172,7 +172,7 @@ contract HederaPumpPool {
         out = gross - fee;
         require(out >= minOut, "slippage");
 
-        p.reserveHbar -= out + protocol;
+        p.reserveHbar -= gross - lpFee; // the providers' cut stays inside the pool
         p.reserveToken += tokenAmount;
         _send(payable(msg.sender), out);
         _send(feeRecipient, protocol);
