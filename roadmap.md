@@ -115,3 +115,4 @@
 - [x] Follow approval: setFollow now accepts the bell's week-long session token instead of a fresh signature; FollowPanel/FollowButton use readNotifSession, falling back to a signature when no session. 23 tests pass, typecheck clean, build OK. Not yet published.
 
 - [x] Bubble map op muntpagina: knop die een kaart opent met bubbels per houder (grootte = aantal munten), zoals memejob.fun maar niet meteen groot zichtbaar.
+- [ ] Own pools: HederaPumpPool.sol written and proven on a local network (25 tests cover opening deposits, second providers, the 1% buy/sell fee split, withdrawals while trading is paused, the fee cap and that nobody can withdraw the pool's money). Still to do before anything is live: independent review, deployment, routing NEW graduations to it, liquidity and trading screens, extending the DexScreener feed. Nothing deployed, no funds moved, existing SaucerSwap pool untouched.
