@@ -340,3 +340,17 @@ export const sellBotCoin = createServerFn({ method: "POST" })
       throw new Error(e instanceof Error ? e.message.slice(0, 200) : "Sale failed");
     }
   });
+
+/** Pins HIP-405 metadata to IPFS for a new coin; returns "ipfs://<cid>" or null (caller falls back). */
+export const pinCoinMetadata = createServerFn({ method: "POST" })
+  .inputValidator((d: { name: string; symbol: string; description?: string; imageHash?: string; website?: string; twitter?: string; telegram?: string; creator?: string }) => {
+    const s = (v: unknown, n: number) => v === undefined || (typeof v === "string" && v.length <= n);
+    if (!s(d.name, 60) || !s(d.symbol, 12) || !s(d.description, 5000) || !s(d.imageHash, 64) || !s(d.website, 200) || !s(d.twitter, 200) || !s(d.telegram, 200) || !s(d.creator, 64))
+      throw new Error("Invalid metadata");
+    if (d.imageHash && !/^[a-f0-9]{64}$/.test(d.imageHash)) throw new Error("Invalid image");
+    return d;
+  })
+  .handler(async ({ data }) => {
+    const { pinTokenMetadata } = await import("./ipfs-meta.server");
+    return { uri: await pinTokenMetadata(data) };
+  });
