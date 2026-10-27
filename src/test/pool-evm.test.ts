@@ -123,9 +123,9 @@ describe("HederaPump Pools", () => {
     const res = await r.call(r.p, pool.abi, "swapExactHbarForTokens", [TOKEN, 3_600n, DEADLINE], 1_000n);
     expect(res.execResult.exceptionError).toBeUndefined();
     expect(await r.tokenOf(user.toString() as `0x${string}`)).toBe(963_600n);
-    expect(await r.bal(feeWallet)).toBe(27n);
-    expect(await r.reserves()).toEqual([10_973n, 36_373n, 20_000n]);
-    expect(await r.bal(r.p)).toBe(10_973n); // the pool still holds exactly what its reserves claim
+    expect(await r.tokenOf(feeWallet.toString() as `0x${string}`)).toBe(27n); // our cut arrives as coins, the asset the trader was paid in
+    expect(await r.reserves()).toEqual([11_000n, 36_373n, 20_000n]);
+    expect(await r.bal(r.p)).toBe(11_000n); // the pool still holds exactly what its reserves claim
   });
 
   it("pays HBAR out on a sell and keeps the accounts equal", async () => {
