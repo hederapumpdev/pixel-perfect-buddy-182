@@ -2,8 +2,8 @@
 // memos, so new coins store "ipfs://<cid>" pointing at this JSON. Returns null on any
 // failure so callers can fall back to the hederapump.dev URL rather than block a launch.
 export type IpfsMetaInput = {
-  name: string; symbol: string; description?: string; imageHash?: string;
-  website?: string; twitter?: string; telegram?: string; creator?: string;
+  name: string; symbol: string; description?: string | undefined; imageHash?: string | undefined;
+  website?: string | undefined; twitter?: string | undefined; telegram?: string | undefined; creator?: string | undefined;
 };
 
 async function pin(jwt: string, file: Blob, filename: string): Promise<string | null> {
