@@ -343,7 +343,7 @@ export const sellBotCoin = createServerFn({ method: "POST" })
 
 /** Pins HIP-405 metadata to IPFS for a new coin; returns "ipfs://<cid>" or null (caller falls back). */
 export const pinCoinMetadata = createServerFn({ method: "POST" })
-  .inputValidator((d: { name: string; symbol: string; description?: string; imageHash?: string; website?: string; twitter?: string; telegram?: string; creator?: string }) => {
+  .inputValidator((d: { name: string; symbol: string; description?: string | undefined; imageHash?: string | undefined; website?: string | undefined; twitter?: string | undefined; telegram?: string | undefined; creator?: string | undefined }) => {
     const s = (v: unknown, n: number) => v === undefined || (typeof v === "string" && v.length <= n);
     if (!s(d.name, 60) || !s(d.symbol, 12) || !s(d.description, 5000) || !s(d.imageHash, 64) || !s(d.website, 200) || !s(d.twitter, 200) || !s(d.telegram, 200) || !s(d.creator, 64))
       throw new Error("Invalid metadata");

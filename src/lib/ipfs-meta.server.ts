@@ -38,7 +38,7 @@ export function buildHip405(m: IpfsMetaInput, imageCid: string | null) {
 }
 
 export async function pinTokenMetadata(m: IpfsMetaInput): Promise<string | null> {
-  const jwt = process.env.PINATA_JWT;
+  const jwt = process.env["PINATA_JWT"];
   if (!jwt) return null;
   try {
     let imageCid: string | null = null;
