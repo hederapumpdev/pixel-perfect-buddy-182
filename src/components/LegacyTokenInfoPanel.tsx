@@ -57,7 +57,7 @@ export function LegacyTokenInfoPanel({ tokens, loading, error }: { tokens: Legac
           <div className="flex flex-wrap gap-2">
             <Button onClick={copyRequest}><Copy />Copy request</Button>
             <Button variant="outline" onClick={download}><Download />Token-info JSON</Button>
-            <Button variant="outline" asChild><a href="https://davincigraph.io/#pics_home" target="_blank" rel="noreferrer"><ExternalLink />Davinci Pics</a></Button>
+            <Button variant="outline" asChild><a href="https://davincigraph.io/pics/tokens" target="_blank" rel="noreferrer"><ExternalLink />Davinci Pics</a></Button>
             <Button variant="outline" asChild><a href="https://docs.saucerswap.finance/resources/for-projects" target="_blank" rel="noreferrer"><ExternalLink />Official requirements</a></Button>
           </div>
           <Textarea aria-label="SaucerSwap token-info request" readOnly value={request} className="min-h-72 font-mono text-xs" />

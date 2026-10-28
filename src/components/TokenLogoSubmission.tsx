@@ -66,7 +66,7 @@ export function TokenLogoSubmission({ token }: { token: TokenRow }) {
           <Button variant="outline" onClick={downloadDetails}><Download className="size-4" />Details JSON</Button>
           <Button variant="outline" onClick={downloadLogo} disabled={!token.image_url}><Download className="size-4" />Download logo</Button>
           <Button variant="outline" asChild><a href={TOKEN_ICON_FORM} target="_blank" rel="noreferrer"><ExternalLink className="size-4" />HashPack form</a></Button>
-          <Button variant="outline" asChild><a href="https://davincigraph.io/#pics_home" target="_blank" rel="noreferrer"><ExternalLink className="size-4" />DaVinci Pics</a></Button>
+          <Button variant="outline" asChild><a href="https://davincigraph.io/pics/tokens" target="_blank" rel="noreferrer"><ExternalLink className="size-4" />DaVinci Pics</a></Button>
         </div>
         <p className="text-xs text-muted-foreground">DaVinci may require the treasury or token-creation account. Support for contract-created tokens must be confirmed by DaVinci. This does not change token metadata or confirm a listing.</p>
       </DialogContent>
