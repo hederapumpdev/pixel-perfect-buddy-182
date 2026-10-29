@@ -311,6 +311,26 @@ Meanwhile: ${fallback}
   return { x, telegram, discord };
 }
 
+/** One-off follow-up to the domain outage notice: one post per channel, ever. */
+export const domainReachableSlot = "domain:reachable";
+
+/** One-time: the site is reachable again at our Lovable address; hederapump.dev is still held by the registrar. */
+export function domainReachableMessages() {
+  const fallback = "https://pixel-perfect-buddy-182.lovable.app";
+  const x = addMentions(`✅ HederaPump is reachable again — at ${fallback}
+
+The site is back and everything works there: launch, buy, sell, profiles, charts.
+
+hederapump.dev is still held by our registrar and we're pushing them to release it. We'll post the moment the name works again.
+
+Nothing on-chain ever changed: coins, pools and balances are untouched.
+
+#Hedera #HederaPump`, ["hedera"]);
+  const telegram = `<b>✅ HederaPump is reachable again</b>\n\nThe site is back and everything works at <a href="${fallback}">pixel-perfect-buddy-182.lovable.app</a> — launch, buy, sell, profiles, charts.\n\n<b>hederapump.dev</b> is still held by our registrar and we're pushing them to release it. We'll post here the moment the name works again.\n\nNothing on-chain ever changed: coins, pools and balances are untouched.\n\n${RISK}`;
+  const discord = `✅ **HederaPump is reachable again**\n\nThe site is back and everything works at ${fallback} — launch, buy, sell, profiles, charts.\n\n**hederapump.dev** is still held by our registrar and we're pushing them to release it. We'll post the moment the name works again.\n\nNothing on-chain ever changed: coins, pools and balances are untouched.\n\n${RISK}`;
+  return { x, telegram, discord };
+}
+
 /** One-off profiles announcement: one post per channel, ever. */
 export const profilesSlot = "profiles:announce";
 
