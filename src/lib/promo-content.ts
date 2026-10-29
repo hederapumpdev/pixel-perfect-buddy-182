@@ -323,7 +323,7 @@ Everything works there — launch, buy, sell, profiles, charts.
 
 hederapump.dev is still held by our registrar; we'll post the moment the name works again.
 
-Coins, pools and balances are untouched.
+Coins, pools and balances untouched.
 
 #Hedera #HederaPump`, ["hedera"]);
   const telegram = `<b>✅ HederaPump is reachable again</b>\n\nThe site is back and everything works at <a href="${fallback}">pixel-perfect-buddy-182.lovable.app</a> — launch, buy, sell, profiles, charts.\n\n<b>hederapump.dev</b> is still held by our registrar and we're pushing them to release it. We'll post here the moment the name works again.\n\nNothing on-chain ever changed: coins, pools and balances are untouched.\n\n${RISK}`;
