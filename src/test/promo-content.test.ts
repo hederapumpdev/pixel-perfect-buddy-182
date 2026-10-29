@@ -422,9 +422,11 @@ describe("domain outage notice", () => {
     }
     expect(xWeight(messages.x)).toBeLessThanOrEqual(280);
   });
-  it("does not claim the site is already reachable", () => {
+  it("says the site is down now without claiming it is already fixed", () => {
     const messages = domainOutageMessages();
-    expect(messages.x).not.toMatch(/is back\.|is fixed|resolved/i);
-    expect(messages.discord).not.toMatch(/is back\.|is fixed|resolved/i);
+    const falseClaim = /back up|has been fixed|now resolved|working again|is live again/i;
+    expect(messages.x).toMatch(/unreachable right now/i);
+    expect(messages.x).not.toMatch(falseClaim);
+    expect(messages.discord).not.toMatch(falseClaim);
   });
 });
