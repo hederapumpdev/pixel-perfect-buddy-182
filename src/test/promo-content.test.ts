@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { xWeight } from '../lib/hedera-mentions';
 import {
   contestMessages,
   contestSlot,
