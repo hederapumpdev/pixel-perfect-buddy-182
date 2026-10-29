@@ -432,3 +432,27 @@ describe("domain outage notice", () => {
     expect(messages.discord).not.toMatch(falseClaim);
   });
 });
+
+describe("domain reachable follow-up", () => {
+  it("is a single stable slot separate from the outage slot", () => {
+    expect(domainReachableSlot).toBe("domain:reachable");
+    expect(domainReachableSlot).not.toBe(domainOutageSlot);
+  });
+  it("gives every channel the working address and says the name is still held", () => {
+    const messages = domainReachableMessages();
+    const fallback = "https://pixel-perfect-buddy-182.lovable.app";
+    for (const text of [messages.x, messages.telegram, messages.discord]) {
+      expect(text).toContain(fallback);
+      expect(text).toMatch(/held by our registrar/i);
+      expect(text).toMatch(/untouched/i);
+    }
+    expect(xWeight(messages.x)).toBeLessThanOrEqual(280);
+  });
+  it("never claims hederapump.dev itself works again", () => {
+    const messages = domainReachableMessages();
+    const falseClaim = /hederapump\.dev (is|now|has been) (back|live|working|fixed|resolved)/i;
+    expect(messages.x).not.toMatch(falseClaim);
+    expect(messages.telegram).not.toMatch(falseClaim);
+    expect(messages.discord).not.toMatch(falseClaim);
+  });
+});
