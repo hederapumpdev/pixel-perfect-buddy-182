@@ -291,6 +291,26 @@ Website, socials and banner are live on the chart. Every fee this coin earns buy
   return { x, telegram, discord };
 }
 
+/** One-off domain outage notice: one post per channel, ever. */
+export const domainOutageSlot = "domain:outage";
+
+/** One-time: hederapump.dev is unreachable because the registrar put the domain on hold; nothing on-chain changed. */
+export function domainOutageMessages() {
+  const fallback = "https://pixel-perfect-buddy-182.lovable.app";
+  const x = addMentions(`⚠️ Heads-up: hederapump.dev is unreachable right now.
+
+A domain issue at our registrar — not a hack. Coins, pools and balances on Hedera are untouched.
+
+We're on it — we'll post the moment the site is back.
+
+Meanwhile: ${fallback}
+
+#Hedera #HederaPump`, ["hedera"]);
+  const telegram = `<b>⚠️ Heads-up: hederapump.dev is unreachable right now</b>\n\nThis is a domain issue at our registrar — not a hack and not a contract change. Coins, pools and balances on Hedera are untouched.\n\nWe're working on it with our registrar and will post here the moment the site is back.\n\nIn the meantime the site works at <a href="${fallback}">pixel-perfect-buddy-182.lovable.app</a>.\n\n${RISK}`;
+  const discord = `⚠️ **Heads-up: hederapump.dev is unreachable right now**\n\nThis is a domain issue at our registrar — not a hack and not a contract change. Coins, pools and balances on Hedera are untouched.\n\nWe're working on it with our registrar and will post here the moment the site is back.\n\nIn the meantime the site works at ${fallback}\n\n${RISK}`;
+  return { x, telegram, discord };
+}
+
 /** One-off profiles announcement: one post per channel, ever. */
 export const profilesSlot = "profiles:announce";
 

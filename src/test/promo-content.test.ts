@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { xWeight } from '../lib/hedera-mentions';
 import {
   contestMessages,
   contestSlot,
   discordDailySlot,
+  domainOutageMessages,
+  domainOutageSlot,
   graduationDiscordMessage,
   graduationSlot,
   graduationXMessage,
@@ -399,5 +402,31 @@ describe("daily pump.fun promo week", () => {
   it("returns null outside the promo week", () => {
     expect(solanaDailyMessages("2026-10-25")).toBeNull();
     expect(solanaDailyMessages("2026-11-02")).toBeNull();
+  });
+});
+
+describe("domain outage notice", () => {
+  it("is a single stable slot", () => {
+    expect(domainOutageSlot).toBe("domain:outage");
+  });
+  it("points every channel at the working address and says funds are untouched", () => {
+    const messages = domainOutageMessages();
+    const fallback = "https://pixel-perfect-buddy-182.lovable.app";
+    expect(messages.x).toContain(fallback);
+    expect(messages.telegram).toContain(fallback);
+    expect(messages.discord).toContain(fallback);
+    for (const text of [messages.x, messages.telegram, messages.discord]) {
+      expect(text).toContain("hederapump.dev");
+      expect(text).toMatch(/not a hack/i);
+      expect(text).toMatch(/untouched/i);
+    }
+    expect(xWeight(messages.x)).toBeLessThanOrEqual(280);
+  });
+  it("says the site is down now without claiming it is already fixed", () => {
+    const messages = domainOutageMessages();
+    const falseClaim = /back up|has been fixed|now resolved|working again|is live again/i;
+    expect(messages.x).toMatch(/unreachable right now/i);
+    expect(messages.x).not.toMatch(falseClaim);
+    expect(messages.discord).not.toMatch(falseClaim);
   });
 });
