@@ -6,6 +6,8 @@ import {
   discordDailySlot,
   domainOutageMessages,
   domainOutageSlot,
+  domainReachableMessages,
+  domainReachableSlot,
   graduationDiscordMessage,
   graduationSlot,
   graduationXMessage,

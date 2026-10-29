@@ -39,6 +39,7 @@ import { Route as ApiPublicJobsDailyXRouteImport } from './routes/api/public/job
 import { Route as ApiPublicJobsDiscordCoinsRouteImport } from './routes/api/public/jobs/discord-coins'
 import { Route as ApiPublicJobsDiscordDailyRouteImport } from './routes/api/public/jobs/discord-daily'
 import { Route as ApiPublicJobsDomainOutageRouteImport } from './routes/api/public/jobs/domain-outage'
+import { Route as ApiPublicJobsDomainReachableRouteImport } from './routes/api/public/jobs/domain-reachable'
 import { Route as ApiPublicJobsFastgradAnnounceRouteImport } from './routes/api/public/jobs/fastgrad-announce'
 import { Route as ApiPublicJobsFeeSplitRouteImport } from './routes/api/public/jobs/fee-split'
 import { Route as ApiPublicJobsGraduationPromoRouteImport } from './routes/api/public/jobs/graduation-promo'
@@ -223,6 +224,12 @@ const ApiPublicJobsDomainOutageRoute =
     path: '/api/public/jobs/domain-outage',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsDomainReachableRoute =
+  ApiPublicJobsDomainReachableRouteImport.update({
+    id: '/api/public/jobs/domain-reachable',
+    path: '/api/public/jobs/domain-reachable',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsFastgradAnnounceRoute =
   ApiPublicJobsFastgradAnnounceRouteImport.update({
     id: '/api/public/jobs/fastgrad-announce',
@@ -400,6 +407,7 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
   '/api/public/jobs/domain-outage': typeof ApiPublicJobsDomainOutageRoute
+  '/api/public/jobs/domain-reachable': typeof ApiPublicJobsDomainReachableRoute
   '/api/public/jobs/fastgrad-announce': typeof ApiPublicJobsFastgradAnnounceRoute
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
@@ -457,6 +465,7 @@ export interface FileRoutesByTo {
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
   '/api/public/jobs/domain-outage': typeof ApiPublicJobsDomainOutageRoute
+  '/api/public/jobs/domain-reachable': typeof ApiPublicJobsDomainReachableRoute
   '/api/public/jobs/fastgrad-announce': typeof ApiPublicJobsFastgradAnnounceRoute
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
@@ -515,6 +524,7 @@ export interface FileRoutesById {
   '/api/public/jobs/discord-coins': typeof ApiPublicJobsDiscordCoinsRoute
   '/api/public/jobs/discord-daily': typeof ApiPublicJobsDiscordDailyRoute
   '/api/public/jobs/domain-outage': typeof ApiPublicJobsDomainOutageRoute
+  '/api/public/jobs/domain-reachable': typeof ApiPublicJobsDomainReachableRoute
   '/api/public/jobs/fastgrad-announce': typeof ApiPublicJobsFastgradAnnounceRoute
   '/api/public/jobs/fee-split': typeof ApiPublicJobsFeeSplitRoute
   '/api/public/jobs/graduation-promo': typeof ApiPublicJobsGraduationPromoRoute
@@ -574,6 +584,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/discord-daily'
     | '/api/public/jobs/domain-outage'
+    | '/api/public/jobs/domain-reachable'
     | '/api/public/jobs/fastgrad-announce'
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
@@ -631,6 +642,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/discord-daily'
     | '/api/public/jobs/domain-outage'
+    | '/api/public/jobs/domain-reachable'
     | '/api/public/jobs/fastgrad-announce'
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
@@ -688,6 +700,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/discord-coins'
     | '/api/public/jobs/discord-daily'
     | '/api/public/jobs/domain-outage'
+    | '/api/public/jobs/domain-reachable'
     | '/api/public/jobs/fastgrad-announce'
     | '/api/public/jobs/fee-split'
     | '/api/public/jobs/graduation-promo'
@@ -746,6 +759,7 @@ export interface RootRouteChildren {
   ApiPublicJobsDiscordCoinsRoute: typeof ApiPublicJobsDiscordCoinsRoute
   ApiPublicJobsDiscordDailyRoute: typeof ApiPublicJobsDiscordDailyRoute
   ApiPublicJobsDomainOutageRoute: typeof ApiPublicJobsDomainOutageRoute
+  ApiPublicJobsDomainReachableRoute: typeof ApiPublicJobsDomainReachableRoute
   ApiPublicJobsFastgradAnnounceRoute: typeof ApiPublicJobsFastgradAnnounceRoute
   ApiPublicJobsFeeSplitRoute: typeof ApiPublicJobsFeeSplitRoute
   ApiPublicJobsGraduationPromoRoute: typeof ApiPublicJobsGraduationPromoRoute
@@ -985,6 +999,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsDomainOutageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/domain-reachable': {
+      id: '/api/public/jobs/domain-reachable'
+      path: '/api/public/jobs/domain-reachable'
+      fullPath: '/api/public/jobs/domain-reachable'
+      preLoaderRoute: typeof ApiPublicJobsDomainReachableRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/fastgrad-announce': {
       id: '/api/public/jobs/fastgrad-announce'
       path: '/api/public/jobs/fastgrad-announce'
@@ -1194,6 +1215,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsDiscordCoinsRoute: ApiPublicJobsDiscordCoinsRoute,
   ApiPublicJobsDiscordDailyRoute: ApiPublicJobsDiscordDailyRoute,
   ApiPublicJobsDomainOutageRoute: ApiPublicJobsDomainOutageRoute,
+  ApiPublicJobsDomainReachableRoute: ApiPublicJobsDomainReachableRoute,
   ApiPublicJobsFastgradAnnounceRoute: ApiPublicJobsFastgradAnnounceRoute,
   ApiPublicJobsFeeSplitRoute: ApiPublicJobsFeeSplitRoute,
   ApiPublicJobsGraduationPromoRoute: ApiPublicJobsGraduationPromoRoute,
