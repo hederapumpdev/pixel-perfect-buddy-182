@@ -3,6 +3,8 @@ import {
   contestMessages,
   contestSlot,
   discordDailySlot,
+  domainOutageMessages,
+  domainOutageSlot,
   graduationDiscordMessage,
   graduationSlot,
   graduationXMessage,
@@ -399,5 +401,29 @@ describe("daily pump.fun promo week", () => {
   it("returns null outside the promo week", () => {
     expect(solanaDailyMessages("2026-10-25")).toBeNull();
     expect(solanaDailyMessages("2026-11-02")).toBeNull();
+  });
+});
+
+describe("domain outage notice", () => {
+  it("is a single stable slot", () => {
+    expect(domainOutageSlot).toBe("domain:outage");
+  });
+  it("points every channel at the working address and says funds are untouched", () => {
+    const messages = domainOutageMessages();
+    const fallback = "https://pixel-perfect-buddy-182.lovable.app";
+    expect(messages.x).toContain(fallback);
+    expect(messages.telegram).toContain(fallback);
+    expect(messages.discord).toContain(fallback);
+    for (const text of [messages.x, messages.telegram, messages.discord]) {
+      expect(text).toContain("hederapump.dev");
+      expect(text).toMatch(/not a hack/i);
+      expect(text).toMatch(/untouched/i);
+    }
+    expect(xWeight(messages.x)).toBeLessThanOrEqual(280);
+  });
+  it("does not claim the site is already reachable", () => {
+    const messages = domainOutageMessages();
+    expect(messages.x).not.toMatch(/is back\.|is fixed|resolved/i);
+    expect(messages.discord).not.toMatch(/is back\.|is fixed|resolved/i);
   });
 });

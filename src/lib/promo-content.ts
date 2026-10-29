@@ -301,7 +301,7 @@ export function domainOutageMessages() {
 
 A domain issue at our registrar — not a hack. Coins, pools and balances on Hedera are untouched.
 
-We're working on it and will post the moment the site is back.
+We're on it — we'll post the moment the site is back.
 
 Meanwhile: ${fallback}
 
